@@ -1,8 +1,14 @@
 ---------------------------------------------------------------------
+
 New Features
 ---------------------------------------------------------------------
 -
  
+Push to two repositories on one command:
+git push all master 
+(all is a remote that pushes to both Gitlab and Github repositories push but only fetches from Github)
+
+
 
 ---------------------------------------------------------------------
 Features Pending (In order of Priority)
