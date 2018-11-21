@@ -23,7 +23,7 @@ void Gameplay::Init()
 
 	//Sound
 	{
-		Engine.AddSound("Main",	   "./Resources/Sounds/main.mp3",    true );
+		Engine.AddSound("Main",	   "./Resources/Sounds/main.mp3",     true);
 		Engine.AddSound("ShootInf", "./Resources/Sounds/inflate.mp3", false);
 		Engine.AddSound("ShootRel", "./Resources/Sounds/ploop.mp3",   false);
 		//Engine.GetSound("Main").Play();
@@ -52,7 +52,7 @@ void Gameplay::Init()
 
 		Engine.AddCommand("StartSlamming",	new NewStateOnPressCommand("SlamCharging"));
 		Engine.AddCommand("StartJumping",	new NewStateOnPressCommand("Jumping"));
-		Engine.AddCommand("StartMoving",		new NewStateOnPressCommand("Moving"));
+		Engine.AddCommand("StartMoving",	new NewStateOnPressCommand("Moving"));
 		Engine.AddCommand("StartShooting",	new NewStateOnPressCommand("Shooting"));
 
 		Engine.AddCommand("Zoom", new FxCommand([](const id_type& ActorID)

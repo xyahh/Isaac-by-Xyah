@@ -20,6 +20,12 @@ class Cyan
 {
 	friend Framework;
 
+	template<class T>
+	using Service = STD vector<T>;
+
+	template<class ID, class T>
+	using ServiceLocator = STD map<ID, T>;
+
 public:
 	Cyan() {}
 	~Cyan() {}
@@ -52,7 +58,7 @@ public:
 	void AddSound(const id_type& AssignID, const STD string& ImagePath, bool isBGM);
 	u_int AddTexture(const STD string& ImagePath);
 	void  AddTextures(STD vector<STD pair<STD string, u_int&>> Textures);
-
+	
 	VisualGraphics&	GetVisualGraphics(const id_type& ID);
 	ActorGraphics&	GetActorGraphics(const id_type& ID);
 	ObjectGraphics&	GetObjectGraphics(u_int ID);
@@ -94,44 +100,43 @@ private:
 		a.erase(a.end() - 1);
 	}
 
-	void UpdatePhysicsService(u_int Index);
+	void UpdatePhysicsService(u_int Index); 
 
 	void ChangeStates();
 	StateStruct*		ActorState{ nullptr };
 	id_type				NextStateID;
 
 private:
-	STD vector<u_int>	m_Textures;
 	
+	/*-------------------------------------------*/
+	/* Services								     */
+	/*-------------------------------------------*/
+	Service<u_int>					m_Textures;
+
+	Service<ActorGraphics>			m_ActorGraphics;
+	Service<Physics>				m_Physics;
+	Service<StateStruct>			m_States;
+	Service<ObjectGraphics>			m_ObjectGraphics;
+	Service<EffectGraphics>			m_EffectGraphics;
+	Service<VisualGraphics>			m_VisualGraphics;
+	Service<Command*>				m_Commands;
+	Service<Sound>					m_Sounds;
+	Service<State*>					m_StateTypes;
+
+
 	/*-------------------------------------------*/
 	/* Service Locators                          */
 	/*-------------------------------------------*/
 
-	STD map<id_type, Actor>	m_ActorLocator;
-	STD map<u_int, Object>	m_ObjectLocator; 
+	ServiceLocator<id_type, Actor>	m_ActorLocator;
+	ServiceLocator<u_int,  Object>	m_ObjectLocator; 
+	ServiceLocator<u_int,	u_int>	m_EffectLocator;
+	ServiceLocator<id_type, u_int>	m_VisualLocator;
+	ServiceLocator<id_type, u_int>	m_CommandLocator;
+	ServiceLocator<id_type, u_int>	m_SoundLocator;
+	ServiceLocator<id_type, u_int>	m_StateTypeLocator;
 
-
-	STD map<u_int,	 u_int>	m_EffectLocator;
-	STD map<id_type, u_int>	m_VisualLocator;
-	STD map<id_type, u_int>	m_CommandLocator;
-	STD map<id_type, u_int>	m_SoundLocator;
-	STD map<id_type, u_int>	m_StateTypeLocator;
-
-	/*-------------------------------------------*/
-	/* Services								     */
-	/*-------------------------------------------*/
-	STD vector<Physics>	m_Physics;
-
-	STD vector<EffectGraphics>  m_EffectGraphics;
-	STD vector<ActorGraphics>	m_ActorGraphics;
-	STD vector<ObjectGraphics>	m_ObjectGraphics;
-	STD vector<VisualGraphics>	m_VisualGraphics;
-
-	STD vector<Command*>		m_Commands;
-	STD vector<Sound>			m_Sounds;
-
-	STD vector<StateStruct>		m_States;
-	STD vector<State*>			m_StateTypes;
+	
 };
 
 extern Cyan Engine;
