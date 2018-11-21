@@ -1,0 +1,25 @@
+---------------------------------------------------------------------
+New Features
+---------------------------------------------------------------------
+- Added Input bound to Actor and State.
+- Added Collision 3D + BoundingBox drawing (to draw collision boxes, code must have #define CYAN_DEBUG_2)
+---------------------------------------------------------------------
+Features Pending (In order of Priority)
+---------------------------------------------------------------------
++) Improve Bullet and make it Delete if it touches floor (new class?)
++) Event Dispatcher
++) Button UI Interface Class
++) Text Support
++) Engine to have a Vibration Time Setter for Controllers
++) Engine to have an Optional Periodical try to reconnect Controller.
++) Support for Multiple Controllers
+---------------------------------------------------------------------
+Current Bugs
+---------------------------------------------------------------------
+GetAsyncKeyState does not check if the Window is active 
+***Possible FIX: Think about a state to check if Game is in active 
+window. Make that a ncessary thing to change the key state to 
+DOWN. If not, then push for the UP (always checking that it 
+only gets called once)
+
+Deleting Objects and Updating Service Locator is not working properly
