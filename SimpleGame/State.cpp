@@ -2,16 +2,9 @@
 #include "State.h"
 #include "CyanEngine.h"
 
-id_type State::DefaultState{ "Idle" };
-
 void State::Update(const id_type& ActorID)
 {
 	Engine.GetStateType(Engine.GetActorState(ActorID).StateID)->m_Input[ActorID].HandleInput(ActorID);
-}
-
-void State::SetDefaultState(const id_type & _DefaultState)
-{
-	DefaultState = _DefaultState;
 }
 
 Input& State::GetInput(const id_type& ActorID)
@@ -22,21 +15,6 @@ Input& State::GetInput(const id_type& ActorID)
 void State::ChangeState(const id_type& ActorID, const id_type & NewStateID)
 {
 	Engine.UpdateState(ActorID, NewStateID);
-}
-
-DX XMVECTOR State::GetActorVelocity(const id_type& ActorID) const
-{
-	return Engine.GetActorPhysics(ActorID).GetVelocity();
-}
-
-DX XMVECTOR State::GetActorPosition(const id_type & ActorID) const
-{
-	return Engine.GetActorPhysics(ActorID).GetPosition();
-}
-
-DX XMVECTOR State::GetActorPrevPosition(const id_type & ActorID) const
-{
-	return Engine.GetActorPhysics(ActorID).GetPrevPosition();
 }
 
 DX XMVECTOR State::GetActorForce(const id_type& ActorID) const
@@ -116,8 +94,8 @@ void MovingState::Update(const id_type& ActorID)
 	ActorGraphics& Actor = Engine.GetActorGraphics(ActorID);
 	Actor.Body.FrameLinearAdvance();
 	State::Update(ActorID);
-	if (Zero(DX2 Magnitude(GetActorVelocity(ActorID))) && Zero(DX2 Magnitude(GetActorForce(ActorID))))
-		ChangeState(ActorID, DefaultState);
+	if (Zero(DX2 Magnitude(Engine.GetActorPhysics(ActorID).GetVelocity())) && Zero(DX2 Magnitude(GetActorForce(ActorID))))
+		ChangeState(ActorID, "Idle");
 	else
 	{
 		u_int Dir = GetActorDirection(ActorID);
@@ -143,10 +121,18 @@ void JumpingState::Enter(const id_type& ActorID)
 
 void JumpingState::Update(const id_type& ActorID)
 {
-	if(DX GetZ(GetActorPosition(ActorID)) > 1.f)
+	if(DX GetZ(Engine.GetActorPhysics(ActorID).GetPosition()) > 1.f)
 		State::Update(ActorID);
-	if (Zero(DX GetZ(GetActorVelocity(ActorID))))
-		ChangeState(ActorID, DefaultState);
+
+	DX XMVECTOR Velocity = Engine.GetActorPhysics(ActorID).GetVelocity();
+
+	if (Zero(DX GetZ(Velocity)))
+	{
+		if (Zero(DX2 Magnitude(Velocity)))
+			ChangeState(ActorID, "Idle");
+		else
+			ChangeState(ActorID, "Moving");
+	}
 }
 
 void JumpingState::Exit(const id_type& ActorID)
@@ -176,8 +162,7 @@ void SlamChargingState::Update(const id_type & ActorID)
 
 void SlamChargingState::Exit(const id_type & ActorID)
 {
-	Physics& p = Engine.GetActorPhysics(ActorID);
-	p.SetGravity(Gravity);
+	Engine.GetActorPhysics(ActorID).SetGravity(Gravity);
 }
 
 
@@ -190,8 +175,8 @@ void SlammingState::Enter(const id_type& ActorID)
 
 void SlammingState::Update(const id_type& ActorID)
 {
-	if (Zero(DX GetZ(GetActorVelocity(ActorID))) && Zero(DX GetZ(GetActorForce(ActorID))))
-		ChangeState(ActorID, DefaultState);
+	if (Zero(DX GetZ(Engine.GetActorPhysics(ActorID).GetVelocity()) && Zero(DX GetZ(GetActorForce(ActorID)))))
+		ChangeState(ActorID, "Idle");
 }
 
 void SlammingState::Exit(const id_type& ActorID)

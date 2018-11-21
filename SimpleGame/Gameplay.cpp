@@ -66,8 +66,6 @@ void Gameplay::Init()
 
 	//States
 	{
-		State::SetDefaultState("Idle");
-
 		Engine.AddStateType("Global",			new GlobalState);
 		Engine.AddStateType("Idle",				new IdleState);
 		Engine.AddStateType("Moving",			new MovingState);

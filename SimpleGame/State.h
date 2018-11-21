@@ -25,8 +25,6 @@ public:
 	virtual void Enter(const id_type& ActorID) = 0;
 	virtual void Exit(const id_type& ActorID) = 0;
 	virtual void Update(const id_type& ActorID);
-	
-	static  void SetDefaultState(const id_type& DefaultState);
 
 	Input&  GetInput(const id_type& ActorID);
 
@@ -34,13 +32,8 @@ protected:
 
 	/* Helper Functions for Child States */
 	void ChangeState(const id_type& ActorID, const id_type& NewStateID);
-	DX XMVECTOR GetActorVelocity(const id_type& ActorID) const;
-	DX XMVECTOR GetActorPosition(const id_type& ActorID) const;
-	DX XMVECTOR GetActorPrevPosition(const id_type& ActorID) const;
 	DX XMVECTOR GetActorForce(const id_type& ActorID) const;
 	u_int GetActorDirection(const id_type& ActorID);
-
-	static id_type DefaultState;
 
 private:
 
