@@ -1,0 +1,34 @@
+---------------------------------------------------------------------
+New Features
+---------------------------------------------------------------------
+-
+ 
+
+---------------------------------------------------------------------
+Features Pending (In order of Priority)
+--------------------------------------------
++) Remove Custom Tags for States. (Since States will be customized continuously and therefore we can assign the ID of the State inside the 
+class)
+
++) Event Dispatcher
+
++) Button UI Interface Class
+
++) Text Support
+
++) Engine to have a Vibration Time Setter for Controllers
+
++) Engine to have an Optional Periodical try to reconnect Controller.
+
++) Support for Multiple Controllers
+
+---------------------------------------------------------------------
+Current Bugs
+---------------------------------------------------------------------
+
+GetAsyncKeyState does not check if the Window is active 
+***Possible FIX: Think about a state to check if Game is in active 
+window. 
+Make that a ncessary thing to change the key state to 
+DOWN. If not, then push for the UP (always checking that it 
+only gets called once)

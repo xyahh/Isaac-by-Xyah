@@ -1,0 +1,7 @@
+.vs
+SimpleGame/x64
+SimpleGame/Debug
+SimpleGame/Release
+*.ilk
+*.pdb
+*.exe
