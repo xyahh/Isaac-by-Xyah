@@ -25,7 +25,7 @@ void VisualGraphics::SetSize(float x, float y)
 	m_Size = DX XMFLOAT2(x, y);
 }
 
-void VisualGraphics::SetTexID(int TexID)
+void VisualGraphics::SetTexID(const id_type& TexID)
 {
 	m_TexID = TexID;
 }
@@ -53,8 +53,8 @@ void VisualGraphics::Render()
 		Position = DX XMVectorSetZ(Position, NEAREST);
 	if (m_Config & BACK_DRAW & ~FRONT_DRAW & ~PHYSICAL_DRAW)
 		Position = DX XMVectorSetZ(Position, FARTHEST);
-
-	RenderDevice.DrawTexRect(Position, Size, Color, m_TexID);
+	RenderDevice.DrawTexRect(Position, Size, Color
+		, Engine.GetTexture(m_TexID));
 }
 
 void ActorGraphics::Render(float fInterpolation)
@@ -90,8 +90,10 @@ void ActorGraphics::Render(float fInterpolation)
 	RenderDevice.DrawShadow(Position, HeadSize, Color);
 	RenderDevice.DrawShadow(Position, BodySize, Color);
 
-	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, BodyOffY}), BodySize, Color, Body.GetTexID(), Body.GetSpriteInfo());
-	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, HeadOffY}), HeadSize, Color, Head.GetTexID(), Head.GetSpriteInfo());
+	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, BodyOffY}), 
+		BodySize, Color, Engine.GetTexture(Body.GetTexID()), Body.GetSpriteInfo());
+	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, HeadOffY}), 
+		HeadSize, Color, Engine.GetTexture(Head.GetTexID()), Head.GetSpriteInfo());
 }
 
 void ActorGraphics::SetSpriteOffset(float HeadOffY, float BodyOffY)
@@ -121,7 +123,8 @@ void ObjectGraphics::Render(float fInterpolation)
 	World::Convert(Size);
 
 	RenderDevice.DrawShadow(Position, Size, Color);
-	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, DX GetY(Size) *0.5f }), Size, Color, ObjectSprite.GetTexID(), ObjectSprite.GetSpriteInfo());
+	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, DX GetY(Size) *0.5f }), 
+		Size, Color, Engine.GetTexture(ObjectSprite.GetTexID()), ObjectSprite.GetSpriteInfo());
 
 
 }
@@ -133,7 +136,8 @@ void EffectGraphics::Render(float fInterpolation)
 	DX XMVECTOR Color = DX4 Load(m_Color);
 	World::Convert(Position);
 	World::Convert(Size);
-	RenderDevice.DrawSprite(Position, Size, Color, Effect.GetTexID(), Effect.GetSpriteInfo());
+	RenderDevice.DrawSprite(Position, Size, Color, 
+		Engine.GetTexture(Effect.GetTexID()), Effect.GetSpriteInfo());
 	Effect.FrameGridAdvance();
 }
 

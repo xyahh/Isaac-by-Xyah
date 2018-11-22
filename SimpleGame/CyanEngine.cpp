@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CyanEngine.h"
 #include "Renderer.h"
+#include "File.h"
 
 Cyan Engine;
 
@@ -61,6 +62,135 @@ void Cyan::Update()
 		DeleteEffect(i);
 }
 
+void Cyan::AddSoundsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
+{
+	auto SFile = ReadCSV(filename, delimiter, ignore_first_row);
+	enum
+	{
+		SOUND_ID,
+		SOUND_PATH,
+		IS_MUSIC,
+	};
+	for (auto& d : SFile)
+		Engine.AddSound(d[SOUND_ID], d[SOUND_PATH], STD stoi(d[IS_MUSIC]));
+}
+
+void Cyan::AddTexturesByFile(const STD string & filename, char delimiter, bool ignore_first_row)
+{
+	auto TFile = ReadCSV(filename, delimiter, ignore_first_row);
+	enum
+	{
+		TEX_ID,
+		TEX_PATH,
+	};
+	for (auto& d : TFile)
+		Engine.AddTexture(d[TEX_ID], d[TEX_PATH]);
+}
+
+void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
+{
+	auto AFile = ReadCSV(filename, delimiter, ignore_first_row);
+	
+	enum
+	{
+		ID,
+		STATE,
+		HEAD_TEX,
+		BODY_TEX,
+		MASS,
+		FRICTION,
+		BOX_W,
+		BOX_H,
+		BOX_D,
+		X,
+		Y,
+		Z
+	};
+	
+	float HeadSize = 0.75f;
+	float BodySize = 0.375f;
+
+	for (auto& d : AFile)
+	{
+		Engine.AddActor(d[ID], d[STATE]);
+
+		ActorGraphics& AGraphics = Engine.GetActorGraphics(d[ID]);
+		AGraphics.Head.SetTexID(d[HEAD_TEX]);
+		AGraphics.Body.SetTexID(d[BODY_TEX]);
+		AGraphics.Body.SetFrameRate(20);
+		AGraphics.Head.SetSize({ HeadSize, HeadSize });
+		AGraphics.Body.SetSize({ BodySize, BodySize });
+		AGraphics.SetSpriteOffset(BodySize* 0.5f + HeadSize * 0.5f, BodySize*0.5f);
+		AGraphics.Head.SetSpriteInfo({ 0, 0, 2,  4 });
+		AGraphics.Body.SetSpriteInfo({ 0, 0, 10, 4 });
+		AGraphics.Head.SetDirection(1);
+
+		Physics& APhysics = Engine.GetActorPhysics(d[ID]);
+		APhysics.SetFriction(STD stof(d[FRICTION]));
+		APhysics.SetMass(STD stof(d[MASS]));
+		//0.5f, 0.1f, 0.75f 
+		APhysics.GetBox().SetDimensions(
+			{ 
+				STD stof(d[BOX_W]),
+				STD stof(d[BOX_H]),
+				STD stof(d[BOX_D])
+			});
+		APhysics.SetCollision(NULL);
+		APhysics.SetPosition(
+			{
+				STD stof(d[X]),
+				STD stof(d[Y]),
+				STD stof(d[Z])
+			});
+	}
+}
+
+void Cyan::AddCommandsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
+{
+	auto CFile = ReadCSV(filename, delimiter, ignore_first_row);
+	enum
+	{
+		COMMAND_ID,
+		COMMAND_TYPE,
+		ARGS
+	};
+	for (auto& d : CFile)
+		Engine.AddCommandByString(d[COMMAND_ID], d[COMMAND_TYPE], d[ARGS]);
+}
+
+void Cyan::AddStatesByFile(const STD string & filename, char delimiter, bool ignore_first_row)
+{
+	auto SFile = ReadCSV(filename, delimiter, ignore_first_row);
+	enum
+	{
+		STATE_ID,
+		STATE_TYPE,
+		ARGS
+	};
+	for (auto& d : SFile)
+		Engine.AddStateTypeByString(d[STATE_ID], d[STATE_TYPE], d[ARGS]);
+}
+
+void Cyan::AddInputsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
+{
+	auto IFile = ReadCSV(filename, delimiter, ignore_first_row);
+	enum
+	{
+		STATE_ID,
+		ACTOR_ID,
+		KEY_ID,
+		COMMAND_ID
+	};
+	char Key;
+	for (auto& d : IFile)
+	{
+		if (d[KEY_ID].size() == 1) Key = d[KEY_ID][0]; //char if size of 1
+		else Key = STD stoi(d[KEY_ID]); //int 
+		Engine.GetStateType(d[STATE_ID])->GetInput(d[ACTOR_ID]).AddKeyboardInput(Key, d[COMMAND_ID]);
+	}
+		
+}
+
 /* Command & State Functions ---------------------------------------------------------*/
 
 void Cyan::AddCommand(const id_type& AssignID, Command*&& pCommand)
@@ -69,11 +199,115 @@ void Cyan::AddCommand(const id_type& AssignID, Command*&& pCommand)
 	m_CommandLocator[AssignID] = LastIdx(m_Commands);
 }
 
+void Cyan::AddCommandByString(const id_type& ID,  const STD string& Type, const STD string & Args, char delimiter)
+{
+	STD string data;
+	STD istringstream dataline(Args);
+
+	u_int TypeNo;
+	for (auto& c : CommandTypes)
+		if (c.second == Type)
+			TypeNo = c.first;
+
+	switch (TypeNo)
+	{
+	case COMMAND::FORCE:
+	{
+		STD getline(dataline, data, delimiter);
+		float x = STD stof(data);
+		STD getline(dataline, data, delimiter);
+		float y = STD stof(data);
+		STD getline(dataline, data, delimiter);
+		float z = STD stof(data);
+		AddCommand(ID, new ForceCommand({x , y, z}));
+		break;
+	}	
+	case COMMAND::STATE_ON_PRESS:
+	{
+		STD getline(dataline, data, delimiter);
+		AddCommand(ID, new NewStateOnPressCommand(data));
+		break;
+	}
+	case COMMAND::STATE_ON_RELEASE:
+	{
+		STD getline(dataline, data, delimiter);
+		AddCommand(ID, new NewStateOnReleaseCommand(data));
+		break;
+	}
+	case COMMAND::SHIFT_SCENE:
+	{
+		printf("Adding SHIFT_SCENE command via StringArgs is not Supported!\n");
+		break;
+	}
+	case COMMAND::FUNCTION:
+	{
+		printf("Adding FUNCTION command via StringArgs is not Supported!\n");
+		break;
+	}
+	}
+}
+
 void Cyan::AddStateType(const id_type & AssignID, State *&& pState)
 {
 	m_StateTypes.emplace_back(pState);
 	u_int Idx = LastIdx(m_StateTypes);
 	m_StateTypeLocator[AssignID] = Idx;
+}
+
+void Cyan::AddStateTypeByString(const id_type & ID, const STD string & Type, const STD string & Args, char delimiter)
+{
+	STD string data;
+	STD istringstream dataline(Args);
+
+	u_int TypeNo;
+	for (auto& c : StateTypes)
+		if (c.second == Type)
+			TypeNo = c.first;
+
+	switch (TypeNo)
+	{
+	case STATE::GLOBAL:
+	{
+		Engine.AddStateType(ID, new GlobalState);
+		Engine.AddNonActorState("Global");
+		break;
+	}
+	case STATE::IDLE:
+	{
+		Engine.AddStateType(ID, new IdleState);
+		break;
+	}
+	case STATE::MOVING:
+	{
+		Engine.AddStateType(ID, new MovingState);
+		break;
+	}
+	case STATE::JUMPING:
+	{
+		STD getline(dataline, data, delimiter);
+		Engine.AddStateType(ID, new JumpingState(STD stof(data)));
+		break;
+	}
+	case STATE::SLAMMING:
+	{
+		STD getline(dataline, data, delimiter);
+		std::string TexID = data;
+		STD getline(dataline, data, delimiter);
+		float SlamForce = STD stof(data);
+		STD getline(dataline, data, delimiter);
+		float SlamSize = STD stof(data);
+		Engine.AddStateType(ID, new SlammingState(TexID, SlamForce, SlamSize));
+		break;
+	}
+	case STATE::SLAM_CHARGING:
+	{
+		STD getline(dataline, data, delimiter);
+		float RageRate = STD stof(data);
+		STD getline(dataline, data, delimiter);
+		Engine.AddStateType(ID, new SlamChargingState(RageRate, data));
+		break;
+	}
+	}
 }
 
 StateStruct& Cyan::GetActorState(const id_type & ID)
@@ -105,7 +339,7 @@ void Cyan::ReserveObjects(u_int ActorNumber, u_int BulletNumber, u_int VisualNum
 	m_Physics.reserve(ActorNumber + BulletNumber);
 }
 
-void Cyan::AddGlobalState(const id_type & StartState)
+void Cyan::AddNonActorState(const id_type & StartState)
 {
 	m_States.emplace_back("", StartState, GetStateType(StartState)->Clone());
 }
@@ -176,6 +410,11 @@ ObjectGraphics & Cyan::GetObjectGraphics(u_int ID)
 EffectGraphics & Cyan::GetEffect(u_int ID)
 {
 	return m_EffectGraphics[m_EffectLocator[ID]];
+}
+
+u_int Cyan::GetTexture(const id_type & ID)
+{
+	return m_Textures[m_TextureLocator[ID]];
 }
 
 Physics & Cyan::GetActorPhysics(const id_type& ID)
@@ -267,18 +506,13 @@ u_int Cyan::VisualCount() const
 
 /* Texture Functions -----------------------------------------------------------------*/
 
-u_int Cyan::AddTexture(const STD string& ImagePath)
+void Cyan::AddTexture(const id_type& TexID, const STD string& ImagePath)
 {
-	u_int TexID = RenderDevice.CreatePngTexture(ImagePath);
-	m_Textures.emplace_back(TexID);
-	return TexID;
+	u_int tex = RenderDevice.CreatePngTexture(ImagePath);
+	m_Textures.emplace_back(tex);
+	m_TextureLocator[TexID] = LastIdx(m_Textures);
 }
 
-void Cyan::AddTextures(STD vector<STD pair<STD string, u_int&>> Textures)
-{
-	for (auto& t : Textures)
-		t.second = AddTexture(t.first);
-}
 
 void Cyan::DeleteComponents(WORD Components)
 {

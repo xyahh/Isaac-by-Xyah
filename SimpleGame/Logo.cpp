@@ -8,7 +8,8 @@ void Logo::Init()
 	Engine.ReserveObjects(0, 0, 1, 0);
 
 	Engine.AddVisual("Logo");
-	Engine.GetVisualGraphics("Logo").SetTexID(Engine.AddTexture("./Resources/logo.png"));
+	Engine.AddTexture("Logo", "./Resources/logo.png");
+	Engine.GetVisualGraphics("Logo").SetTexID("Logo");
 	Engine.GetVisualGraphics("Logo").SetSize(300.f, 100.f);
 	
 	FadeMax = 1.5f;

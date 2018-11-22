@@ -1,0 +1,7 @@
+StateID,StateType,Args
+Global,Global,NULL
+Idle,Idle,NULL
+Moving,Moving,NULL
+Jumping,Jumping,45000
+Slamming,Slamming,Landing;100000;5
+SlamCharging,SlamCharging,1;Slamming

@@ -1,5 +1,24 @@
 #pragma once
 
+enum COMMAND
+{
+	FORCE,
+	SHIFT_SCENE,
+	FUNCTION,
+	STATE_ON_PRESS,
+	STATE_ON_RELEASE
+
+} ;
+
+const STD pair<u_int, STD string> CommandTypes[] =
+{
+	{COMMAND::FORCE,			"Force"			},
+	{COMMAND::SHIFT_SCENE,		"ShiftScene"	},
+	{COMMAND::FUNCTION,			"Function"		},
+	{COMMAND::STATE_ON_PRESS,	"StateOnPress"	},
+	{COMMAND::STATE_ON_RELEASE, "StateOnRelease"}
+};
+
 class Command
 {
 public:
@@ -44,7 +63,7 @@ private:
 class ShootCommand : public Command
 {
 public:
-	ShootCommand(u_int TexID, DX FXMVECTOR Force, int State) :
+	ShootCommand(const id_type& TexID, DX FXMVECTOR Force, int State) :
 		TexID(TexID), Created(false),
 		Force(DX3 Store(Force)), 
 		State(State), Released(true), Size(0.125f) {}
@@ -58,7 +77,7 @@ private:
 	bool Created;
 	DX XMFLOAT3 Force;
 	u_int BulletID;
-	u_int TexID;
+	id_type TexID;
 	float Size;
 	int State;
 };

@@ -1,0 +1,12 @@
+StateID,ActorID,KeyID,CommandID
+Global,Player1,W,StartMoving
+Idle,Player1,S,StartMoving
+Idle,Player1,A,StartMoving
+Idle,Player1,D,StartMoving
+Idle,Player1,32,StartJumping
+Moving,Player1,W,MoveUp
+Moving,Player1,S,MoveDown
+Moving,Player1,A,MoveLeft
+Moving,Player1,D,MoveRight
+Moving,Player1,32,StartJumping
+Jumping,Player1,13,StartSlamming

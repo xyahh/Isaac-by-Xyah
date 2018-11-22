@@ -12,6 +12,7 @@
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 
+#include <sstream>
 #include <string>
 #include <vector>
 #include <map>

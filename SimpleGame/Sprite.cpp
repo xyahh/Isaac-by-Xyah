@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Sprite.h"
 
-void Sprite::SetTexID(int _TexID)
+void Sprite::SetTexID(const id_type& _TexID)
 {
 	TexID = _TexID;
 }
@@ -51,7 +51,7 @@ bool Sprite::FrameGridAdvance()
 	return Vframes >= SpriteInfo.w;
 }
 
-int Sprite::GetTexID() const
+id_type Sprite::GetTexID() const
 {
 	return TexID;
 }

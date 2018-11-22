@@ -1,6 +1,27 @@
 #pragma once
 #include "Input.h"
 
+
+enum STATE
+{
+	GLOBAL,
+	IDLE,
+	MOVING,
+	JUMPING,
+	SLAMMING,
+	SLAM_CHARGING
+};
+
+const STD pair<u_int, STD string> StateTypes[] =
+{
+	{STATE::GLOBAL			, "Global"		},
+	{STATE::IDLE			, "Idle"		},
+	{STATE::MOVING			, "Moving"		},
+	{STATE::JUMPING			, "Jumping"		},
+	{STATE::SLAMMING		, "Slamming"	},
+	{STATE::SLAM_CHARGING	, "SlamCharging"}
+};
+
 /*************************************************************/
 class StateStruct
 {
@@ -29,7 +50,6 @@ public:
 	Input&  GetInput(const id_type& ActorID);
 
 protected:
-
 	/* Helper Functions for Child States */
 	void ChangeState(const id_type& ActorID, const id_type& NewStateID);
 	DX XMVECTOR GetActorForce(const id_type& ActorID) const;
@@ -173,7 +193,7 @@ class SlammingState : public State
 {
 public:
 
-	SlammingState(u_int TexID, float SlamForce, float SlamSize) :
+	SlammingState(const id_type& TexID, float SlamForce, float SlamSize) :
 		TexID(TexID), SlamForce(SlamForce), SlamSize(SlamSize)
 	{
 #ifdef CYAN_DEBUG_STATES
@@ -199,7 +219,7 @@ private:
 	float SlamForce;
 	float SlamSize;
 	u_int EffectID;
-	u_int TexID;
+	id_type TexID;
 };
 
 class ShootingState : public State

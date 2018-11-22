@@ -29,17 +29,16 @@ public:
 	VisualGraphics(WORD Config) : 
 		m_Offset(0.f, 0.f), 
 		m_Size(1.f, 1.f),
-		m_TexID(-1), 
 		m_Config(Config) {}
 	virtual ~VisualGraphics() {}
 
 	void SetSize(float x, float y);
-	void SetTexID(int TexID);
+	void SetTexID(const id_type& TexID);
 	void SetOffset(float x, float y);
 	void Render();
 
 private:
-	int			m_TexID;
+	id_type		m_TexID;
 	WORD		m_Config;
 	DX XMFLOAT2 m_Offset;
 	DX XMFLOAT2 m_Size;

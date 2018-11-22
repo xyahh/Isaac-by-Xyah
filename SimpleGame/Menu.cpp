@@ -15,14 +15,15 @@ void Menu::Init()
 	Engine.AddVisual("Title");
 	Engine.GetVisualGraphics("Title").SetSize( 800.f, 800.f);
 	Engine.GetVisualGraphics("Title").SetOffset( 0.f, 50.f );
-	Engine.GetVisualGraphics("Title").SetTexID(Engine.AddTexture("./Resources/title.png"));
+	Engine.AddTexture("Title", "./Resources/title.png");
+	Engine.GetVisualGraphics("Title").SetTexID("Title");
 	
 	Engine.AddCommand("Next", new ShiftSceneCommand(*m_Framework, new Gameplay));
 	
 	Engine.AddStateType("GlobalState", new GlobalState);
 	Engine.GetStateType("GlobalState")->GetInput("").AddKeyboardInput(VK_RETURN, "Next");
 
-	Engine.AddGlobalState("GlobalState");
+	Engine.AddNonActorState("GlobalState");
 }
 
 void Menu::Exit()

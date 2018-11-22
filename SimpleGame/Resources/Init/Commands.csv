@@ -1,0 +1,9 @@
+CommandID,CommandType,Args
+MoveUp,Force,0;1000;0
+MoveDown,Force,0;-1000;0
+MoveLeft,Force,-1000;0;0
+MoveRight,Force,1000;0;0
+StartSlamming,StateOnPress,SlamCharging
+StartJumping,StateOnPress,Jumping
+StartMoving,StateOnPress,Moving
+StartShooting,StateOnPress,Shooting

@@ -16,6 +16,7 @@
 #define TEXTURES	0x20
 /*----------------------------*/
 
+
 class Cyan
 {
 	friend Framework;
@@ -37,6 +38,15 @@ public:
 
 	/*--------------------------*/
 
+	/*---File Readers-----------*/
+	void AddSoundsByFile(const STD string & filename, char delimiter = ',', bool ignore_first_row = true);
+	void AddTexturesByFile(const STD string & filename, char delimiter = ',', bool ignore_first_row = true);
+	void AddActorsByFile(const STD string & filename, char delimiter=',', bool ignore_first_row=true);
+	void AddCommandsByFile(const STD string & filename, char delimiter = ',', bool ignore_first_row = true);
+	void AddStatesByFile(const STD string & filename, char delimiter = ',', bool ignore_first_row = true);
+	void AddInputsByFile(const STD string & filename, char delimiter = ',', bool ignore_first_row = true);
+	/*--------------------------*/
+
 	/*---Components Functions---*/
 	
 	void ReserveObjects(u_int ActorNumber, u_int BulletNumber, u_int VisualNumber, u_int StateNumber);
@@ -44,11 +54,13 @@ public:
 	// RVALUES Only. Engine handles Mem Dealloc.
 	void AddCommand(const id_type& AssignID, Command*&& pCommand);
 	void AddCommand(const id_type& AssignID, Command*& pCommand) = delete;
+	void AddCommandByString(const id_type& ID, const STD string& Type,  const STD string& Args, char delimiter = ';');
 
 	void AddStateType(const id_type& AssignID, State*&& pState);
 	void AddStateType(const id_type& AssignID, State*& pState) = delete;
+	void AddStateTypeByString(const id_type& ID, const STD string& Type, const STD string& Args, char delimiter = ';');
 
-	void AddGlobalState(const id_type& StartState);
+	void AddNonActorState(const id_type& AssignID);
 
 	u_int AddObject();
 	u_int AddEffect();
@@ -56,13 +68,13 @@ public:
 	void AddVisual(const id_type& AssignID, WORD config = 0);
 	
 	void AddSound(const id_type& AssignID, const STD string& ImagePath, bool isBGM);
-	u_int AddTexture(const STD string& ImagePath);
-	void  AddTextures(STD vector<STD pair<STD string, u_int&>> Textures);
+	void AddTexture(const id_type& TexID, const STD string& ImagePath);
 	
 	VisualGraphics&	GetVisualGraphics(const id_type& ID);
 	ActorGraphics&	GetActorGraphics(const id_type& ID);
 	ObjectGraphics&	GetObjectGraphics(u_int ID);
 	EffectGraphics& GetEffect(u_int ID);
+	u_int			GetTexture(const id_type& ID);
 
 	Physics& GetActorPhysics(const id_type& ID);
 	Physics& GetObjectPhysics(u_int ID);
@@ -112,7 +124,6 @@ private:
 	/* Services								     */
 	/*-------------------------------------------*/
 	Service<u_int>					m_Textures;
-
 	Service<ActorGraphics>			m_ActorGraphics;
 	Service<Physics>				m_Physics;
 	Service<StateStruct>			m_States;
@@ -127,7 +138,7 @@ private:
 	/*-------------------------------------------*/
 	/* Service Locators                          */
 	/*-------------------------------------------*/
-
+	ServiceLocator<id_type, u_int>  m_TextureLocator;
 	ServiceLocator<id_type, Actor>	m_ActorLocator;
 	ServiceLocator<u_int,  Object>	m_ObjectLocator; 
 	ServiceLocator<u_int,	u_int>	m_EffectLocator;
