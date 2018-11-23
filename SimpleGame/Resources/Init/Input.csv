@@ -1,5 +1,5 @@
 StateID,ActorID,KeyID,CommandID
-Global,Player1,W,StartMoving
+Idle,Player1,W,StartMoving
 Idle,Player1,S,StartMoving
 Idle,Player1,A,StartMoving
 Idle,Player1,D,StartMoving

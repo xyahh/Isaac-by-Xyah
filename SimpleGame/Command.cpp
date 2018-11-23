@@ -41,29 +41,8 @@ void FxCommand::release(const id_type& ActorID)
 void ShootCommand::execute(const id_type& ActorID)
 {
 	if (ActorID.empty()) return;
+	Engine.GetActorGraphics(ActorID).Head.SetDirection(State);
 
-	if (Released)
-	{
-		Sound& sn = Engine.GetSound("ShootInf");
-		sn.Play();
-		sn.FadeOut(47'000);
-
-		Engine.GetActorGraphics(ActorID).Head.SetDirection(State);
-		BulletID = Engine.AddObject();
-		Engine.GetObjectGraphics(BulletID).ObjectSprite.SetTexID(TexID);
-		Engine.GetObjectPhysics(BulletID).SetFriction(0.2f);
-		Engine.GetObjectPhysics(BulletID).SetMass(Size);
-		Released = false;			
-		Created = true;
-	} 
-
-	if (Size < 0.75f && Created) // Max size of 50 cm 
-	{
-		Size += UPDATE_TIME;
-		Engine.GetObjectGraphics(BulletID).ObjectSprite.SetSize({ Size, Size });
-		Engine.GetObjectPhysics(BulletID).SetMass(Size);
-	}
-		
 		
 	DX XMVECTOR v = Engine.GetActorPhysics(ActorID).GetPosition();
 	
@@ -96,12 +75,12 @@ void ShootCommand::release(const id_type& ActorID)
 void NewStateOnPressCommand::execute(const id_type & ActorID)
 {
 	if (ActorID.empty()) return;
-	Engine.UpdateState(ActorID, NewStateID);
+	Engine.UpdateState(ActorID, 0, NewStateID);
 }
 
 void NewStateOnReleaseCommand::release(const id_type & ActorID)
 {
 	if (ActorID.empty()) return;
-	Engine.UpdateState(ActorID, NewStateID);
+	Engine.UpdateState(ActorID, 0, NewStateID);
 }
 

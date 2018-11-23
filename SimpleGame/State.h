@@ -247,5 +247,6 @@ private:
 	virtual State* Clone() { return new ShootingState; }
 
 	float ShootingRate;
-	u_int TexID;
+	u_int BulletID;
+	id_type TexID;
 };

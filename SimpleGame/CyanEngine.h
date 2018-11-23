@@ -56,6 +56,7 @@ public:
 	void AddCommand(const id_type& AssignID, Command*& pCommand) = delete;
 	void AddCommandByString(const id_type& ID, const STD string& Type,  const STD string& Args, char delimiter = ';');
 
+	void AddConcurrentStateLevel();
 	void AddStateType(const id_type& AssignID, State*&& pState);
 	void AddStateType(const id_type& AssignID, State*& pState) = delete;
 	void AddStateTypeByString(const id_type& ID, const STD string& Type, const STD string& Args, char delimiter = ';');
@@ -79,7 +80,7 @@ public:
 	Physics& GetActorPhysics(const id_type& ID);
 	Physics& GetObjectPhysics(u_int ID);
 	
-	void UpdateState(const id_type& ActorID, const id_type& NewStateID);
+	void UpdateState(const id_type& ActorID, u_int WhoseState, const id_type& NewStateID);
 
 	StateStruct& GetActorState(const id_type& ID);
 	Command* GetCommand(const id_type& ID);
@@ -126,7 +127,7 @@ private:
 	Service<u_int>					m_Textures;
 	Service<ActorGraphics>			m_ActorGraphics;
 	Service<Physics>				m_Physics;
-	Service<StateStruct>			m_States;
+	Service<Service<StateStruct>>	m_States;
 	Service<ObjectGraphics>			m_ObjectGraphics;
 	Service<EffectGraphics>			m_EffectGraphics;
 	Service<VisualGraphics>			m_VisualGraphics;

@@ -164,8 +164,6 @@ void Framework::Loop()
 	{
 		m_CurrentScene->Update(); 
 		m_TimeAccumulator -= UPDATE_TIME;
-		//if (!m_CurrentScene)
-		//	return;
 	}
 	m_CurrentScene->Render(m_TimeAccumulator * UPDATE_FREQUENCY);
 

@@ -14,7 +14,7 @@ Input& State::GetInput(const id_type& ActorID)
 
 void State::ChangeState(const id_type& ActorID, const id_type & NewStateID)
 {
-	Engine.UpdateState(ActorID, NewStateID);
+	Engine.UpdateState(ActorID, 0, NewStateID);
 }
 
 DX XMVECTOR State::GetActorForce(const id_type& ActorID) const
@@ -194,6 +194,13 @@ void SlammingState::Exit(const id_type& ActorID)
 /* Shooting State*/
 void ShootingState::Enter(const id_type & ActorID)
 {
+	BulletID = Engine.AddObject();
+	Physics& p = Engine.GetObjectPhysics(BulletID);
+	p.SetMass(0.5f);
+	p.SetFriction(0.2f);
+	ObjectGraphics& g = Engine.GetObjectGraphics(BulletID);
+	g.ObjectSprite.SetTexID(TexID);
+	g.ObjectSprite.SetSize({ 0.5f, 0.5f });
 }
 
 void ShootingState::Update(const id_type & ActorID)

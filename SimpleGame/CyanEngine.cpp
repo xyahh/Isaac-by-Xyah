@@ -36,10 +36,11 @@ void Cyan::Render(float fInterpolation)
 void Cyan::Update()
 {
 	for (auto& s : m_States)
-	{
-		s.pState->Update(s.ActorID);
-		ChangeStates();
-	}
+		for (auto& r : s)
+		{
+			r.pState->Update(r.ActorID);
+			ChangeStates();
+		}
 
 	for (auto Obj = m_Physics.begin(); Obj != m_Physics.end(); ++Obj)
 	{
@@ -247,6 +248,11 @@ void Cyan::AddCommandByString(const id_type& ID,  const STD string& Type, const 
 	}
 }
 
+void Cyan::AddConcurrentStateLevel()
+{
+	m_States.emplace_back();
+}
+
 void Cyan::AddStateType(const id_type & AssignID, State *&& pState)
 {
 	m_StateTypes.emplace_back(pState);
@@ -312,7 +318,7 @@ void Cyan::AddStateTypeByString(const id_type & ID, const STD string & Type, con
 
 StateStruct& Cyan::GetActorState(const id_type & ID)
 {
-	return m_States[m_ActorLocator[ID].StateIndex];
+	return m_States[0][m_ActorLocator[ID].StateIndex];
 }
 
 Command * Cyan::GetCommand(const id_type& ID)
@@ -341,7 +347,7 @@ void Cyan::ReserveObjects(u_int ActorNumber, u_int BulletNumber, u_int VisualNum
 
 void Cyan::AddNonActorState(const id_type & StartState)
 {
-	m_States.emplace_back("", StartState, GetStateType(StartState)->Clone());
+	m_States[0].emplace_back("", StartState, GetStateType(StartState)->Clone());
 }
 
 u_int Cyan::AddObject()
@@ -366,11 +372,11 @@ void Cyan::AddActor(const id_type & AssignID, const id_type & StartStateID)
 {
 	m_Physics.emplace_back();
 	m_ActorGraphics.emplace_back(AssignID);	
-
-	m_States.emplace_back(AssignID, StartStateID, GetStateType(StartStateID)->Clone());
+	
+	for (auto& s : m_States)
+		s.emplace_back(AssignID, StartStateID, GetStateType(StartStateID)->Clone());
 	m_ActorLocator[AssignID].GraphicsIndex =	LastIdx(m_ActorGraphics);
 	m_ActorLocator[AssignID].PhysicsIndex =		LastIdx(m_Physics);
-
 	m_ActorLocator[AssignID].StateIndex =		LastIdx(m_States);
 }
 
@@ -427,11 +433,11 @@ Physics & Cyan::GetObjectPhysics(u_int ID)
 	return m_Physics[m_ObjectLocator[ID].PhysicsIndex];
 }
 
-void Cyan::UpdateState(const id_type& ActorID, const id_type& NewStateID)
+void Cyan::UpdateState(const id_type& ActorID, u_int WhoseState, const id_type& NewStateID)
 {
 	if (ActorState != NULL || !NextStateID.empty()) return;
 
-	ActorState = &m_States[m_ActorLocator[ActorID].StateIndex];
+	ActorState = &m_States[WhoseState][m_ActorLocator[ActorID].StateIndex];
 	NextStateID = NewStateID;
 }
 
@@ -470,8 +476,9 @@ void Cyan::DeleteEffect(u_int EffectID)
 void Cyan::DeleteActor(const id_type& ActorID)
 {
 	for (auto& i : m_States)
-		if(ActorID == i.ActorID)
-			i.ActorID.clear();
+		for(auto& j : i)
+			if(ActorID == j.ActorID)
+				j.ActorID.clear();
 
 	u_int Index = m_ActorLocator[ActorID].PhysicsIndex;
 	UpdatePhysicsService(Index);
@@ -525,13 +532,14 @@ void Cyan::DeleteComponents(WORD Components)
 	}	
 	if (Components & STATES)
 	{
-		for (auto Iter = m_States.rbegin(); Iter != m_States.rend(); ++Iter)
-		{
-			Iter->StateID.clear();
-			Iter->ActorID.clear();
-			delete Iter->pState;
-			Iter->pState = nullptr;
-		}
+		for (auto OuterIter = m_States.rbegin(); OuterIter != m_States.rend(); ++OuterIter)
+			for (auto InnerIter = OuterIter->begin(); InnerIter != OuterIter->end(); ++InnerIter)
+			{
+				InnerIter->StateID.clear();
+				InnerIter->ActorID.clear();
+				delete InnerIter->pState;
+				InnerIter->pState = nullptr;
+			}
 
 		for (auto Iter = m_StateTypes.rbegin(); Iter != m_StateTypes.rend(); ++Iter)
 		{
@@ -550,7 +558,8 @@ void Cyan::DeleteComponents(WORD Components)
 		m_ObjectGraphics.clear();
 
 		for (auto& i : m_States) 
-			i.ActorID.clear();
+			for(auto& j : i)
+				j.ActorID.clear();
 
 		m_ActorLocator.clear();
 		m_ObjectLocator.clear();
