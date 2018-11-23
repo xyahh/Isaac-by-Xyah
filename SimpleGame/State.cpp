@@ -17,14 +17,9 @@ void State::ChangeState(const id_type& ActorID, const id_type & NewStateID)
 	Engine.UpdateState(ActorID, NewStateID);
 }
 
-DX XMVECTOR State::GetActorForce(const id_type& ActorID) const
+u_int XM_CALLCONV State::GetVector2Direction(DX FXMVECTOR v)
 {
-	return DX3 Load(Engine.GetActorPhysics(ActorID).m_Force);
-}
-
-u_int State::GetActorDirection(const id_type & ActorID)
-{
-	DX XMFLOAT2 Direction = DX2 Store(GetActorForce(ActorID));
+	DX XMFLOAT2 Direction = DX2 Store(v);
 	float Highest = 0.f;
 	if (Direction.y > Highest)
 	{
@@ -49,7 +44,24 @@ u_int State::GetActorDirection(const id_type & ActorID)
 	return m_Direction;
 }
 
-/****************************************************************************************/
+u_int State::GetActorFacingDirection(const id_type & ActorID)
+{
+	return Engine.GetActorGraphics(ActorID).Head.GetDirection();
+}
+
+DX XMVECTOR State::GetDirectionVector(u_int Direction)
+{
+	switch (Direction)
+	{
+	case DIRECTION::UP: return { 0.f, 1.f, 0.f };
+	case DIRECTION::DOWN: return { 0.f, -1.f, 0.f };
+	case DIRECTION::LEFT: return { -1.f, 0.f, 0.f };
+	case DIRECTION::RIGHT: return { 1.f, 0.f, 0.f };
+	}
+	return DX XMVECTOR();
+}
+
+/*--------------------------------------------------------------------------------------*/
 
 /*Global State */
 void GlobalState::Enter(const id_type& ActorID)
@@ -91,16 +103,17 @@ void MovingState::Enter(const id_type& ActorID)
 void MovingState::Update(const id_type& ActorID)
 {
 
-	ActorGraphics& Actor = Engine.GetActorGraphics(ActorID);
-	Actor.Body.FrameLinearAdvance();
+	ActorGraphics& AGraphics = Engine.GetActorGraphics(ActorID);
+	Physics& APhysics = Engine.GetActorPhysics(ActorID);
+	AGraphics.Body.FrameLinearAdvance();
 	State::Update(ActorID);
-	if (Zero(DX2 Magnitude(Engine.GetActorPhysics(ActorID).GetVelocity())) && Zero(DX2 Magnitude(GetActorForce(ActorID))))
+	if (Zero(DX2 Magnitude(APhysics.GetVelocity())) && Zero(DX2 Magnitude(APhysics.GetForce())))
 		ChangeState(ActorID, "Idle");
 	else
 	{
-		u_int Dir = GetActorDirection(ActorID);
-		Actor.Body.SetDirection(Dir);
-		Actor.Head.SetDirection(Dir);
+		u_int Dir = GetVector2Direction(APhysics.GetForce());
+		AGraphics.Body.SetDirection(Dir);
+		AGraphics.Head.SetDirection(Dir);
 	}
 		
 }
@@ -175,7 +188,8 @@ void SlammingState::Enter(const id_type& ActorID)
 
 void SlammingState::Update(const id_type& ActorID)
 {
-	if (Zero(DX GetZ(Engine.GetActorPhysics(ActorID).GetVelocity()) && Zero(DX GetZ(GetActorForce(ActorID)))))
+	Physics& p = Engine.GetActorPhysics(ActorID);
+	if (Zero(DX GetZ(p.GetVelocity()) && Zero(DX GetZ(p.GetForce()))))
 		ChangeState(ActorID, "Idle");
 }
 
@@ -194,17 +208,30 @@ void SlammingState::Exit(const id_type& ActorID)
 /* Shooting State*/
 void ShootingState::Enter(const id_type & ActorID)
 {
-	BulletID = Engine.AddObject();
-	Physics& p = Engine.GetObjectPhysics(BulletID);
-	p.SetMass(0.5f);
-	p.SetFriction(0.2f);
-	ObjectGraphics& g = Engine.GetObjectGraphics(BulletID);
-	g.ObjectSprite.SetTexID(TexID);
-	g.ObjectSprite.SetSize({ 0.5f, 0.5f });
+	ShootingTime = 1.f;
+	
 }
 
 void ShootingState::Update(const id_type & ActorID)
 {
+	State::Update(ActorID);
+	ShootingTime += UPDATE_TIME * ShootingRate;
+	if (ShootingTime >= 1.f)
+	{
+		ShootingTime = 0.f;
+		BulletID = Engine.AddObject();
+		Physics& p = Engine.GetObjectPhysics(BulletID);
+		Physics& Ap = Engine.GetActorPhysics(ActorID);
+		p.SetMass(0.5f);
+		p.SetFriction(0.2f);
+		p.ApplyForce(DX Scale(GetDirectionVector(GetActorFacingDirection(ActorID)), Force));
+		p.SetPosition(Ap.GetPosition());
+		p.SetVelocity(Ap.GetVelocity());
+
+		ObjectGraphics& g = Engine.GetObjectGraphics(BulletID);
+		g.ObjectSprite.SetTexID(TexID);
+		g.ObjectSprite.SetSize({ 0.5f, 0.5f });
+	}
 }
 
 void ShootingState::Exit(const id_type & ActorID)

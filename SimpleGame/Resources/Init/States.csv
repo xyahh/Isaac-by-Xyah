@@ -5,3 +5,4 @@ Moving,Moving,NULL
 Jumping,Jumping,45000
 Slamming,Slamming,Landing;100000;5
 SlamCharging,SlamCharging,1;Slamming
+Shooting,Shooting,Tear;4;1000

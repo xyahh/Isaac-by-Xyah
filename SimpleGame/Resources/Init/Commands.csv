@@ -7,3 +7,9 @@ StartSlamming,StateOnPress,SlamCharging
 StartJumping,StateOnPress,Jumping
 StartMoving,StateOnPress,Moving
 StartShooting,StateOnPress,Shooting
+ShootUp,Shoot,0
+ShootDown,Shoot,1
+ShootLeft,Shoot,2
+ShootRight,Shoot,3
+StartShooting,StateOnPress,Shooting
+EndShooting,StateOnRelease,Idle

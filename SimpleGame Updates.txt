@@ -13,6 +13,8 @@ so definitely not in the hot code zone.
 ---------------------------------------------------------------------
 Features Pending (In order of Priority)
 --------------------------------------------
++) Collision class instances be static (Since this is just
+behavior-related and no member variables will be used)
 
 +) Event Dispatcher
 +) Button UI Interface Class

@@ -11,6 +11,11 @@ void Sprite::SetDirection(u_int _State)
 	SpriteInfo.y = _State;
 }
 
+u_int Sprite::GetDirection() const
+{
+	return SpriteInfo.y;
+}
+
 void Sprite::SetFrameRate(int FrameRate_)
 {
 	FrameRate = static_cast<float>(FrameRate_);

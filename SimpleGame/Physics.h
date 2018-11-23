@@ -22,6 +22,7 @@ public:
 
 	void XM_CALLCONV ApplyForce(DX FXMVECTOR force);
 	void XM_CALLCONV SetForce(DX FXMVECTOR force);
+	DX XMVECTOR GetForce() const;
 
 	void SetPosition(float x, float y, float z);
 	void XM_CALLCONV SetPosition(DX FXMVECTOR v);

@@ -17,7 +17,7 @@ public:
 		Force(DX3 Store(force)) {}
 	virtual ~ForceCommand() {}
 	
-	static Command* Make(const STD string& Args, char delimiter = ';')
+	static Command* Make(const STD string& Args, char delimiter)
 	{
 		STD string data;
 		STD istringstream dataline(Args);
@@ -56,23 +56,23 @@ private:
 class ShootCommand : public Command
 {
 public:
-	ShootCommand(const id_type& TexID, DX FXMVECTOR Force, int State) :
-		TexID(TexID), Created(false),
-		Force(DX3 Store(Force)), 
-		State(State), Released(true), Size(0.125f) {}
+	ShootCommand(u_int Direction) :
+		Direction(Direction) {}
 	virtual ~ShootCommand() {}
+
+	static Command* Make(const STD string& Args, char delimiter)
+	{
+		STD string data;
+		STD istringstream dataline(Args);
+		STD getline(dataline, data, delimiter);
+		return new ShootCommand(STD stoi(data));
+	}
 
 	virtual void execute(const id_type& ActorID);
 	virtual void release(const id_type& ActorID);
 
 private:
-	bool Released;
-	bool Created;
-	DX XMFLOAT3 Force;
-	u_int BulletID;
-	id_type TexID;
-	float Size;
-	int State;
+	u_int Direction;
 };
 
 class ShiftSceneCommand : public Command
@@ -148,13 +148,13 @@ private:
 	id_type NewStateID;
 };
 
-
 /*---------------------------------------------------------------------------------------------*/
-const STD pair<STD string, Command*(*)(const STD string&, char)> CommandTypes[] =
+const STD pair<STD string, Command*(*)(const STD string& Args, char delimiter)> CommandTypes[] =
 {
-{"Force"			, ForceCommand::Make				},
-{"StateOnPress"		, NewStateOnPressCommand::Make		},
-{"StateOnRelease"	, NewStateOnReleaseCommand::Make	}
+{"Force", ForceCommand::Make },
+{"StateOnPress", NewStateOnPressCommand::Make },
+{"StateOnRelease", NewStateOnReleaseCommand::Make },
+{"Shoot", ShootCommand::Make }
 };
 /* Notes: ShiftScene & FxCommand are not Supported. 
 (as they need pointers [Scene ptr & Function ptr respectively] to work)*/

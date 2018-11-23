@@ -1,9 +1,9 @@
 TextureID,TexturePath
 Cain_Head,./Resources/Characters/cain_head.png
-Juan,./Resources/Characters/isaac_head.png
+Isaac_Head,./Resources/Characters/isaac_head.png
 Basic_Body,./Resources/Characters/basic_body.png
 Map,./Resources/Levels/Depths.png
-Bullet,./Resources/bullet.png
+Tear,./Resources/bullet.png
 HP,./Resources/hp_test.png
 Landing,./Resources/landing.png
 Vent,./Resources/vent.png

@@ -13,6 +13,9 @@ public:
 
 	void SetTexID(const id_type& _TexID);
 	void SetDirection(u_int _State);
+	
+	u_int GetDirection() const;
+
 	void SetFrameRate(int FrameRate);
 	void SetSize(const DX XMFLOAT2& _Size);
 	void SetSpriteInfo(const DX XMINT4& _SpriteInfo);

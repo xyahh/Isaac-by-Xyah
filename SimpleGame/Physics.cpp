@@ -81,6 +81,11 @@ void XM_CALLCONV Physics::SetForce(DX FXMVECTOR force)
 	m_Force = DX3 Store(force);
 }
 
+DX XMVECTOR Physics::GetForce() const
+{
+	return DX3 Load(m_Force);
+}
+
 void XM_CALLCONV Physics::SetVelocity(DX FXMVECTOR v)
 {
 	m_Velocity = DX3 Store(v);

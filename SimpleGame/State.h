@@ -32,8 +32,9 @@ public:
 protected:
 	/* Helper Functions for Child States */
 	void ChangeState(const id_type& ActorID, const id_type& NewStateID);
-	DX XMVECTOR GetActorForce(const id_type& ActorID) const;
-	u_int GetActorDirection(const id_type& ActorID);
+	u_int XM_CALLCONV GetVector2Direction(DX FXMVECTOR v);
+	u_int GetActorFacingDirection(const id_type& ActorID);
+	DX XMVECTOR GetDirectionVector(u_int Direction);
 
 private:
 
@@ -287,7 +288,8 @@ public:
 
 private:
 	virtual State* Clone() { return new ShootingState(TexID, ShootingRate, Force); }
-
+	
+	float ShootingTime;
 	float ShootingRate;
 	float Force;
 	u_int BulletID;
@@ -298,11 +300,12 @@ private:
 /*---------------------------------------------------------------------------------------------*/
 const STD pair<STD string, State*(*)(const STD string&, char)> StateTypes[] =
 {
-{"Global"	, GlobalState::Make		},
-{"Idle"		, IdleState::Make		},
-{"Moving"	, MovingState::Make		},
-{"Jumping"	, JumpingState::Make	},
-{"Slamming"	, SlammingState::Make	},
-{"SlamCharging", SlamChargingState::Make}
+{"Global"	, GlobalState::Make },
+{"Idle"		, IdleState::Make },
+{"Moving"	, MovingState::Make },
+{"Jumping"	, JumpingState::Make },
+{"Slamming"	, SlammingState::Make },
+{"SlamCharging", SlamChargingState::Make },
+{"Shooting", ShootingState::Make }
 };
 /*---------------------------------------------------------------------------------------------*/
