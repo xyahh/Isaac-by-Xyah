@@ -2,30 +2,23 @@
 
 New Features
 ---------------------------------------------------------------------
--
- 
-Push to two repositories on one command:
-git push all master 
-(all is a remote that pushes to both Gitlab and Github repositories push but only fetches from Github)
+Data gathered to Add Actors, Inputs, States, Commands
+all done through the power of CSV, String parsing and
+Function Pointers. 
 
-
+Notes: Slower than before but this is only done
+when shifting scenes (i.e. from Menu to Gameplay) 
+so definitely not in the hot code zone.
 
 ---------------------------------------------------------------------
 Features Pending (In order of Priority)
 --------------------------------------------
-+) Remove Custom Tags for States. (Since States will be customized continuously and therefore we can assign the ID of the State inside the 
-class)
 
 +) Event Dispatcher
-
 +) Button UI Interface Class
-
 +) Text Support
-
 +) Engine to have a Vibration Time Setter for Controllers
-
 +) Engine to have an Optional Periodical try to reconnect Controller.
-
 +) Support for Multiple Controllers
 
 ---------------------------------------------------------------------

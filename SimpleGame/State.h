@@ -1,28 +1,7 @@
 #pragma once
 #include "Input.h"
 
-
-enum STATE
-{
-	GLOBAL,
-	IDLE,
-	MOVING,
-	JUMPING,
-	SLAMMING,
-	SLAM_CHARGING
-};
-
-const STD pair<u_int, STD string> StateTypes[] =
-{
-	{STATE::GLOBAL			, "Global"		},
-	{STATE::IDLE			, "Idle"		},
-	{STATE::MOVING			, "Moving"		},
-	{STATE::JUMPING			, "Jumping"		},
-	{STATE::SLAMMING		, "Slamming"	},
-	{STATE::SLAM_CHARGING	, "SlamCharging"}
-};
-
-/*************************************************************/
+/*---------------------------------------------------------------------------------------------*/
 class StateStruct
 {
 public:
@@ -33,7 +12,8 @@ public:
 	id_type StateID;
 	State*	pState;
 };
-/*************************************************************/
+/*---------------------------------------------------------------------------------------------*/
+
 
 class State
 {
@@ -74,6 +54,11 @@ public:
 	virtual void Update(const id_type& ActorID);
 	virtual void Exit(const id_type& ActorID);
 
+	static State* Make(const STD string& Args, char delim)
+	{
+		return new GlobalState;
+	}
+
 private:
 
 	virtual State* Clone()	{	return new GlobalState; }
@@ -100,6 +85,11 @@ public:
 	virtual void Update(const id_type& ActorID);
 	virtual void Exit(const id_type& ActorID);
 
+	static State* Make(const STD string& Args, char delim)
+	{
+		return new IdleState;
+	}
+
 private:
 	virtual State* Clone()	{ return new IdleState; }
 };
@@ -124,6 +114,11 @@ public:
 	virtual void Enter(const id_type& ActorID);
 	virtual void Update(const id_type& ActorID);
 	virtual void Exit(const id_type& ActorID);
+
+	static State* Make(const STD string& Args, char delim)
+	{
+		return new MovingState;
+	}
 
 private:
 	virtual State* Clone() { return new MovingState; }
@@ -150,6 +145,15 @@ public:
 	virtual void Enter(const id_type& ActorID);
 	virtual void Update(const id_type& ActorID);
 	virtual void Exit(const id_type& ActorID);
+
+	static State* Make(const STD string& Args, char delim)
+	{
+		STD string data;
+		STD istringstream dataline(Args);
+		STD getline(dataline, data, delim);
+		float force = STD stof(data);
+		return new JumpingState(force);
+	}
 
 private:
 
@@ -181,6 +185,16 @@ public:
 	virtual void Update(const id_type& ActorID);
 	virtual void Exit(const id_type& ActorID);
 
+	static State* Make(const STD string& Args, char delim)
+	{
+		STD string data;
+		STD istringstream dataline(Args);
+		STD getline(dataline, data, delim);
+		float RageRate = STD stof(data);
+		STD getline(dataline, data, delim);
+		return new SlamChargingState(RageRate, data);
+	}
+
 private:
 	virtual State* Clone() { return new SlamChargingState(RageRate, GroundSlamStateID); }
 	float	RageRate;
@@ -211,6 +225,19 @@ public:
 	virtual void Update(const id_type& ActorID);
 	virtual void Exit(const id_type& ActorID);
 
+	static State* Make(const STD string& Args, char delim)
+	{
+		STD string data;
+		STD istringstream dataline(Args);
+		STD getline(dataline, data, delim);
+		std::string TexID = data;
+		STD getline(dataline, data, delim);
+		float SlamForce = STD stof(data);
+		STD getline(dataline, data, delim);
+		float SlamSize = STD stof(data);
+		return new SlammingState(TexID, SlamForce, SlamSize);
+	}
+
 private:
 
 	virtual State* Clone() { return new SlammingState(TexID, SlamForce, SlamSize); }
@@ -226,7 +253,8 @@ class ShootingState : public State
 {
 public:
 
-	ShootingState()
+	ShootingState(const id_type& TexID, float ShootingRate, float Force) :
+		TexID(TexID), ShootingRate(ShootingRate), Force(Force)
 	{
 #ifdef CYAN_DEBUG_STATES
 		printf("ShootingState Created!\n");
@@ -239,14 +267,42 @@ public:
 #endif
 	}
 
+	static State* Make(const STD string& Args, char delim)
+	{
+		STD string data;
+		STD istringstream dataline(Args);
+		STD getline(dataline, data, delim);
+		std::string TexID = data;
+		STD getline(dataline, data, delim);
+		float ShootingRate = STD stof(data);
+		STD getline(dataline, data, delim);
+		float Force = STD stof(data);
+		return new ShootingState(TexID, ShootingRate, Force);
+	}
+
 	virtual void Enter(const id_type& ActorID);
 	virtual void Update(const id_type& ActorID);
 	virtual void Exit(const id_type& ActorID);
 
+
 private:
-	virtual State* Clone() { return new ShootingState; }
+	virtual State* Clone() { return new ShootingState(TexID, ShootingRate, Force); }
 
 	float ShootingRate;
+	float Force;
 	u_int BulletID;
 	id_type TexID;
 };
+
+
+/*---------------------------------------------------------------------------------------------*/
+const STD pair<STD string, State*(*)(const STD string&, char)> StateTypes[] =
+{
+{"Global"	, GlobalState::Make		},
+{"Idle"		, IdleState::Make		},
+{"Moving"	, MovingState::Make		},
+{"Jumping"	, JumpingState::Make	},
+{"Slamming"	, SlammingState::Make	},
+{"SlamCharging", SlamChargingState::Make}
+};
+/*---------------------------------------------------------------------------------------------*/

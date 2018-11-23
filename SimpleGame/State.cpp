@@ -14,7 +14,7 @@ Input& State::GetInput(const id_type& ActorID)
 
 void State::ChangeState(const id_type& ActorID, const id_type & NewStateID)
 {
-	Engine.UpdateState(ActorID, 0, NewStateID);
+	Engine.UpdateState(ActorID, NewStateID);
 }
 
 DX XMVECTOR State::GetActorForce(const id_type& ActorID) const

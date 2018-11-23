@@ -20,7 +20,6 @@ void Gameplay::Init()
 		ZoomedOut = !ZoomedOut;
 	}));
 
-	Engine.AddConcurrentStateLevel();
 	Engine.AddStatesByFile("./Resources/Init/States.csv");
 	Engine.AddInputsByFile("./Resources/Init/Input.csv");
 	Engine.AddActorsByFile("./Resources/Init/Actors.csv");

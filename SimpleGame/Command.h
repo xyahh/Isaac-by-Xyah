@@ -1,24 +1,4 @@
 #pragma once
-
-enum COMMAND
-{
-	FORCE,
-	SHIFT_SCENE,
-	FUNCTION,
-	STATE_ON_PRESS,
-	STATE_ON_RELEASE
-
-} ;
-
-const STD pair<u_int, STD string> CommandTypes[] =
-{
-	{COMMAND::FORCE,			"Force"			},
-	{COMMAND::SHIFT_SCENE,		"ShiftScene"	},
-	{COMMAND::FUNCTION,			"Function"		},
-	{COMMAND::STATE_ON_PRESS,	"StateOnPress"	},
-	{COMMAND::STATE_ON_RELEASE, "StateOnRelease"}
-};
-
 class Command
 {
 public:
@@ -36,6 +16,19 @@ public:
 	ForceCommand(DX FXMVECTOR force) :
 		Force(DX3 Store(force)) {}
 	virtual ~ForceCommand() {}
+	
+	static Command* Make(const STD string& Args, char delimiter = ';')
+	{
+		STD string data;
+		STD istringstream dataline(Args);
+		STD getline(dataline, data, delimiter);
+		float x = STD stof(data);
+		STD getline(dataline, data, delimiter);
+		float y = STD stof(data);
+		STD getline(dataline, data, delimiter);
+		float z = STD stof(data);
+		return new ForceCommand({ x, y, z });
+	}
 
 	virtual void execute(const id_type& ActorID);
 	virtual void release(const id_type& ActorID) {}
@@ -82,7 +75,6 @@ private:
 	int State;
 };
 
-
 class ShiftSceneCommand : public Command
 {
 public:
@@ -122,6 +114,14 @@ public:
 	NewStateOnPressCommand(const id_type& NewStateID) : NewStateID(NewStateID) {}
 	~NewStateOnPressCommand() {}
 
+	static Command* Make(const STD string& Args, char delimiter = ';')
+	{
+		STD string data;
+		STD istringstream dataline(Args);
+		STD getline(dataline, data, delimiter);
+		return new NewStateOnPressCommand(data);
+	}
+
 	virtual void execute(const id_type& ActorID);
 
 private:
@@ -134,8 +134,28 @@ public:
 	NewStateOnReleaseCommand(const id_type& NewStateID) : NewStateID(NewStateID) {}
 	~NewStateOnReleaseCommand() {}
 
+	static Command* Make(const STD string& Args, char delimiter = ';')
+	{
+		STD string data;
+		STD istringstream dataline(Args);
+		STD getline(dataline, data, delimiter);
+		return new NewStateOnReleaseCommand(data);
+	}
+
 	virtual void release(const id_type& ActorID);
 
 private:
 	id_type NewStateID;
 };
+
+
+/*---------------------------------------------------------------------------------------------*/
+const STD pair<STD string, Command*(*)(const STD string&, char)> CommandTypes[] =
+{
+{"Force"			, ForceCommand::Make				},
+{"StateOnPress"		, NewStateOnPressCommand::Make		},
+{"StateOnRelease"	, NewStateOnReleaseCommand::Make	}
+};
+/* Notes: ShiftScene & FxCommand are not Supported. 
+(as they need pointers [Scene ptr & Function ptr respectively] to work)*/
+/*---------------------------------------------------------------------------------------------*/

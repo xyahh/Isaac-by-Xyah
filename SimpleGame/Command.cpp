@@ -75,12 +75,12 @@ void ShootCommand::release(const id_type& ActorID)
 void NewStateOnPressCommand::execute(const id_type & ActorID)
 {
 	if (ActorID.empty()) return;
-	Engine.UpdateState(ActorID, 0, NewStateID);
+	Engine.UpdateState(ActorID, NewStateID);
 }
 
 void NewStateOnReleaseCommand::release(const id_type & ActorID)
 {
 	if (ActorID.empty()) return;
-	Engine.UpdateState(ActorID, 0, NewStateID);
+	Engine.UpdateState(ActorID, NewStateID);
 }
 
