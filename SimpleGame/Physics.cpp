@@ -9,12 +9,12 @@ DX XMVECTOR XM_CALLCONV Physics::GetPosition() const
 	return DX3 Load(m_Position);
 }
 
-void Physics::SetCollision(BaseCollision* collision)
+void Physics::SetCollision(BasicCollision* collision)
 {
 	m_Collision = collision;
 }
 
-BaseCollision * Physics::GetCollision() const
+BasicCollision * Physics::GetCollision() const
 {
 	return m_Collision;
 }
@@ -33,7 +33,7 @@ void Physics::HandleCollision(Physics * OtherPhysics)
 			m_Collision->OnCollision(*this, *OtherPhysics);
 		if (OtherPhysics->m_Collision)
 			OtherPhysics->GetCollision()->OnCollision(*OtherPhysics, *this);
-	}		
+	}
 }
 
 Collision::Box & Physics::GetBox()

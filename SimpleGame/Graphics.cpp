@@ -138,7 +138,7 @@ void EffectGraphics::Render(float fInterpolation)
 	World::Convert(Size);
 	RenderDevice.DrawSprite(Position, Size, Color, 
 		Engine.GetTexture(Effect.GetTexID()), Effect.GetSpriteInfo());
-	Effect.FrameGridAdvance();
+	Effect.FrameGridUpdate();
 }
 
 void EffectGraphics::SetPosition(DX XMVECTOR pos)

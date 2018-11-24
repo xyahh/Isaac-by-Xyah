@@ -125,18 +125,17 @@ private:
 	virtual State* Clone() { return new MovingState; }
 };
 
-class JumpingState : public State
+class InAirState : public State
 {
 public:
 
-	JumpingState(float JumpForce) :
-		JumpForce(JumpForce)
+	InAirState()
 	{ 
 #ifdef CYAN_DEBUG_STATES
 		printf("JumpState Created!\n"); 
 #endif
 	}
-	virtual ~JumpingState() 
+	virtual ~InAirState()
 	{ 
 #ifdef CYAN_DEBUG_STATES
 		printf("JumpState Destroyed!\n"); 
@@ -149,18 +148,12 @@ public:
 
 	static State* Make(const STD string& Args, char delim)
 	{
-		STD string data;
-		STD istringstream dataline(Args);
-		STD getline(dataline, data, delim);
-		float force = STD stof(data);
-		return new JumpingState(force);
+		return new InAirState;
 	}
 
 private:
 
-	virtual State* Clone() { return new JumpingState(JumpForce); }
-
-	float JumpForce;
+	virtual State* Clone() { return new InAirState; }
 	float GroundFriction;
 };
 
@@ -208,8 +201,8 @@ class SlammingState : public State
 {
 public:
 
-	SlammingState(const id_type& TexID, float SlamForce, float SlamSize) :
-		TexID(TexID), SlamForce(SlamForce), SlamSize(SlamSize)
+	SlammingState(const id_type& TexID, float SlamForce) :
+		TexID(TexID), SlamForce(SlamForce)
 	{
 #ifdef CYAN_DEBUG_STATES
 		printf("GroundSlamState Created!\n");
@@ -234,18 +227,15 @@ public:
 		std::string TexID = data;
 		STD getline(dataline, data, delim);
 		float SlamForce = STD stof(data);
-		STD getline(dataline, data, delim);
-		float SlamSize = STD stof(data);
-		return new SlammingState(TexID, SlamForce, SlamSize);
+		return new SlammingState(TexID, SlamForce);
 	}
 
 private:
 
-	virtual State* Clone() { return new SlammingState(TexID, SlamForce, SlamSize); }
+	virtual State* Clone() { return new SlammingState(TexID, SlamForce); }
 
 private:
 	float SlamForce;
-	float SlamSize;
 	u_int EffectID;
 	id_type TexID;
 };
@@ -303,7 +293,7 @@ const STD pair<STD string, State*(*)(const STD string&, char)> StateTypes[] =
 {"Global"	, GlobalState::Make },
 {"Idle"		, IdleState::Make },
 {"Moving"	, MovingState::Make },
-{"Jumping"	, JumpingState::Make },
+{"InAir"	, InAirState::Make },
 {"Slamming"	, SlammingState::Make },
 {"SlamCharging", SlamChargingState::Make },
 {"Shooting", ShootingState::Make }

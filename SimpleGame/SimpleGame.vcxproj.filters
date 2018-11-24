@@ -64,6 +64,12 @@
     <Filter Include="헤더 파일\Utilities">
       <UniqueIdentifier>{addd9583-87d9-402a-9427-a5a3eaadbeb5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Custom">
+      <UniqueIdentifier>{fc5dd939-74a9-4598-b813-475d8b5c5264}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Custom">
+      <UniqueIdentifier>{daf44a14-3167-4430-bd48-3a607fb9626a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gameplay.h">
@@ -102,9 +108,6 @@
     <ClInclude Include="Sound.h">
       <Filter>헤더 파일\Components\Sound</Filter>
     </ClInclude>
-    <ClInclude Include="Command.h">
-      <Filter>헤더 파일\Core</Filter>
-    </ClInclude>
     <ClInclude Include="Framework.h">
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
@@ -130,10 +133,13 @@
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
     <ClInclude Include="State.h">
-      <Filter>헤더 파일\Components\Input</Filter>
+      <Filter>헤더 파일\Custom</Filter>
     </ClInclude>
     <ClInclude Include="Collision.h">
-      <Filter>헤더 파일\Components\Physics</Filter>
+      <Filter>헤더 파일\Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>헤더 파일\Custom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -160,9 +166,6 @@
     </ClCompile>
     <ClCompile Include="Sound.cpp">
       <Filter>소스 파일\Components\Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="Command.cpp">
-      <Filter>소스 파일\Core</Filter>
     </ClCompile>
     <ClCompile Include="Framework.cpp">
       <Filter>소스 파일\Core</Filter>
@@ -198,10 +201,13 @@
       <Filter>소스 파일\Core</Filter>
     </ClCompile>
     <ClCompile Include="State.cpp">
-      <Filter>소스 파일\Components\Input</Filter>
+      <Filter>소스 파일\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Command.cpp">
+      <Filter>소스 파일\Custom</Filter>
     </ClCompile>
     <ClCompile Include="Collision.cpp">
-      <Filter>소스 파일\Components\Physics</Filter>
+      <Filter>소스 파일\Custom</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

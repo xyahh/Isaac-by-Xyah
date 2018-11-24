@@ -38,14 +38,20 @@ void Sprite::ResetSprite()
 	CurrentFrame = 0.f;
 }
 
-bool Sprite::FrameLinearAdvance()
+bool Sprite::FrameLinearNext()
+{
+	SpriteInfo.x = (SpriteInfo.x + 1) % SpriteInfo.z;
+	return SpriteInfo.x > SpriteInfo.z;
+}
+
+bool Sprite::FrameLinearUpdate()
 {
 	CurrentFrame += UPDATE_TIME *  FrameRate;
 	SpriteInfo.x = (int)(CurrentFrame) % SpriteInfo.z;
 	return CurrentFrame > SpriteInfo.z;
 }
 
-bool Sprite::FrameGridAdvance()
+bool Sprite::FrameGridUpdate()
 {
 	CurrentFrame += UPDATE_TIME * FrameRate;
 	SpriteInfo.x = (int)(CurrentFrame) % SpriteInfo.z;

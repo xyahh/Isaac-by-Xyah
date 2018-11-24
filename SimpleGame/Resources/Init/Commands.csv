@@ -3,8 +3,9 @@ MoveUp,Force,0;1000;0
 MoveDown,Force,0;-1000;0
 MoveLeft,Force,-1000;0;0
 MoveRight,Force,1000;0;0
+Jump,Force,0;0;40000
 StartSlamming,StateOnPress,SlamCharging
-StartJumping,StateOnPress,Jumping
+StartInAir,StateOnPress,InAir
 StartMoving,StateOnPress,Moving
 StartShooting,StateOnPress,Shooting
 ShootUp,Shoot,0

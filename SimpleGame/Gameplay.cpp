@@ -5,10 +5,10 @@
 
 void Gameplay::Init()
 {
-	Engine.ReserveObjects(4, 100, 1, 10);
+	Engine.ReserveObjects(4, 100, 1, 10); 
 	Engine.AddSoundsByFile("./Resources/Init/Sounds.csv");
 	Engine.AddTexturesByFile("./Resources/Init/Textures.csv");
-	Engine.GetSound("Main").Play();
+	//Engine.GetSound("Main").Play();
 	Gamepad1.Connect();
 	Engine.AddCommandsByFile("./Resources/Init/Commands.csv");
 

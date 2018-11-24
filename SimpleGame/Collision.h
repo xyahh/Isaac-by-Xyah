@@ -1,4 +1,44 @@
 #pragma once
+class BasicCollision
+{
+public:
+	BasicCollision() {}
+	virtual ~BasicCollision() {}
+
+	virtual void OnCollision(Physics& MyBody, Physics& CollidingBody);
+
+private:
+};
+
+class ActorCollision : public BasicCollision
+{
+public:
+	ActorCollision() {}
+	virtual ~ActorCollision() {}
+
+	virtual void OnCollision(Physics& MyBody, Physics& CollidingBody);
+
+};
+
+class VentCollision : public BasicCollision
+{
+public:
+	VentCollision() {}
+	virtual ~VentCollision() {}
+
+	virtual void OnCollision(Physics& MyBody, Physics& CollidingBody);
+};
+
+class BulletCollision : public BasicCollision
+{
+public:
+	BulletCollision() {}
+	virtual	~BulletCollision() {}
+
+	virtual void OnCollision(Physics& MyBody, Physics& CollidingBody);
+};
+
+
 
 namespace Collision
 {
@@ -26,7 +66,7 @@ namespace Collision
 		DX XMVECTOR Half = DX Scale({ box.Size.x, box.Size.y }, 0.5f);
 		*Max = DX Add(position, Half);
 		*Min = DX Subtract(position, Half);
-		DX Add(Max, { 0.f, 0.f, box.Size.z });		
+		DX Add(Max, { 0.f, 0.f, box.Size.z });
 	}
 
 	inline DX XMVECTOR XM_CALLCONV HandleCollision(DX FXMVECTOR A_Pos, const Box& A_Box,
@@ -43,34 +83,9 @@ namespace Collision
 			DX Greater(B_Min, A_Max));
 	}
 
+	static BasicCollision	Basic;
+	static ActorCollision	Actor;
+	static VentCollision	Vent;
+	static BulletCollision	Bullet;
+
 }
-
-class BaseCollision
-{
-public:
-	BaseCollision() {}
-	~BaseCollision() {}
-
-	virtual void OnCollision(Physics& MyBody, Physics& CollidingBody);
-
-private:
-};
-
-class ActorCollision : public BaseCollision
-{
-public:
-	ActorCollision() {}
-	~ActorCollision() {}
-
-	virtual void OnCollision(Physics& MyBody, Physics& CollidingBody);
-
-};
-
-class VentCollision : public BaseCollision
-{
-public:
-	VentCollision() {}
-	~VentCollision() {}
-
-	virtual void OnCollision(Physics& MyBody, Physics& CollidingBody);
-};

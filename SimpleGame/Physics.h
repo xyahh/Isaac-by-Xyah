@@ -41,8 +41,8 @@ public:
 	float GetGravity() const;
 	void SetGravity(float Gravity);
 
-	void SetCollision(BaseCollision* collision);
-	BaseCollision* GetCollision() const;
+	void SetCollision(BasicCollision* collision);
+	BasicCollision* GetCollision() const;
 
 	void HandleCollision(Physics* OtherPhysics);
 	Collision::Box& GetBox();
@@ -60,6 +60,6 @@ private:
 	float			m_Gravity;
 	float			m_Friction;
 	Collision::Box	m_Box;
-	BaseCollision*	m_Collision;
+	BasicCollision*	m_Collision;
 	
 };

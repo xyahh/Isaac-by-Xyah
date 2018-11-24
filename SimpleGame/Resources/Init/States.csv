@@ -2,7 +2,7 @@ StateID,StateType,Args
 Global,Global,NULL
 Idle,Idle,NULL
 Moving,Moving,NULL
-Jumping,Jumping,45000
-Slamming,Slamming,Landing;100000;5
+InAir,InAir,NULL
+Slamming,Slamming,Explosion;100000
 SlamCharging,SlamCharging,1;Slamming
-Shooting,Shooting,Tear;4;1000
+Shooting,Shooting,Tear;4;2000

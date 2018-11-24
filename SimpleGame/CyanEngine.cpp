@@ -18,6 +18,29 @@ void Cyan::Destroy()
 	Sound::Destroy();
 }
 
+void Cyan::ProcessDeletionRequests()
+{
+	for (auto& o : m_ObjectDeletionRequests)
+	{
+		u_int PhysicsIndex = m_ObjectLocator[o].PhysicsIndex;
+		u_int GraphicsIndex = m_ObjectLocator[o].GraphicsIndex;
+		printf("ID: %o Delete PhysicsIdx %o   and GraphicsIndex %d\n", o, PhysicsIndex, GraphicsIndex);
+		m_Physics.erase(m_Physics.begin() + PhysicsIndex);
+		m_ObjectGraphics.erase(m_ObjectGraphics.begin() + GraphicsIndex);
+
+		for (auto& i : m_ObjectLocator)
+		{
+			if (i.second.PhysicsIndex > PhysicsIndex)
+				--i.second.PhysicsIndex;
+			if (i.second.GraphicsIndex > GraphicsIndex)
+				--i.second.GraphicsIndex;
+		}
+		m_ObjectLocator.erase(o);
+	}
+	m_ObjectDeletionRequests.clear();
+	
+}
+
 void Cyan::Render(float fInterpolation)
 {
 	for (auto& g : m_VisualGraphics)
@@ -38,7 +61,7 @@ void Cyan::Update()
 	for (auto& s : m_States)
 	{
 		s.pState->Update(s.ActorID);
-		ChangeStates();
+		ProcessUpdatedStates();
 	}
 	for (auto Obj = m_Physics.begin(); Obj != m_Physics.end(); ++Obj)
 	{
@@ -54,16 +77,19 @@ void Cyan::Update()
 	STD vector<u_int> StuffToDelete;
 	for (auto i = m_EffectLocator.begin(); i != m_EffectLocator.end(); ++i)
 	{
-		if (m_EffectGraphics[i->second].Effect.FrameGridAdvance())
+		if (m_EffectGraphics[i->second].Effect.FrameGridUpdate())
 			StuffToDelete.emplace_back(i->first);
 	}
 	for (auto& i : StuffToDelete)
 		DeleteEffect(i);
+
+	ProcessDeletionRequests();
 }
 
 void Cyan::AddSoundsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
 {
 	auto SFile = ReadCSV(filename, delimiter, ignore_first_row);
+	m_Sounds.reserve(SFile.size());
 	enum
 	{
 		SOUND_ID,
@@ -77,6 +103,7 @@ void Cyan::AddSoundsByFile(const STD string & filename, char delimiter, bool ign
 void Cyan::AddTexturesByFile(const STD string & filename, char delimiter, bool ignore_first_row)
 {
 	auto TFile = ReadCSV(filename, delimiter, ignore_first_row);
+	m_Textures.reserve(TFile.size());
 	enum
 	{
 		TEX_ID,
@@ -89,7 +116,10 @@ void Cyan::AddTexturesByFile(const STD string & filename, char delimiter, bool i
 void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
 {
 	auto AFile = ReadCSV(filename, delimiter, ignore_first_row);
-	
+	m_ActorGraphics.reserve(AFile.size());
+	m_Physics.reserve(AFile.size());
+	m_States.reserve(AFile.size());
+
 	enum
 	{
 		ID,
@@ -103,11 +133,12 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 		BOX_D,
 		X,
 		Y,
-		Z
+		Z,
+		TEAM
 	};
 	
-	float HeadSize = 0.75f;
-	float BodySize = 0.375f;
+	float HeadSize = 1.25f;
+	float BodySize = 0.75f;
 
 	for (auto& d : AFile)
 	{
@@ -119,7 +150,7 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 		AGraphics.Body.SetFrameRate(20);
 		AGraphics.Head.SetSize({ HeadSize, HeadSize });
 		AGraphics.Body.SetSize({ BodySize, BodySize });
-		AGraphics.SetSpriteOffset(BodySize* 0.5f + HeadSize * 0.5f, BodySize*0.5f);
+		AGraphics.SetSpriteOffset(BodySize * 0.5f + HeadSize * 0.5, BodySize * 0.5f - 0.1f);
 		AGraphics.Head.SetSpriteInfo({ 0, 0, 2,  4 });
 		AGraphics.Body.SetSpriteInfo({ 0, 0, 10, 4 });
 		AGraphics.Head.SetDirection(1);
@@ -141,12 +172,14 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 				STD stof(d[Y]),
 				STD stof(d[Z])
 			});
+		m_ActorLocator[d[ID]].Team = STD stoi(d[TEAM]);
 	}
 }
 
 void Cyan::AddCommandsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
 {
 	auto CFile = ReadCSV(filename, delimiter, ignore_first_row);
+	m_Commands.reserve(CFile.size());
 	enum
 	{
 		COMMAND_ID,
@@ -160,6 +193,7 @@ void Cyan::AddCommandsByFile(const STD string & filename, char delimiter, bool i
 void Cyan::AddStatesByFile(const STD string & filename, char delimiter, bool ignore_first_row)
 {
 	auto SFile = ReadCSV(filename, delimiter, ignore_first_row);
+	m_StateTypes.reserve(SFile.size());
 	enum
 	{
 		STATE_ID,
@@ -173,6 +207,7 @@ void Cyan::AddStatesByFile(const STD string & filename, char delimiter, bool ign
 void Cyan::AddInputsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
 {
 	auto IFile = ReadCSV(filename, delimiter, ignore_first_row);
+
 	enum
 	{
 		STATE_ID,
@@ -189,8 +224,6 @@ void Cyan::AddInputsByFile(const STD string & filename, char delimiter, bool ign
 	}
 		
 }
-
-/* Command & State Functions ---------------------------------------------------------*/
 
 void Cyan::AddCommand(const id_type& AssignID, Command*&& pCommand)
 {
@@ -233,8 +266,6 @@ State* Cyan::GetStateType(const id_type& ID)
 {
 	return m_StateTypes[m_StateTypeLocator[ID]];
 }
-
-/* Actor & Visual Functions ----------------------------------------------------------*/
 
 void Cyan::ReserveObjects(u_int ActorNumber, u_int BulletNumber, u_int VisualNumber, u_int StateNumber)
 {
@@ -287,23 +318,6 @@ void Cyan::AddVisual(const id_type& AssignID, WORD config)
 	m_VisualLocator[AssignID] = LastIdx(m_VisualGraphics);
 }
 
-void Cyan::UpdatePhysicsService(u_int Index)
-{
-	for (auto& a : m_ActorLocator)
-		if (a.second.PhysicsIndex == LastIdx(m_Physics))
-		{
-			a.second.PhysicsIndex = Index;
-			break;
-		}
-
-	for (auto& b : m_ObjectLocator)
-		if (b.second.PhysicsIndex == LastIdx(m_Physics))
-		{
-			b.second.PhysicsIndex = Index;
-			break;
-		}
-}
-
 VisualGraphics& Cyan::GetVisualGraphics(const id_type& ID)
 {
 	return m_VisualGraphics[m_VisualLocator[ID]];
@@ -342,7 +356,7 @@ void Cyan::UpdateState(const id_type& ActorID, const id_type& NewStateID)
 	NextStateID = NewStateID;
 }
 
-void Cyan::ChangeStates()
+void Cyan::ProcessUpdatedStates()
 {
 	if (ActorState == NULL || NextStateID.empty() || NextStateID == ActorState->StateID) return;
 
@@ -369,37 +383,23 @@ void Cyan::DeleteEffect(u_int EffectID)
 	for (auto& l : m_EffectLocator)
 		if (l.second >= Idx)
 			--l.second;
-
-	EraseFromService(m_EffectGraphics, Idx);
+	m_EffectGraphics.erase(m_EffectGraphics.begin() + Idx);
 	m_EffectLocator.erase(EffectID);
 }
 
 void Cyan::DeleteActor(const id_type& ActorID)
 {
-	for (auto& i : m_States)
-		if (ActorID == i.ActorID)
-			i.ActorID.clear();
-			
-
-	u_int Index = m_ActorLocator[ActorID].PhysicsIndex;
-	UpdatePhysicsService(Index);
-	
-	EraseFromService(m_ActorGraphics, m_ActorLocator[ActorID].GraphicsIndex);
-	EraseFromService(m_States, m_ActorLocator[ActorID].StateIndex);
-	EraseFromService(m_Physics, Index);
+	//ToDo
 }
 
 void Cyan::DeleteVisual(const id_type& VisualID)
 {
-	EraseFromService(m_VisualGraphics, m_VisualLocator[VisualID]);
+	//ToDo
 }
 
 void Cyan::DeleteObject(u_int BulletID)
 {
-	u_int Index = m_ObjectLocator[BulletID].PhysicsIndex;
-	UpdatePhysicsService(Index);
-	EraseFromService(m_ObjectGraphics, m_ObjectLocator[BulletID].GraphicsIndex);
-	EraseFromService(m_Physics, Index);
+	m_ObjectDeletionRequests.emplace(BulletID);
 }
 
 u_int Cyan::ActorCount() const
@@ -456,11 +456,8 @@ void Cyan::DeleteComponents(WORD Components)
 		m_Physics.clear();
 		m_ActorGraphics.clear();
 		m_ObjectGraphics.clear();
-
-		for (auto& i : m_States) 
+		for (auto& i : m_States) //Maybe I have to delete the m_States here as well?
 			i.ActorID.clear();
-				
-
 		m_ActorLocator.clear();
 		m_ObjectLocator.clear();
 	}

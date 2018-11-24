@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Collision.h"
 #include "Physics.h"
-
+#include "CyanEngine.h"
 
 void XM_CALLCONV Collision::Box::SetDimensions(DX FXMVECTOR v)
 {
@@ -20,7 +20,7 @@ DX XMVECTOR XM_CALLCONV Collision::Box::ConvertPosition(DX FXMVECTOR Position) c
 	return TransformedPos;
 }
 
-void BaseCollision::OnCollision(Physics& MyBody, Physics& CollidingBody)
+void BasicCollision::OnCollision(Physics& MyBody, Physics& CollidingBody)
 {
 	CollidingBody.SetPosition(CollidingBody.GetPrevPosition());
 	CollidingBody.SetVelocity(DX Multiply(CollidingBody.GetVelocity(), { 0.f, 0.f, 1.f }));
@@ -37,4 +37,19 @@ void ActorCollision::OnCollision(Physics& MyBody, Physics& CollidingBody)
 void VentCollision::OnCollision(Physics& MyBody, Physics& CollidingBody)
 {
 	//CollidedEntity->SetForce({ 0.f, 0.f, 1'000.f });
+}
+
+void BulletCollision::OnCollision(Physics & MyBody, Physics & CollidingBody)
+{
+	id_type ActorID = Engine.FindActor(CollidingBody);
+	u_int ObjectID = Engine.FindObject(MyBody);
+	if (!ActorID.empty())
+	{
+		if (Engine.GetActorTeam(ActorID) != Engine.GetObjectTeam(ObjectID))
+		{
+			Engine.GetActorGraphics(ActorID).SetColor(1.f, 0.f, 0.f, 1.f);
+			Engine.DeleteObject(ObjectID);
+
+		}
+	}
 }

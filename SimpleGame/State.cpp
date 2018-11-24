@@ -105,7 +105,7 @@ void MovingState::Update(const id_type& ActorID)
 
 	ActorGraphics& AGraphics = Engine.GetActorGraphics(ActorID);
 	Physics& APhysics = Engine.GetActorPhysics(ActorID);
-	AGraphics.Body.FrameLinearAdvance();
+	AGraphics.Body.FrameLinearUpdate();
 	State::Update(ActorID);
 	if (Zero(DX2 Magnitude(APhysics.GetVelocity())) && Zero(DX2 Magnitude(APhysics.GetForce())))
 		ChangeState(ActorID, "Idle");
@@ -123,20 +123,17 @@ void MovingState::Exit(const id_type& ActorID)
 }
 
 
-/* Jumping State */
-void JumpingState::Enter(const id_type& ActorID)
+/* In Air State */
+void InAirState::Enter(const id_type& ActorID)
 {
 	Physics& p = Engine.GetActorPhysics(ActorID);
 	GroundFriction = p.GetFriction();
 	p.SetFriction(0.2f);
-	p.ApplyForce({ 0.f, 0.f, JumpForce });
 }
 
-void JumpingState::Update(const id_type& ActorID)
+void InAirState::Update(const id_type& ActorID)
 {
-	if(DX GetZ(Engine.GetActorPhysics(ActorID).GetPosition()) > 1.f)
-		State::Update(ActorID);
-
+	State::Update(ActorID);
 	DX XMVECTOR Velocity = Engine.GetActorPhysics(ActorID).GetVelocity();
 
 	if (Zero(DX GetZ(Velocity)))
@@ -148,7 +145,7 @@ void JumpingState::Update(const id_type& ActorID)
 	}
 }
 
-void JumpingState::Exit(const id_type& ActorID)
+void InAirState::Exit(const id_type& ActorID)
 {
 	Engine.GetActorPhysics(ActorID).SetFriction(GroundFriction);
 }
@@ -198,7 +195,7 @@ void SlammingState::Exit(const id_type& ActorID)
 	EffectID = Engine.AddEffect();
 	EffectGraphics& e = Engine.GetEffect(EffectID);
 	e.Effect.SetTexID(TexID);
-	e.Effect.SetSize({ SlamSize, SlamSize });
+	e.Effect.SetSize({ 5.f, 5.f });
 	e.Effect.SetFrameRate(60);
 	e.Effect.SetSpriteInfo({ 0, 0, 9, 9 });
 	e.SetPosition(DX Add(Engine.GetActorPhysics(ActorID).GetPosition(), { 0.f, 0.1f, -0.1f }));
@@ -210,30 +207,43 @@ void ShootingState::Enter(const id_type & ActorID)
 {
 	ShootingTime = 1.f;
 	
+	Engine.GetActorGraphics(ActorID).Head.ResetSprite();
 }
 
 void ShootingState::Update(const id_type & ActorID)
 {
 	State::Update(ActorID);
 	ShootingTime += UPDATE_TIME * ShootingRate;
+	Physics& Ap = Engine.GetActorPhysics(ActorID);
+	ActorGraphics& Ag = Engine.GetActorGraphics(ActorID);
+	Ag.Body.SetDirection(GetVector2Direction(Ap.GetForce()));
+
+	if (!Zero(DX2 Magnitude(Ap.GetVelocity())))
+		Ag.Body.FrameLinearUpdate();
+
 	if (ShootingTime >= 1.f)
 	{
+		Ag.Head.FrameLinearNext();
 		ShootingTime = 0.f;
 		BulletID = Engine.AddObject();
-		Physics& p = Engine.GetObjectPhysics(BulletID);
-		Physics& Ap = Engine.GetActorPhysics(ActorID);
-		p.SetMass(0.5f);
-		p.SetFriction(0.2f);
-		p.ApplyForce(DX Scale(GetDirectionVector(GetActorFacingDirection(ActorID)), Force));
-		p.SetPosition(Ap.GetPosition());
-		p.SetVelocity(Ap.GetVelocity());
 
-		ObjectGraphics& g = Engine.GetObjectGraphics(BulletID);
-		g.ObjectSprite.SetTexID(TexID);
-		g.ObjectSprite.SetSize({ 0.5f, 0.5f });
+		Physics& Op = Engine.GetObjectPhysics(BulletID);
+
+		Op.SetMass(0.5f);
+		Op.SetFriction(0.2f);
+		Op.ApplyForce(DX Scale(GetDirectionVector(GetActorFacingDirection(ActorID)), Force));
+		Op.SetPosition(DX Add(Ap.GetPosition(), {0.f, 0.f, 0.75f})); //Fix later :)
+		Op.SetVelocity(Ap.GetVelocity());
+		Op.SetCollision(&Collision::Bullet);
+		Op.GetBox().SetDimensions({ 0.5f, 0.5f, 0.5f });
+
+		ObjectGraphics& Og = Engine.GetObjectGraphics(BulletID);
+		Og.ObjectSprite.SetTexID(TexID);
+		Og.ObjectSprite.SetSize({ 0.5f, 0.5f });
 	}
 }
 
 void ShootingState::Exit(const id_type & ActorID)
 {
+	Engine.GetActorGraphics(ActorID).Head.ResetSprite();
 }

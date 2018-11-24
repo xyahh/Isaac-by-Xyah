@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Command.h"
 #include "Graphics.h"
 #include "Physics.h"
@@ -37,6 +36,35 @@ public:
 	void Update();
 
 	/*--------------------------*/
+
+	//I don't like these Functions
+	id_type FindActor(const Physics& physics) const
+	{
+		for (u_int i = 0; i < m_Physics.size(); ++i)
+			if (&physics == &m_Physics[i])
+				for (auto& l : m_ActorLocator)
+					if (i == l.second.PhysicsIndex)
+						return l.first;
+		return id_type("");
+	}
+	u_int FindObject(const Physics& physics) const
+	{
+		for (u_int i = 0; i < m_Physics.size(); ++i)
+			if (&physics == &m_Physics[i])
+				for (auto& l : m_ObjectLocator)
+					if (i == l.second.PhysicsIndex)
+						return l.first;
+		return u_int();
+	}
+	u_int GetActorTeam(const id_type& ID) const
+	{
+		return m_ActorLocator.at(ID).Team;
+	}
+	u_int GetObjectTeam(u_int ID) const
+	{
+		return m_ObjectLocator.at(ID).Team;
+	}
+
 
 	/*---File Readers-----------*/
 	void AddSoundsByFile(const STD string & filename, char delimiter = ',', bool ignore_first_row = true);
@@ -103,23 +131,17 @@ private:
 	bool Initialize(int WindowWidth, int WindowHeight);
 	void Destroy();
 
-	template <class T>
-	void EraseFromService(STD vector<T>& a, u_int Index)
-	{
-		T temp = a[a.size() - 1];
-		a[a.size() - 1] = a[Index];
-		a[Index] = temp;
-		a.erase(a.end() - 1);
-	}
+	//Done at the end of Cycles to avoid Dangling pointers / skipped items in loops
+	void ProcessDeletionRequests(); 
+	void ProcessUpdatedStates(); 
 
-	void UpdatePhysicsService(u_int Index); 
-
-	void ChangeStates();
 	StateStruct*		ActorState{ nullptr };
 	id_type				NextStateID;
 
 private:
 	
+	STD set<u_int>					m_ObjectDeletionRequests;
+
 	/*-------------------------------------------*/
 	/* Services								     */
 	/*-------------------------------------------*/

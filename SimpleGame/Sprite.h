@@ -20,8 +20,11 @@ public:
 	void SetSize(const DX XMFLOAT2& _Size);
 	void SetSpriteInfo(const DX XMINT4& _SpriteInfo);
 	void ResetSprite();
-	bool FrameLinearAdvance();
-	bool FrameGridAdvance();
+
+	bool FrameLinearNext();
+
+	bool FrameLinearUpdate();
+	bool FrameGridUpdate();
 
 	id_type GetTexID() const;
 	DX XMVECTOR XM_CALLCONV GetSize() const;
