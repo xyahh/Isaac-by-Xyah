@@ -28,7 +28,7 @@ void Gameplay::Init()
 		int o = Engine.AddObject();
 		Physics& p = Engine.GetObjectPhysics(o);
 		p.SetCollision(&Collision::Basic);
-		p.GetBox().SetDimensions({ 2.f, 17.5f, 10.f });
+		p.GetBox().SetDimensions({ 1.75f, 17.5f, 10.f });
 		p.SetPosition({ 10.f, 0.f, 0.f });
 	}
 
@@ -52,7 +52,7 @@ void Gameplay::Init()
 		int o = Engine.AddObject();
 		Physics& p = Engine.GetObjectPhysics(o);
 		p.SetCollision(&Collision::Basic);
-		p.GetBox().SetDimensions({ 2.f, 17.5f, 10.f });
+		p.GetBox().SetDimensions({ 1.75f, 17.5f, 10.f });
 		p.SetPosition({ -10.f, 0.f, 0.f });
 	}
 

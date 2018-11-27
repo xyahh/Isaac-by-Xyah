@@ -205,45 +205,54 @@ void SlammingState::Exit(const id_type& ActorID)
 /* Shooting State*/
 void ShootingState::Enter(const id_type & ActorID)
 {
-	ShootingTime = 1.f;
-	
-	Engine.GetActorGraphics(ActorID).Head.ResetSprite();
+	Growth = 0.5f;
+	Engine.GetActorGraphics(ActorID).Head.FrameLinearNext();
+
+	BulletID = Engine.AddObject();
+	printf("New Obj\t");
+	ObjectGraphics& Og = Engine.GetObjectGraphics(BulletID);
+	Og.ObjectSprite.SetTexID(TexID);
+	Og.ObjectSprite.SetSize({ Growth, Growth });
+
+	Physics& Op = Engine.GetObjectPhysics(BulletID);
+	Op.SetPosition(Engine.GetActorPhysics(ActorID).GetPosition());
+	Op.SetMass(0.5f);
+	Op.SetFriction(0.2f);
+	printf("%d : ", BulletID);
 }
 
 void ShootingState::Update(const id_type & ActorID)
 {
 	State::Update(ActorID);
-	ShootingTime += UPDATE_TIME * ShootingRate;
+	Growth += UPDATE_TIME * GrowingRate;
+	Clamp(0.5f, &Growth, 2.5f);
 	Physics& Ap = Engine.GetActorPhysics(ActorID);
 	ActorGraphics& Ag = Engine.GetActorGraphics(ActorID);
 	Ag.Body.SetDirection(GetVector2Direction(Ap.GetForce()));
 
-	if (!Zero(DX2 Magnitude(Ap.GetVelocity())))
+	if (Zero(DX2 Magnitude(Ap.GetVelocity())))
+		Ag.Body.ResetSprite();
+	else 
 		Ag.Body.FrameLinearUpdate();
 
-	if (ShootingTime >= 1.f)
-	{
-		Ag.Head.FrameLinearNext();
-		ShootingTime = 0.f;
-		BulletID = Engine.AddObject();
 
-		Physics& Op = Engine.GetObjectPhysics(BulletID);
+	ObjectGraphics& Og = Engine.GetObjectGraphics(BulletID);
+	Og.ObjectSprite.SetSize({ Growth, Growth });
 
-		Op.SetMass(0.5f);
-		Op.SetFriction(0.2f);
-		Op.ApplyForce(DX Scale(GetDirectionVector(GetActorFacingDirection(ActorID)), Force));
-		Op.SetPosition(DX Add(Ap.GetPosition(), {0.f, 0.f, 0.75f})); //Fix later :)
-		Op.SetVelocity(Ap.GetVelocity());
-		Op.SetCollision(&Collision::Bullet);
-		Op.GetBox().SetDimensions({ 0.5f, 0.5f, 0.5f });
-
-		ObjectGraphics& Og = Engine.GetObjectGraphics(BulletID);
-		Og.ObjectSprite.SetTexID(TexID);
-		Og.ObjectSprite.SetSize({ 0.5f, 0.5f });
-	}
+	Physics& Op = Engine.GetObjectPhysics(BulletID);
+	Op.SetPosition(Ap.GetPosition());
+	Op.GetBox().SetDimensions({ Growth, Growth*0.25f, Growth });
 }
 
 void ShootingState::Exit(const id_type & ActorID)
 {
+	printf("%d : ", BulletID);
+	Physics& Op = Engine.GetObjectPhysics(BulletID);
+	DX XMVECTOR For = DX Scale(GetDirectionVector(GetActorFacingDirection(ActorID)), Force);
+	DX Print(For, '\t');
+	Op.ApplyForce(For);
+	Op.SetCollision(&Collision::Bullet);
+	printf("%f\n", Growth);
+	Op.SetVelocity(Engine.GetActorPhysics(ActorID).GetVelocity());
 	Engine.GetActorGraphics(ActorID).Head.ResetSprite();
 }

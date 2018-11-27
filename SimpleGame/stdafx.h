@@ -20,7 +20,7 @@
 
 #include "Math.h"
 
-//#define CYAN_DEBUG_STATES
+#define CYAN_DEBUG_STATES
 #define CYAN_DEBUG_COLLISION
 
 enum DIRECTION

@@ -2,20 +2,13 @@
 
 New Features
 ---------------------------------------------------------------------
-Data gathered to Add Actors, Inputs, States, Commands
-all done through the power of CSV, String parsing and
-Function Pointers. 
-
-Notes: Slower than before but this is only done
-when shifting scenes (i.e. from Menu to Gameplay) 
-so definitely not in the hot code zone.
+Collision Works in General
 
 ---------------------------------------------------------------------
 Features Pending (In order of Priority)
 --------------------------------------------
-+) Collision class instances be static (Since this is just
-behavior-related and no member variables will be used)
-
++) Have a way to identify Objects as BULLETS, WALLS, etc. + 
+BULLETS need to have a "Who shot" it variable.
 +) Event Dispatcher
 +) Button UI Interface Class
 +) Text Support

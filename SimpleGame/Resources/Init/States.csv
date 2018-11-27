@@ -5,4 +5,4 @@ Moving,Moving,NULL
 InAir,InAir,NULL
 Slamming,Slamming,Explosion;100000
 SlamCharging,SlamCharging,1;Slamming
-Shooting,Shooting,Tear;4;2000
+Shooting,Shooting,Tear;1;2000
