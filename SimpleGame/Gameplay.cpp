@@ -23,6 +23,22 @@ void Gameplay::Init()
 	Engine.AddStatesByFile("./Resources/Init/States.csv");
 	Engine.AddInputsByFile("./Resources/Init/Input.csv");
 	Engine.AddActorsByFile("./Resources/Init/Actors.csv");
+	{
+		int o = Engine.AddObject();
+		Physics& p = Engine.GetObjectPhysics(o);
+		p.SetCollision(&Collision::Basic);
+		p.GetBox().SetDimensions({ 2.f, 17.5f, 10.f });
+		p.SetPosition({ 10.f, 0.f, 0.f });
+	}
+
+	{
+		int o = Engine.AddObject();
+		Physics& p = Engine.GetObjectPhysics(o);
+		p.SetCollision(&Collision::Basic);
+		p.GetBox().SetDimensions({ 17.5f, 3.f, 10.f });
+		p.SetPosition({ 0.f, 10.f, 0.f });
+	}
+	
 
 	/* Visuals */
 	Engine.AddVisual("Map", PHYSICAL_UNITS | BACK_DRAW);

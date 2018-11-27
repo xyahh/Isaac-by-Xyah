@@ -65,10 +65,11 @@ void Cyan::Update()
 	}
 	for (auto Obj = m_Physics.begin(); Obj != m_Physics.end(); ++Obj)
 	{
-
 		Obj->Update();
+		Obj->SetDeltaPosition(DX Subtract(Obj->GetPosition(), Obj->GetPrevPosition()));
 		for (auto Nearby = Obj+1; Nearby != m_Physics.end();  ++Nearby)
 			Obj->HandleCollision(&*Nearby);
+		Obj->SetPosition(DX Add(Obj->GetPrevPosition(), Obj->GetDeltaPosition()));
 	}
 
 	
@@ -165,7 +166,7 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 				STD stof(d[BOX_H]),
 				STD stof(d[BOX_D])
 			});
-		APhysics.SetCollision(NULL);
+		APhysics.SetCollision(&Collision::Actor);
 		APhysics.SetPosition(
 			{
 				STD stof(d[X]),

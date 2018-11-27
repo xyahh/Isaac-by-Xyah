@@ -21,18 +21,17 @@ BasicCollision * Physics::GetCollision() const
 
 void Physics::HandleCollision(Physics * OtherPhysics)
 {
-	DX XMVECTOR Collision = Collision::HandleCollision
-	(
-		GetPosition(), m_Box,
-		OtherPhysics->GetPosition(), OtherPhysics->m_Box
-	);
+	DX XMVECTOR Min, Max, OtherMin, OtherMax;
+	Collision::GetExtents(&Min, &Max, GetPosition(), m_Box);
+	Collision::GetExtents(&OtherMin, &OtherMax, OtherPhysics->GetPosition(), OtherPhysics->m_Box);
 
-	if (!(DX AnyTrue(Collision)))
+	if (Collision::HandleCollision(Min, Max, OtherMin, OtherMax))
 	{
+		DX XMVECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
 		if (m_Collision)
-			m_Collision->OnCollision(*this, *OtherPhysics);
+			m_Collision->OnCollision(*this, *OtherPhysics, Normal);
 		if (OtherPhysics->m_Collision)
-			OtherPhysics->GetCollision()->OnCollision(*OtherPhysics, *this);
+			OtherPhysics->GetCollision()->OnCollision(*OtherPhysics, *this, Normal);
 	}
 }
 
@@ -86,6 +85,16 @@ DX XMVECTOR Physics::GetForce() const
 	return DX3 Load(m_Force);
 }
 
+DX XMVECTOR XM_CALLCONV Physics::GetDeltaPosition() const
+{
+	return DX3 Load(m_DeltaPos);
+}
+
+void XM_CALLCONV Physics::SetDeltaPosition(DX FXMVECTOR v)
+{
+	m_DeltaPos = DX3 Store(v);
+}
+
 void XM_CALLCONV Physics::SetVelocity(DX FXMVECTOR v)
 {
 	m_Velocity = DX3 Store(v);
@@ -118,6 +127,9 @@ void Physics::SetGravity(float Gravity)
 
 void Physics::Update()
 {
+	//For Interpolation
+	m_PrevPos = m_Position;
+
 	DX XMVECTOR Position =	DX3 Load(m_Position);
 	DX XMVECTOR Velocity =	DX3 Load(m_Velocity);
 	DX XMVECTOR Force =		DX3 Load(m_Force);
@@ -125,10 +137,6 @@ void Physics::Update()
 	//DX Print(Force);
 	//Apply Gravity Force
 	DX Add(&Force, { 0.f, 0.f, -m_Gravity * m_Mass });
-
-
-	//For Interpolation
-	m_PrevPos = m_Position;
 
 	//2D Friction
 	{

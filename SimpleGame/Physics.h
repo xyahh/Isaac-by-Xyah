@@ -29,6 +29,9 @@ public:
 	DX XMVECTOR XM_CALLCONV GetPosition() const;
 	DX XMVECTOR XM_CALLCONV GetPrevPosition() const;
 
+	DX XMVECTOR XM_CALLCONV GetDeltaPosition() const;
+	void XM_CALLCONV SetDeltaPosition(DX FXMVECTOR v);
+
 	void XM_CALLCONV SetVelocity(DX FXMVECTOR v);
 	DX XMVECTOR XM_CALLCONV GetVelocity() const;
 
@@ -54,7 +57,8 @@ private:
 
 	float			m_Mass;
 	DX XMFLOAT3		m_Position;
-	DX XMFLOAT3		m_PrevPos;
+	DX XMFLOAT3		m_DeltaPos; //For Collision
+	DX XMFLOAT3		m_PrevPos;  //For Interpolation
 	DX XMFLOAT3		m_Force;
 	DX XMFLOAT3		m_Velocity;
 	float			m_Gravity;
