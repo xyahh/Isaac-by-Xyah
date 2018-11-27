@@ -56,15 +56,6 @@ public:
 						return l.first;
 		return u_int();
 	}
-	u_int GetActorTeam(const id_type& ID) const
-	{
-		return m_ActorLocator.at(ID).Team;
-	}
-	u_int GetObjectTeam(u_int ID) const
-	{
-		return m_ObjectLocator.at(ID).Team;
-	}
-
 
 	/*---File Readers-----------*/
 	void AddSoundsByFile(const STD string & filename, char delimiter = ',', bool ignore_first_row = true);

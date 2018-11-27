@@ -24,7 +24,6 @@ void Cyan::ProcessDeletionRequests()
 	{
 		u_int PhysicsIndex = m_ObjectLocator[o].PhysicsIndex;
 		u_int GraphicsIndex = m_ObjectLocator[o].GraphicsIndex;
-		printf("ID: %o Delete PhysicsIdx %o   and GraphicsIndex %d\n", o, PhysicsIndex, GraphicsIndex);
 		m_Physics.erase(m_Physics.begin() + PhysicsIndex);
 		m_ObjectGraphics.erase(m_ObjectGraphics.begin() + GraphicsIndex);
 
@@ -134,8 +133,7 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 		BOX_D,
 		X,
 		Y,
-		Z,
-		TEAM
+		Z
 	};
 	
 	float HeadSize = 1.25f;
@@ -173,7 +171,6 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 				STD stof(d[Y]),
 				STD stof(d[Z])
 			});
-		m_ActorLocator[d[ID]].Team = STD stoi(d[TEAM]);
 	}
 }
 

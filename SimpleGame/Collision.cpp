@@ -26,20 +26,18 @@ void XM_CALLCONV BasicCollision::OnCollision(Physics& MyBody, Physics& Colliding
 	DX XMVECTOR v = DX Add(DX Scale(CollisionNormal, -1.f), DX XMVectorSplatOne());
 	CollidingBody.SetDeltaPosition(DX Multiply(CollidingBody.GetDeltaPosition(), v));
 	CollidingBody.SetVelocity(DX Multiply(CollidingBody.GetVelocity(), v));
-	DX Print(CollidingBody.GetVelocity(), '\n');
 }
 
 
 void XM_CALLCONV ActorCollision::OnCollision(Physics& MyBody, Physics& CollidingBody, DX FXMVECTOR CollisionNormal)
 {
-	
+	//BasicCollision::OnCollision(MyBody, CollidingBody, CollisionNormal)
 }
 
 
 void XM_CALLCONV BulletCollision::OnCollision(Physics & MyBody, Physics & CollidingBody, DX FXMVECTOR CollisionNormal)
 {
-	u_int OtherObjID = Engine.FindObject(CollidingBody);
+	id_type ActorID = Engine.FindActor(CollidingBody);
 	u_int ObjectID = Engine.FindObject(MyBody);
-	if (Engine.GetObjectTeam(OtherObjID) != Engine.GetObjectTeam(ObjectID))
-		Engine.DeleteObject(ObjectID);
+	if (ActorID.empty()) Engine.DeleteObject(ObjectID);
 }

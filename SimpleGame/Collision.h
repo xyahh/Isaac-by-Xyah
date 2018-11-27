@@ -71,19 +71,24 @@ inline DX XMVECTOR XM_CALLCONV GetNormal(DX FXMVECTOR A_Min, DX FXMVECTOR A_Max,
 {
 	DX XMVECTOR DiffA = DX Subtract(A_Max, B_Min);
 	DX XMVECTOR DiffB = DX Subtract(B_Max, A_Min);
-	DX XMVECTOR NormalA = DX XMVectorSplatOne();
-	DX XMVECTOR NormalB = DX XMVectorSplatOne();
-	DX SetW(&DiffA, 1.f);
-	DX SetW(&DiffB, 1.f);
+
+	DX XMVECTOR MinA = DX XMVectorSplatOne();
+	DX XMVECTOR MinB = DX XMVectorSplatOne();
+	DX SetW(&DiffA, 0xFFFFFFFF); //Max Value To Check for Min
+	DX SetW(&DiffB, 0xFFFFFFFF); // Max Value To Check for Min
+
+	//Find Min of Both Vectors
 	for (int i = 1; i <= 3; ++i)
 	{
-		NormalA = DX Multiply(NormalA, DX Evaluate(DX Less(DiffA, DX ShiftLeft(DiffA, i))));
-		NormalB = DX Multiply(NormalB, DX Evaluate(DX Less(DiffB, DX ShiftLeft(DiffB, i))));
+		MinA = DX Multiply(MinA, DX Evaluate(DX Less(DiffA, DX ShiftLeft(DiffA, i))));
+		MinB = DX Multiply(MinB, DX Evaluate(DX Less(DiffB, DX ShiftLeft(DiffB, i))));
 	}
-	float FA = DX4 MagnitudeSQ(DX Multiply(DiffA, NormalA));
-	float FB = DX4 MagnitudeSQ(DX Multiply(DiffB, NormalB));
-	if (FA < FB) return NormalA;
-	else return NormalB;
+	float FA = DX4 MagnitudeSQ(DX Multiply(DiffA, MinA));
+	float FB = DX4 MagnitudeSQ(DX Multiply(DiffB, MinB));
+	if (FA < FB) return 
+		MinA;	
+	else return 
+		MinB;
 }
 
 NS_COLLISION_END

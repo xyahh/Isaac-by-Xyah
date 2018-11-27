@@ -249,19 +249,16 @@ u_int Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 #ifdef CYAN_DEBUG_COLLISION
 void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size)
 {
-	DX XMVECTOR GLPosY = GetGLPosition(Position);
-	DX XMVECTOR GLPosZ = GLPosY;
-	DX SetY(&GLPosZ, DX GetY(GLPosZ) + DX GetZ(GLPosZ));
+	DX XMVECTOR WDRect = GetGLPosition(Position);
+	DX XMVECTOR WHRect = WDRect;
+	DX SetY(&WHRect, DX GetY(WHRect) + DX GetZ(WHRect));
 
 	DX XMVECTOR SizeZ = DX Swizzle(Size, 0, 2, 2, 3);
 
-	DX SetZ(&GLPosZ, NEAREST);
-	DX SetZ(&GLPosY, FARTHEST);
-	DrawTexture(GLPosZ, SizeZ, { 0.f, 0.f, 1.f, 1.f }, m_DebugRect);
-	DrawTexture(DX Add(GLPosZ, { 0.f, DX GetY(Size), 0.f}), SizeZ, { 0.f, 1.f, 0.f, 1.f }, m_DebugRect);
-
-
-	DrawTexture(GLPosY, Size, {1.f, 0.f, 0.f, 1.f}, m_DebugRect);
+	DX SetZ(&WHRect, NEAREST);
+	DX SetZ(&WDRect, FARTHEST);
+	DrawTexture(WHRect, SizeZ, { 0.f, 0.f, 1.f, 1.f }, m_DebugRect);
+	DrawTexture(WDRect, Size,  { 1.f, 0.f, 0.f, 1.f}, m_DebugRect);
 
 }
 #endif

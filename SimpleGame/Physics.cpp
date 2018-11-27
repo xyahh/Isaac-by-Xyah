@@ -21,6 +21,7 @@ BasicCollision * Physics::GetCollision() const
 
 void Physics::HandleCollision(Physics * OtherPhysics)
 {
+
 	DX XMVECTOR Min, Max, OtherMin, OtherMax;
 	Collision::GetExtents(&Min, &Max, GetPosition(), m_Box);
 	Collision::GetExtents(&OtherMin, &OtherMax, OtherPhysics->GetPosition(), OtherPhysics->m_Box);
