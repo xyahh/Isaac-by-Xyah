@@ -74,8 +74,8 @@ inline DX XMVECTOR XM_CALLCONV GetNormal(DX FXMVECTOR A_Min, DX FXMVECTOR A_Max,
 
 	DX XMVECTOR MinA = DX XMVectorSplatOne();
 	DX XMVECTOR MinB = DX XMVectorSplatOne();
-	DX SetW(&DiffA, 0xFFFFFFFF); //Max Value To Check for Min
-	DX SetW(&DiffB, 0xFFFFFFFF); // Max Value To Check for Min
+	DX SetW(&DiffA, (float)0xFFFFFFFF); //Max Value To Check for Min
+	DX SetW(&DiffB, (float)0xFFFFFFFF); // Max Value To Check for Min
 
 	//Find Min of Both Vectors
 	for (int i = 1; i <= 3; ++i)

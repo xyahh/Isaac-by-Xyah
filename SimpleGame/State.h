@@ -34,7 +34,7 @@ protected:
 	void ChangeState(const id_type& ActorID, const id_type& NewStateID);
 	u_int XM_CALLCONV GetVector2Direction(DX FXMVECTOR v);
 	u_int GetActorFacingDirection(const id_type& ActorID);
-	DX XMVECTOR GetDirectionVector(u_int Direction);
+	DX XMVECTOR GetDirectionVector2(u_int Direction);
 
 private:
 
@@ -282,7 +282,7 @@ private:
 	float Growth;
 	float GrowingRate;
 	float Force;
-	u_int BulletID;
+	id_type BulletID;
 	id_type TexID;
 };
 

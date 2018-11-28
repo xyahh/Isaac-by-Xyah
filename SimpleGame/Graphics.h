@@ -24,7 +24,7 @@ public:
 
 	Sprite& GetSprite(const id_type& SpriteName);
 
-	void SetActor(const id_type& ActorID);
+	void SetID(const id_type& ActorID);
 	id_type GetActor() const;
 
 protected:
@@ -52,23 +52,6 @@ private:
 	WORD		m_Config;
 	DX XMFLOAT2 m_Offset;
 	DX XMFLOAT2 m_Size;
-};
-
-class ObjectGraphics : public Graphics
-{
-	friend Cyan;
-
-public:
-	ObjectGraphics(u_int ObjectID) :
-		ObjectID(ObjectID) {}
-	virtual ~ObjectGraphics() {}
-
-	void Render(float fInterpolation);
-
-	Sprite ObjectSprite;
-
-private:
-	u_int ObjectID;
 };
 
 class EffectGraphics : public Graphics

@@ -36,8 +36,8 @@ void XM_CALLCONV ActorCollision::OnCollision(Physics& MyBody, Physics& Colliding
 
 void XM_CALLCONV BulletCollision::OnCollision(Physics & MyBody, Physics & CollidingBody, DX FXMVECTOR CollisionNormal)
 {
-	id_type ActorID = Engine.FindActor(CollidingBody);
-	u_int ObjectID = Engine.FindObject(MyBody);
+	//id_type ActorID = Engine.FindActor(CollidingBody);
+	//id_type ObjectID = Engine.FindObject(MyBody);
 	//if (ActorID.empty()) 
 	//	Engine.DeleteObject(ObjectID);
 }

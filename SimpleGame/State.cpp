@@ -46,10 +46,10 @@ u_int XM_CALLCONV State::GetVector2Direction(DX FXMVECTOR v)
 
 u_int State::GetActorFacingDirection(const id_type & ActorID)
 {
-	return Engine.GetActorGraphics(ActorID).GetSprite("Head").GetDirection();
+	return Engine.GetEntityGraphics(ActorID).GetSprite("Head").GetDirection();
 }
 
-DX XMVECTOR State::GetDirectionVector(u_int Direction)
+DX XMVECTOR State::GetDirectionVector2(u_int Direction)
 {
 	switch (Direction)
 	{
@@ -80,7 +80,7 @@ void GlobalState::Exit(const id_type& ActorID)
 /* Idle State */
 void IdleState::Enter(const id_type& ActorID)
 {
-	Engine.GetActorGraphics(ActorID).GetSprite("Body").ResetSprite();
+	Engine.GetEntityGraphics(ActorID).GetSprite("Body").ResetSprite();
 	
 }
 
@@ -103,8 +103,8 @@ void MovingState::Enter(const id_type& ActorID)
 void MovingState::Update(const id_type& ActorID)
 {
 
-	Graphics& AGraphics = Engine.GetActorGraphics(ActorID);
-	Physics& APhysics = Engine.GetActorPhysics(ActorID);
+	Graphics& AGraphics = Engine.GetEntityGraphics(ActorID);
+	Physics& APhysics = Engine.GetEntityPhysics(ActorID);
 	AGraphics.GetSprite("Body").FrameLinearUpdate();
 	State::Update(ActorID);
 	if (Zero(DX2 Magnitude(APhysics.GetVelocity())) && Zero(DX2 Magnitude(APhysics.GetForce())))
@@ -126,7 +126,7 @@ void MovingState::Exit(const id_type& ActorID)
 /* In Air State */
 void InAirState::Enter(const id_type& ActorID)
 {
-	Physics& p = Engine.GetActorPhysics(ActorID);
+	Physics& p = Engine.GetEntityPhysics(ActorID);
 	GroundFriction = p.GetFriction();
 	p.SetFriction(0.2f);
 }
@@ -134,7 +134,7 @@ void InAirState::Enter(const id_type& ActorID)
 void InAirState::Update(const id_type& ActorID)
 {
 	State::Update(ActorID);
-	DX XMVECTOR Velocity = Engine.GetActorPhysics(ActorID).GetVelocity();
+	DX XMVECTOR Velocity = Engine.GetEntityPhysics(ActorID).GetVelocity();
 
 	if (Zero(DX GetZ(Velocity)))
 	{
@@ -147,7 +147,7 @@ void InAirState::Update(const id_type& ActorID)
 
 void InAirState::Exit(const id_type& ActorID)
 {
-	Engine.GetActorPhysics(ActorID).SetFriction(GroundFriction);
+	Engine.GetEntityPhysics(ActorID).SetFriction(GroundFriction);
 }
 
 
@@ -155,7 +155,7 @@ void InAirState::Exit(const id_type& ActorID)
 
 void SlamChargingState::Enter(const id_type & ActorID)
 {
-	Physics& p = Engine.GetActorPhysics(ActorID);
+	Physics& p = Engine.GetEntityPhysics(ActorID);
 	Gravity = p.GetGravity();
 	p.SetGravity(0.f);
 	RageAmount = 0.f;
@@ -165,27 +165,27 @@ void SlamChargingState::Enter(const id_type & ActorID)
 void SlamChargingState::Update(const id_type & ActorID)
 {
 	RageAmount += UPDATE_TIME * RageRate;
-	Engine.GetActorGraphics(ActorID).SetColor(1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f);
+	Engine.GetEntityGraphics(ActorID).SetColor(1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f);
 	if (RageAmount >= 1.f)
 		ChangeState(ActorID, GroundSlamStateID);
 }
 
 void SlamChargingState::Exit(const id_type & ActorID)
 {
-	Engine.GetActorPhysics(ActorID).SetGravity(Gravity);
+	Engine.GetEntityPhysics(ActorID).SetGravity(Gravity);
 }
 
 
 /* Ground Slam State*/
 void SlammingState::Enter(const id_type& ActorID)
 {
-	Physics& ActorPhysics = Engine.GetActorPhysics(ActorID);
+	Physics& ActorPhysics = Engine.GetEntityPhysics(ActorID);
 	ActorPhysics.ApplyForce({ 0.f, 0.f, -100'000.f });
 }
 
 void SlammingState::Update(const id_type& ActorID)
 {
-	Physics& p = Engine.GetActorPhysics(ActorID);
+	Physics& p = Engine.GetEntityPhysics(ActorID);
 	if (Zero(DX GetZ(p.GetVelocity()) && Zero(DX GetZ(p.GetForce()))))
 		ChangeState(ActorID, "Idle");
 }
@@ -198,61 +198,57 @@ void SlammingState::Exit(const id_type& ActorID)
 	e.Effect.SetSize({ 5.f, 5.f });
 	e.Effect.SetFrameRate(60);
 	e.Effect.SetSpriteInfo({ 0, 0, 9, 9 });
-	e.SetPosition(DX Add(Engine.GetActorPhysics(ActorID).GetPosition(), { 0.f, 0.1f, -0.1f }));
-	Engine.GetActorGraphics(ActorID).SetColor(1.f, 1.f, 1.f, 1.f);
+	e.SetPosition(DX Add(Engine.GetEntityPhysics(ActorID).GetPosition(), { 0.f, 0.1f, -0.1f }));
+	Engine.GetEntityGraphics(ActorID).SetColor(1.f, 1.f, 1.f, 1.f);
 }
 
 /* Shooting State*/
 void ShootingState::Enter(const id_type & ActorID)
 {
 	Growth = 0.5f;
-	Engine.GetActorGraphics(ActorID).GetSprite("Head").FrameLinearNext();
+	Engine.GetEntityGraphics(ActorID).GetSprite("Head").FrameLinearNext();
 
-	BulletID = Engine.AddObject();
-	printf("New Obj\t");
-	ObjectGraphics& Og = Engine.GetObjectGraphics(BulletID);
-	Og.ObjectSprite.SetTexID(TexID);
-	Og.ObjectSprite.SetSize({ Growth, Growth });
+	BulletID = Engine.AddObject("Bullet");
+	Graphics& BulletGraphics = Engine.GetEntityGraphics(BulletID);
+	BulletGraphics.AddSprite("Bullet");
+	Sprite& BulletSprite = BulletGraphics.GetSprite("Bullet");
+	BulletSprite.SetTexID(TexID);
+	BulletSprite.SetSize({ Growth, Growth });
 
-	Physics& Op = Engine.GetObjectPhysics(BulletID);
-	Op.SetPosition(Engine.GetActorPhysics(ActorID).GetPosition());
-	Op.SetMass(0.5f);
-	Op.SetFriction(0.2f);
-	printf("%d : ", BulletID);
+	Physics& BulletPhysics = Engine.GetEntityPhysics(BulletID);
+	BulletPhysics.SetPosition(Engine.GetEntityPhysics(ActorID).GetPosition());
+	BulletPhysics.SetMass(0.5f);
+	BulletPhysics.SetFriction(0.2f);
 }
 
 void ShootingState::Update(const id_type & ActorID)
 {
 	State::Update(ActorID);
+	Physics& ActorPhysics = Engine.GetEntityPhysics(ActorID);
+	Physics& BulletPhysics = Engine.GetEntityPhysics(BulletID);
+	Graphics& ActorGraphics = Engine.GetEntityGraphics(ActorID);
+	Graphics& BulletGraphics = Engine.GetEntityGraphics(BulletID);
+
 	Growth += UPDATE_TIME * GrowingRate;
-	Clamp(0.5f, &Growth, 2.5f);
-	Physics& Ap = Engine.GetActorPhysics(ActorID);
-	Graphics& Ag = Engine.GetActorGraphics(ActorID);
-	Ag.GetSprite("Body").SetDirection(GetVector2Direction(Ap.GetForce()));
+	Clamp(0.5f, &Growth, 2.f);
 
-	if (Zero(DX2 Magnitude(Ap.GetVelocity())))
-		Ag.GetSprite("Body").ResetSprite();
+	ActorGraphics.GetSprite("Body").SetDirection(GetVector2Direction(ActorPhysics.GetForce()));
+	if (Zero(DX2 Magnitude(ActorPhysics.GetVelocity())))
+		ActorGraphics.GetSprite("Body").ResetSprite();
 	else 
-		Ag.GetSprite("Body").FrameLinearUpdate();
+		ActorGraphics.GetSprite("Body").FrameLinearUpdate();
 
-
-	ObjectGraphics& Og = Engine.GetObjectGraphics(BulletID);
-	Og.ObjectSprite.SetSize({ Growth, Growth });
-
-	Physics& Op = Engine.GetObjectPhysics(BulletID);
-	Op.SetPosition(Ap.GetPosition());
-	Op.GetBox().SetDimensions({ Growth, Growth*0.25f, Growth });
+	BulletGraphics.GetSprite("Bullet").SetSize({ Growth, Growth });	
+	BulletPhysics.SetPosition(ActorPhysics.GetPosition());
+	BulletPhysics.GetBox().SetDimensions({ Growth, Growth*0.25f, Growth });
 }
 
 void ShootingState::Exit(const id_type & ActorID)
 {
-	printf("%d : ", BulletID);
-	Physics& Op = Engine.GetObjectPhysics(BulletID);
-	DX XMVECTOR For = DX Scale(GetDirectionVector(GetActorFacingDirection(ActorID)), Force);
-	DX Print(For, '\t');
-	Op.ApplyForce(For);
-	Op.SetCollision(&Collision::Bullet);
-	printf("%f\n", Growth);
-	Op.SetVelocity(Engine.GetActorPhysics(ActorID).GetVelocity());
-	Engine.GetActorGraphics(ActorID).GetSprite("Head").ResetSprite();
+	Physics& BulletPhysics = Engine.GetEntityPhysics(BulletID);
+	DX XMVECTOR For = DX Scale(GetDirectionVector2(GetActorFacingDirection(ActorID)), Force);
+	BulletPhysics.ApplyForce(For);
+	BulletPhysics.SetCollision(&Collision::Bullet);
+	BulletPhysics.SetVelocity(Engine.GetEntityPhysics(ActorID).GetVelocity());
+	Engine.GetEntityGraphics(ActorID).GetSprite("Head").ResetSprite();
 }

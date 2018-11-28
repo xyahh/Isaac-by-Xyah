@@ -18,26 +18,73 @@ void Cyan::Destroy()
 	Sound::Destroy();
 }
 
-void Cyan::ProcessDeletionRequests()
+void Cyan::HandleEvents()
 {
-	for (auto& o : m_ObjectDeletionRequests)
-	{
-		u_int PhysicsIndex = m_ObjectLocator[o].PhysicsIndex;
-		u_int GraphicsIndex = m_ObjectLocator[o].GraphicsIndex;
-		m_Physics.erase(m_Physics.begin() + PhysicsIndex);
-		m_ObjectGraphics.erase(m_ObjectGraphics.begin() + GraphicsIndex);
-
-		for (auto& i : m_ObjectLocator)
+	for (auto& Event : m_Events)
+		switch (Event.first)
 		{
-			if (i.second.PhysicsIndex > PhysicsIndex)
-				--i.second.PhysicsIndex;
-			if (i.second.GraphicsIndex > GraphicsIndex)
-				--i.second.GraphicsIndex;
+		case EVENT::EFFECT_DELETE:
+			DeleteEffect(STD stoi(Event.second));
+			break;
 		}
-		m_ObjectLocator.erase(o);
+	m_Events.clear();
+}
+
+void Cyan::DeleteComponents(WORD Components)
+{
+	if (Components & SOUNDS)
+	{
+		for (auto Iter = m_Sounds.rbegin(); Iter != m_Sounds.rend(); ++Iter)
+			Iter->Release();
+		m_Sounds.clear();
+		m_SoundLocator.clear();
 	}
-	m_ObjectDeletionRequests.clear();
-	
+	if (Components & STATES)
+	{
+		for (auto Iter = m_States.rbegin(); Iter != m_States.rend(); ++Iter)
+		{
+			Iter->StateID.clear();
+			Iter->ActorID.clear();
+			delete Iter->pState;
+			Iter->pState = nullptr;
+		}
+
+		for (auto Iter = m_StateTypes.rbegin(); Iter != m_StateTypes.rend(); ++Iter)
+		{
+			delete (*Iter);
+			(*Iter) = nullptr;
+		}
+
+		m_States.clear();
+		m_StateTypes.clear();
+		m_StateTypeLocator.clear();
+	}
+	if (Components & ENTITIES)
+	{
+		m_Physics.clear();
+		m_Graphics.clear();
+		for (auto& i : m_States) //Maybe I have to delete the m_States here as well?
+			i.ActorID.clear();
+		m_EntityLocator.clear();
+	}
+	if (Components & VISUALS)
+	{
+		m_VisualGraphics.clear();
+		m_VisualLocator.clear();
+	}
+	if (Components & COMMANDS)
+	{
+		for (auto Iter = m_Commands.rbegin(); Iter != m_Commands.rend(); ++Iter)
+			delete (*Iter);
+		m_Commands.clear();
+		m_CommandLocator.clear();
+	}
+	if (Components & TEXTURES)
+	{
+		for (auto Iter = m_Textures.rbegin(); Iter != m_Textures.rend(); ++Iter)
+			RenderDevice.DeleteTexture(*Iter);
+		m_Textures.clear();
+	}
 }
 
 void Cyan::Render(float fInterpolation)
@@ -45,11 +92,8 @@ void Cyan::Render(float fInterpolation)
 	for (auto& g : m_VisualGraphics)
 		g.Render();
 
-	for (auto& g : m_ActorGraphics)
+	for (auto& g : m_Graphics)
 		g.Render(fInterpolation);
-
-	for (auto& b : m_ObjectGraphics)
-		b.Render(fInterpolation);
 
 	for (auto& e : m_EffectGraphics)
 		e.Render(fInterpolation);
@@ -71,20 +115,15 @@ void Cyan::Update()
 		Obj->SetPosition(DX Add(Obj->GetPrevPosition(), Obj->GetDeltaPosition()));
 	}
 
-	
-
-	//Move this later pls;
-	STD vector<u_int> StuffToDelete;
 	for (auto i = m_EffectLocator.begin(); i != m_EffectLocator.end(); ++i)
 	{
 		if (m_EffectGraphics[i->second].Effect.FrameGridUpdate())
-			StuffToDelete.emplace_back(i->first);
+			AddEvent(EVENT::EFFECT_DELETE, STD to_string(i->first));
 	}
-	for (auto& i : StuffToDelete)
-		DeleteEffect(i);
-
-	ProcessDeletionRequests();
+	HandleEvents();
 }
+
+/* FILE READERS */
 
 void Cyan::AddSoundsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
 {
@@ -116,7 +155,7 @@ void Cyan::AddTexturesByFile(const STD string & filename, char delimiter, bool i
 void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ignore_first_row)
 {
 	auto AFile = ReadCSV(filename, delimiter, ignore_first_row);
-	m_ActorGraphics.reserve(AFile.size());
+	m_Graphics.reserve(AFile.size());
 	m_Physics.reserve(AFile.size());
 	m_States.reserve(AFile.size());
 
@@ -143,7 +182,7 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 	{
 		Engine.AddActor(d[ID], d[STATE]);
 
-		Graphics& AGraphics = Engine.GetActorGraphics(d[ID]);
+		Graphics& AGraphics = Engine.GetEntityGraphics(d[ID]);
 		AGraphics.AddSprite("Head");
 		AGraphics.AddSprite("Body");
 
@@ -162,7 +201,7 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 		Body.SetSpriteInfo({ 0, 0, 10, 4 });
 		Body.SetFrameRate(20);
 
-		Physics& APhysics = Engine.GetActorPhysics(d[ID]);
+		Physics& APhysics = Engine.GetEntityPhysics(d[ID]);
 		APhysics.SetFriction(STD stof(d[FRICTION]));
 		APhysics.SetMass(STD stof(d[MASS]));
 		//0.5f, 0.1f, 0.75f 
@@ -231,6 +270,8 @@ void Cyan::AddInputsByFile(const STD string & filename, char delimiter, bool ign
 		
 }
 
+
+
 void Cyan::AddCommand(const id_type& AssignID, Command*&& pCommand)
 {
 	m_Commands.emplace_back(pCommand);
@@ -260,7 +301,7 @@ void Cyan::AddStateTypeByString(const id_type & ID, const STD string & Type, con
 
 StateStruct& Cyan::GetActorState(const id_type & ID)
 {
-	return m_States[m_ActorLocator[ID].StateIndex];
+	return m_States[m_EntityLocator[ID].StateIndex];
 }
 
 Command * Cyan::GetCommand(const id_type& ID)
@@ -273,6 +314,11 @@ State* Cyan::GetStateType(const id_type& ID)
 	return m_StateTypes[m_StateTypeLocator[ID]];
 }
 
+void Cyan::AddEvent(u_int Event, const id_type & ID)
+{
+	m_Events.emplace_back(Event, ID);
+}
+
 void Cyan::ReserveObjects(u_int ActorNumber, u_int BulletNumber, u_int VisualNumber, u_int StateNumber)
 {
 	/* Use Swap if memory needs to be reduced for each Scene */
@@ -280,8 +326,7 @@ void Cyan::ReserveObjects(u_int ActorNumber, u_int BulletNumber, u_int VisualNum
 	m_EffectGraphics.reserve(ActorNumber);
 	m_States.reserve(ActorNumber + 1);
 	m_StateTypes.reserve(StateNumber);
-	m_ActorGraphics.reserve(ActorNumber);
-	m_ObjectGraphics.reserve(BulletNumber);
+	m_Graphics.reserve(ActorNumber + BulletNumber);
 	m_Physics.reserve(ActorNumber + BulletNumber);
 }
 
@@ -290,14 +335,16 @@ void Cyan::AddNonActorState(const id_type & StartState)
 	m_States.emplace_back("", StartState, GetStateType(StartState)->Clone());
 }
 
-u_int Cyan::AddObject()
+id_type Cyan::AddObject(const id_type& ObjectType)
 {
 	static u_int Idx = 0;
-	m_ObjectGraphics.emplace_back(Idx);
+	id_type ObjectID = ObjectType + STD to_string(Idx++);
+	m_Graphics.emplace_back();
+	m_Graphics[LastIdx(m_Graphics)].SetID(ObjectID);
 	m_Physics.emplace_back();
-	m_ObjectLocator[Idx].GraphicsIndex = m_ObjectGraphics.size() - 1;
-	m_ObjectLocator[Idx].PhysicsIndex  = LastIdx(m_Physics);
-	return Idx++;
+	m_EntityLocator[ObjectID].GraphicsIndex = LastIdx(m_Graphics);
+	m_EntityLocator[ObjectID].PhysicsIndex  = LastIdx(m_Physics);
+	return ObjectID;
 }
 
 u_int Cyan::AddEffect()
@@ -311,12 +358,12 @@ u_int Cyan::AddEffect()
 void Cyan::AddActor(const id_type & AssignID, const id_type & StartStateID)
 {
 	m_Physics.emplace_back();
-	m_ActorGraphics.emplace_back();
-	m_ActorGraphics[LastIdx(m_ActorGraphics)].SetActor(AssignID);
+	m_Graphics.emplace_back();
+	m_Graphics[LastIdx(m_Graphics)].SetID(AssignID);
 	m_States.emplace_back(AssignID, StartStateID, GetStateType(StartStateID)->Clone());
-	m_ActorLocator[AssignID].GraphicsIndex =	LastIdx(m_ActorGraphics);
-	m_ActorLocator[AssignID].PhysicsIndex =		LastIdx(m_Physics);
-	m_ActorLocator[AssignID].StateIndex =		LastIdx(m_States);
+	m_EntityLocator[AssignID].GraphicsIndex = LastIdx(m_Graphics);
+	m_EntityLocator[AssignID].PhysicsIndex = LastIdx(m_Physics);
+	m_EntityLocator[AssignID].StateIndex = LastIdx(m_States);
 }
 
 void Cyan::AddVisual(const id_type& AssignID, WORD config)
@@ -330,9 +377,9 @@ VisualGraphics& Cyan::GetVisualGraphics(const id_type& ID)
 	return m_VisualGraphics[m_VisualLocator[ID]];
 }
 
-ObjectGraphics & Cyan::GetObjectGraphics(u_int ID)
+Graphics& Cyan::GetEntityGraphics(const id_type& ID)
 {
-	return m_ObjectGraphics[m_ObjectLocator[ID].GraphicsIndex];
+	return m_Graphics[m_EntityLocator[ID].GraphicsIndex];
 }
 
 EffectGraphics & Cyan::GetEffect(u_int ID)
@@ -345,21 +392,15 @@ u_int Cyan::GetTexture(const id_type & ID)
 	return m_Textures[m_TextureLocator[ID]];
 }
 
-Physics & Cyan::GetActorPhysics(const id_type& ID)
+Physics & Cyan::GetEntityPhysics(const id_type& ID)
 {
-	return m_Physics[m_ActorLocator[ID].PhysicsIndex];
-}
-
-Physics & Cyan::GetObjectPhysics(u_int ID)
-{
-	return m_Physics[m_ObjectLocator[ID].PhysicsIndex];
+	return m_Physics[m_EntityLocator[ID].PhysicsIndex];
 }
 
 void Cyan::UpdateState(const id_type& ActorID, const id_type& NewStateID)
 {
 	if (ActorState != NULL || !NextStateID.empty()) return;
-
-	ActorState = &m_States[m_ActorLocator[ActorID].StateIndex];
+	ActorState = &m_States[m_EntityLocator[ActorID].StateIndex];
 	NextStateID = NewStateID;
 }
 
@@ -378,11 +419,6 @@ void Cyan::ProcessUpdatedStates()
 	NextStateID.clear();
 }
 
-Graphics & Cyan::GetActorGraphics(const id_type& ID)
-{
-	return m_ActorGraphics[m_ActorLocator[ID].GraphicsIndex];
-}
-
 void Cyan::DeleteEffect(u_int EffectID)
 {
 	u_int Idx = m_EffectLocator[EffectID];
@@ -394,31 +430,6 @@ void Cyan::DeleteEffect(u_int EffectID)
 	m_EffectLocator.erase(EffectID);
 }
 
-void Cyan::DeleteActor(const id_type& ActorID)
-{
-	//ToDo
-}
-
-void Cyan::DeleteVisual(const id_type& VisualID)
-{
-	//ToDo
-}
-
-void Cyan::DeleteObject(u_int BulletID)
-{
-	m_ObjectDeletionRequests.emplace(BulletID);
-}
-
-u_int Cyan::ActorCount() const
-{
-	return m_ActorGraphics.size();
-}
-
-u_int Cyan::VisualCount() const
-{
-	return m_VisualGraphics.size();
-}
-
 /* Texture Functions -----------------------------------------------------------------*/
 
 void Cyan::AddTexture(const id_type& TexID, const STD string& ImagePath)
@@ -428,65 +439,6 @@ void Cyan::AddTexture(const id_type& TexID, const STD string& ImagePath)
 	m_TextureLocator[TexID] = LastIdx(m_Textures);
 }
 
-
-void Cyan::DeleteComponents(WORD Components)
-{
-	if (Components & SOUNDS)
-	{
-		for (auto Iter = m_Sounds.rbegin(); Iter != m_Sounds.rend(); ++Iter)
-			Iter->Release();
-		m_Sounds.clear();
-		m_SoundLocator.clear();
-	}	
-	if (Components & STATES)
-	{
-		for (auto Iter = m_States.rbegin(); Iter != m_States.rend(); ++Iter)
-		{
-			Iter->StateID.clear();
-			Iter->ActorID.clear();
-			delete Iter->pState;
-			Iter->pState = nullptr;
-		}
-
-		for (auto Iter = m_StateTypes.rbegin(); Iter != m_StateTypes.rend(); ++Iter)
-		{
-			delete (*Iter);
-			(*Iter) = nullptr;
-		}
-
-		m_States.clear();
-		m_StateTypes.clear();
-		m_StateTypeLocator.clear();
-	}	
-	if (Components & ENTITIES)
-	{
-		m_Physics.clear();
-		m_ActorGraphics.clear();
-		m_ObjectGraphics.clear();
-		for (auto& i : m_States) //Maybe I have to delete the m_States here as well?
-			i.ActorID.clear();
-		m_ActorLocator.clear();
-		m_ObjectLocator.clear();
-	}
-	if (Components & VISUALS)
-	{
-		m_VisualGraphics.clear();
-		m_VisualLocator.clear();
-	}
-	if (Components & COMMANDS)
-	{
-		for (auto Iter = m_Commands.rbegin(); Iter != m_Commands.rend(); ++Iter)
-			delete (*Iter);
-		m_Commands.clear();
-		m_CommandLocator.clear();
-	}
-	if (Components & TEXTURES)
-	{
-		for (auto Iter = m_Textures.rbegin(); Iter != m_Textures.rend(); ++Iter)
-			RenderDevice.DeleteTexture(*Iter);
-		m_Textures.clear();
-	}
-}
 
 /* Sound Functions -------------------------------------------------------------------*/
 

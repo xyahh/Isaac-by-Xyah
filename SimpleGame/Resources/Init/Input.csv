@@ -34,4 +34,3 @@ Shooting,Player1,38,EndShooting
 Shooting,Player1,39,EndShooting
 Shooting,Player1,40,EndShooting
 InAir,Player1,13,StartSlamming
-Idle,Player1,Z,Zoom

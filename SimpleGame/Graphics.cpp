@@ -27,7 +27,7 @@ void Graphics::AddSprite(const id_type& SpriteName)
 
 void Graphics::Render(float Interpolation)
 {
-	Physics& ActorPhysics = Engine.GetActorPhysics(m_Actor);
+	Physics& ActorPhysics = Engine.GetEntityPhysics(m_Actor);
 	DX XMVECTOR Color = DX4 Load(m_Color);
 	DX XMVECTOR Position = DX Add
 	(
@@ -57,7 +57,7 @@ Sprite& Graphics::GetSprite(const id_type& SpriteName)
 	return m_Sprites[SpriteName];
 }
 
-void Graphics::SetActor(const id_type & ActorID)
+void Graphics::SetID(const id_type & ActorID)
 {
 	m_Actor = ActorID;
 }
@@ -104,33 +104,6 @@ void VisualGraphics::Render()
 		Position = DX XMVectorSetZ(Position, FARTHEST);
 	RenderDevice.DrawTexRect(Position, Size, Color
 		, Engine.GetTexture(m_TexID));
-}
-
-void ObjectGraphics::Render(float fInterpolation)
-{
-	Physics& BulletPhysics = Engine.GetObjectPhysics(ObjectID);
-
-	DX XMVECTOR Size = ObjectSprite.GetSize();
-	DX XMVECTOR Color = DX4 Load(m_Color);
-
-	DX XMVECTOR Position = DX Add
-	(
-		DX Scale(BulletPhysics.GetPosition(), fInterpolation),
-		DX Scale(BulletPhysics.GetPrevPosition(), 1.f - fInterpolation)
-	);
-
-#ifdef CYAN_DEBUG_COLLISION
-	DrawBoundingBoxes(Position, BulletPhysics);
-#endif
-
-	World::Convert(Position);
-	World::Convert(Size);
-
-	RenderDevice.DrawShadow(Position, Size, Color);
-	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, DX GetY(Size) *0.5f }), 
-		Size, Color, Engine.GetTexture(ObjectSprite.GetTexID()), ObjectSprite.GetSpriteInfo());
-
-
 }
 
 void EffectGraphics::Render(float fInterpolation)

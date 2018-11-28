@@ -1,15 +1,8 @@
 #pragma once
-class Actor
+class Entity
 {
 public:
 	u_int		GraphicsIndex;
 	u_int		PhysicsIndex;
 	u_int		StateIndex;
-};
-
-class Object
-{
-public:
-	u_int GraphicsIndex;
-	u_int PhysicsIndex;
 };
