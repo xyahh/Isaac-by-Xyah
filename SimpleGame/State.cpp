@@ -46,7 +46,7 @@ u_int XM_CALLCONV State::GetVector2Direction(DX FXMVECTOR v)
 
 u_int State::GetActorFacingDirection(const id_type & ActorID)
 {
-	return Engine.GetActorGraphics(ActorID).Head.GetDirection();
+	return Engine.GetActorGraphics(ActorID).GetSprite("Head").GetDirection();
 }
 
 DX XMVECTOR State::GetDirectionVector(u_int Direction)
@@ -80,7 +80,7 @@ void GlobalState::Exit(const id_type& ActorID)
 /* Idle State */
 void IdleState::Enter(const id_type& ActorID)
 {
-	Engine.GetActorGraphics(ActorID).Body.ResetSprite();
+	Engine.GetActorGraphics(ActorID).GetSprite("Body").ResetSprite();
 	
 }
 
@@ -103,17 +103,17 @@ void MovingState::Enter(const id_type& ActorID)
 void MovingState::Update(const id_type& ActorID)
 {
 
-	ActorGraphics& AGraphics = Engine.GetActorGraphics(ActorID);
+	Graphics& AGraphics = Engine.GetActorGraphics(ActorID);
 	Physics& APhysics = Engine.GetActorPhysics(ActorID);
-	AGraphics.Body.FrameLinearUpdate();
+	AGraphics.GetSprite("Body").FrameLinearUpdate();
 	State::Update(ActorID);
 	if (Zero(DX2 Magnitude(APhysics.GetVelocity())) && Zero(DX2 Magnitude(APhysics.GetForce())))
 		ChangeState(ActorID, "Idle");
 	else
 	{
 		u_int Dir = GetVector2Direction(APhysics.GetForce());
-		AGraphics.Body.SetDirection(Dir);
-		AGraphics.Head.SetDirection(Dir);
+		AGraphics.GetSprite("Body").SetDirection(Dir);
+		AGraphics.GetSprite("Head").SetDirection(Dir);
 	}
 		
 }
@@ -206,7 +206,7 @@ void SlammingState::Exit(const id_type& ActorID)
 void ShootingState::Enter(const id_type & ActorID)
 {
 	Growth = 0.5f;
-	Engine.GetActorGraphics(ActorID).Head.FrameLinearNext();
+	Engine.GetActorGraphics(ActorID).GetSprite("Head").FrameLinearNext();
 
 	BulletID = Engine.AddObject();
 	printf("New Obj\t");
@@ -227,13 +227,13 @@ void ShootingState::Update(const id_type & ActorID)
 	Growth += UPDATE_TIME * GrowingRate;
 	Clamp(0.5f, &Growth, 2.5f);
 	Physics& Ap = Engine.GetActorPhysics(ActorID);
-	ActorGraphics& Ag = Engine.GetActorGraphics(ActorID);
-	Ag.Body.SetDirection(GetVector2Direction(Ap.GetForce()));
+	Graphics& Ag = Engine.GetActorGraphics(ActorID);
+	Ag.GetSprite("Body").SetDirection(GetVector2Direction(Ap.GetForce()));
 
 	if (Zero(DX2 Magnitude(Ap.GetVelocity())))
-		Ag.Body.ResetSprite();
+		Ag.GetSprite("Body").ResetSprite();
 	else 
-		Ag.Body.FrameLinearUpdate();
+		Ag.GetSprite("Body").FrameLinearUpdate();
 
 
 	ObjectGraphics& Og = Engine.GetObjectGraphics(BulletID);
@@ -254,5 +254,5 @@ void ShootingState::Exit(const id_type & ActorID)
 	Op.SetCollision(&Collision::Bullet);
 	printf("%f\n", Growth);
 	Op.SetVelocity(Engine.GetActorPhysics(ActorID).GetVelocity());
-	Engine.GetActorGraphics(ActorID).Head.ResetSprite();
+	Engine.GetActorGraphics(ActorID).GetSprite("Head").ResetSprite();
 }

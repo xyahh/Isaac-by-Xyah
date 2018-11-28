@@ -22,7 +22,6 @@ DX XMVECTOR XM_CALLCONV Collision::Box::ConvertPosition(DX FXMVECTOR Position) c
 
 void XM_CALLCONV BasicCollision::OnCollision(Physics& MyBody, Physics& CollidingBody, DX FXMVECTOR CollisionNormal)
 {
-
 	DX XMVECTOR v = DX Add(DX Scale(CollisionNormal, -1.f), DX XMVectorSplatOne());
 	CollidingBody.SetDeltaPosition(DX Multiply(CollidingBody.GetDeltaPosition(), v));
 	CollidingBody.SetVelocity(DX Multiply(CollidingBody.GetVelocity(), v));

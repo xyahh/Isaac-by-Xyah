@@ -11,6 +11,16 @@ void Sprite::SetDirection(u_int _State)
 	SpriteInfo.y = _State;
 }
 
+void Sprite::SetOffsetY(float offset_y)
+{
+	OffsetY = offset_y;
+}
+
+float Sprite::GetOffsetY() const
+{
+	return OffsetY;
+}
+
 u_int Sprite::GetDirection() const
 {
 	return SpriteInfo.y;

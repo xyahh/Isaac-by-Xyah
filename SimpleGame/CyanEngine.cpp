@@ -143,16 +143,24 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 	{
 		Engine.AddActor(d[ID], d[STATE]);
 
-		ActorGraphics& AGraphics = Engine.GetActorGraphics(d[ID]);
-		AGraphics.Head.SetTexID(d[HEAD_TEX]);
-		AGraphics.Body.SetTexID(d[BODY_TEX]);
-		AGraphics.Body.SetFrameRate(20);
-		AGraphics.Head.SetSize({ HeadSize, HeadSize });
-		AGraphics.Body.SetSize({ BodySize, BodySize });
-		AGraphics.SetSpriteOffset(BodySize * 0.5f + HeadSize * 0.5, BodySize * 0.5f - 0.1f);
-		AGraphics.Head.SetSpriteInfo({ 0, 0, 2,  4 });
-		AGraphics.Body.SetSpriteInfo({ 0, 0, 10, 4 });
-		AGraphics.Head.SetDirection(1);
+		Graphics& AGraphics = Engine.GetActorGraphics(d[ID]);
+		AGraphics.AddSprite("Head");
+		AGraphics.AddSprite("Body");
+
+		Sprite& Head = AGraphics.GetSprite("Head");
+		Sprite& Body = AGraphics.GetSprite("Body");
+
+		Head.SetTexID(d[HEAD_TEX]);
+		Head.SetOffsetY(BodySize * 0.5f + HeadSize * 0.5);
+		Head.SetSize({ HeadSize, HeadSize });
+		Head.SetSpriteInfo({ 0, 0, 2,  4 });
+		Head.SetDirection(1);
+
+		Body.SetTexID(d[BODY_TEX]);
+		Body.SetOffsetY(BodySize * 0.5f - 0.1f);
+		Body.SetSize({ BodySize, BodySize });
+		Body.SetSpriteInfo({ 0, 0, 10, 4 });
+		Body.SetFrameRate(20);
 
 		Physics& APhysics = Engine.GetActorPhysics(d[ID]);
 		APhysics.SetFriction(STD stof(d[FRICTION]));
@@ -303,7 +311,8 @@ u_int Cyan::AddEffect()
 void Cyan::AddActor(const id_type & AssignID, const id_type & StartStateID)
 {
 	m_Physics.emplace_back();
-	m_ActorGraphics.emplace_back(AssignID);	
+	m_ActorGraphics.emplace_back();
+	m_ActorGraphics[LastIdx(m_ActorGraphics)].SetActor(AssignID);
 	m_States.emplace_back(AssignID, StartStateID, GetStateType(StartStateID)->Clone());
 	m_ActorLocator[AssignID].GraphicsIndex =	LastIdx(m_ActorGraphics);
 	m_ActorLocator[AssignID].PhysicsIndex =		LastIdx(m_Physics);
@@ -369,7 +378,7 @@ void Cyan::ProcessUpdatedStates()
 	NextStateID.clear();
 }
 
-ActorGraphics & Cyan::GetActorGraphics(const id_type& ID)
+Graphics & Cyan::GetActorGraphics(const id_type& ID)
 {
 	return m_ActorGraphics[m_ActorLocator[ID].GraphicsIndex];
 }

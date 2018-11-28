@@ -38,7 +38,7 @@ void FxCommand::release(const id_type& ActorID)
 
 void ShootCommand::execute(const id_type& ActorID)
 {
-	Engine.GetActorGraphics(ActorID).Head.SetDirection(Direction);
+	Engine.GetActorGraphics(ActorID).GetSprite("Head").SetDirection(Direction);
 }
 
 void ShootCommand::release(const id_type& ActorID)

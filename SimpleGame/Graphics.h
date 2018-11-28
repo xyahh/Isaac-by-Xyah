@@ -18,9 +18,19 @@ public:
 	~Graphics() {}
 
 	void SetColor(float r, float g, float b, float a);
+	void AddSprite(const id_type& SpriteName);
+	
+	void Render(float Interpolation);
+
+	Sprite& GetSprite(const id_type& SpriteName);
+
+	void SetActor(const id_type& ActorID);
+	id_type GetActor() const;
 
 protected:
-	DX XMFLOAT4 m_Color;
+	id_type					 m_Actor;
+	STD map<id_type, Sprite> m_Sprites;
+	DX XMFLOAT4				 m_Color;
 };
 
 class VisualGraphics : public Graphics
@@ -59,30 +69,6 @@ public:
 
 private:
 	u_int ObjectID;
-};
-
-class ActorGraphics : public Graphics
-{
-	friend Cyan;
-
-public:
-
-	ActorGraphics(const id_type& ActorID) :
-		ActorID(ActorID) {}
-	virtual ~ActorGraphics() {}
-
-	void Render(float fInterpolation);
-
-	void SetSpriteOffset(float HeadOffY, float BodyOffY);
-	Sprite	Head;
-	Sprite	Body;
-
-	
-
-private:
-	float HeadOffsetY;
-	float BodyOffsetY;
-	id_type			ActorID;
 };
 
 class EffectGraphics : public Graphics

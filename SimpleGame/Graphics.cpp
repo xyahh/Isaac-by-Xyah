@@ -20,6 +20,55 @@ void Graphics::SetColor(float r, float g, float b, float a)
 	m_Color = DX XMFLOAT4(r, g, b, a);
 }
 
+void Graphics::AddSprite(const id_type& SpriteName)
+{
+	m_Sprites[SpriteName];
+}
+
+void Graphics::Render(float Interpolation)
+{
+	Physics& ActorPhysics = Engine.GetActorPhysics(m_Actor);
+	DX XMVECTOR Color = DX4 Load(m_Color);
+	DX XMVECTOR Position = DX Add
+	(
+		DX Scale(ActorPhysics.GetPosition(), Interpolation),
+		DX Scale(ActorPhysics.GetPrevPosition(), 1.f - Interpolation)
+	);
+#ifdef CYAN_DEBUG_COLLISION
+	DrawBoundingBoxes(Position, ActorPhysics);
+#endif
+
+	World::Convert(Position);
+
+	for (auto& Sprite : m_Sprites)
+	{
+		DX XMVECTOR SpriteSize = Sprite.second.GetSize();
+		float SpriteOffset = Sprite.second.GetOffsetY();
+		World::Convert(SpriteOffset);
+		World::Convert(SpriteSize);
+		RenderDevice.DrawShadow(Position, SpriteSize, Color);
+		RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, SpriteOffset }),
+			SpriteSize, Color, Engine.GetTexture(Sprite.second.GetTexID()), Sprite.second.GetSpriteInfo());
+	}
+}
+
+Sprite& Graphics::GetSprite(const id_type& SpriteName)
+{
+	return m_Sprites[SpriteName];
+}
+
+void Graphics::SetActor(const id_type & ActorID)
+{
+	m_Actor = ActorID;
+}
+
+id_type Graphics::GetActor() const
+{
+	return m_Actor;
+}
+
+/*-------------------------------------------------------------------------*/
+
 void VisualGraphics::SetSize(float x, float y)
 {
 	m_Size = DX XMFLOAT2(x, y);
@@ -55,51 +104,6 @@ void VisualGraphics::Render()
 		Position = DX XMVectorSetZ(Position, FARTHEST);
 	RenderDevice.DrawTexRect(Position, Size, Color
 		, Engine.GetTexture(m_TexID));
-}
-
-void ActorGraphics::Render(float fInterpolation)
-{
-	Physics& ActorPhysics = Engine.GetActorPhysics(ActorID);
-
-	DX XMVECTOR HeadSize = Head.GetSize();
-	DX XMVECTOR BodySize = Body.GetSize();
-	DX XMVECTOR Color = DX4 Load(m_Color);
-	
-
-	DX XMVECTOR Position = DX Add
-	(
-		DX Scale(ActorPhysics.GetPosition(), fInterpolation),
-		DX Scale(ActorPhysics.GetPrevPosition(), 1.f - fInterpolation)
-	);
-	
-
-#ifdef CYAN_DEBUG_COLLISION
-	DrawBoundingBoxes(Position, ActorPhysics);
-#endif
-
-	World::Convert(Position);
-	World::Convert(HeadSize);
-	World::Convert(BodySize);
-
-	float BodyOffY{ BodyOffsetY };
-	float HeadOffY{ HeadOffsetY };
-
-	World::Convert(BodyOffY);
-	World::Convert(HeadOffY);
-
-	RenderDevice.DrawShadow(Position, HeadSize, Color);
-	RenderDevice.DrawShadow(Position, BodySize, Color);
-
-	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, BodyOffY}), 
-		BodySize, Color, Engine.GetTexture(Body.GetTexID()), Body.GetSpriteInfo());
-	RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, HeadOffY}), 
-		HeadSize, Color, Engine.GetTexture(Head.GetTexID()), Head.GetSpriteInfo());
-}
-
-void ActorGraphics::SetSpriteOffset(float HeadOffY, float BodyOffY)
-{
-	HeadOffsetY = HeadOffY;
-	BodyOffsetY = BodyOffY;
 }
 
 void ObjectGraphics::Render(float fInterpolation)

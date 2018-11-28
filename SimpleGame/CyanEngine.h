@@ -90,7 +90,7 @@ public:
 	void AddTexture(const id_type& TexID, const STD string& ImagePath);
 	
 	VisualGraphics&	GetVisualGraphics(const id_type& ID);
-	ActorGraphics&	GetActorGraphics(const id_type& ID);
+	Graphics&	GetActorGraphics(const id_type& ID);
 	ObjectGraphics&	GetObjectGraphics(u_int ID);
 	EffectGraphics& GetEffect(u_int ID);
 	u_int			GetTexture(const id_type& ID);
@@ -137,7 +137,7 @@ private:
 	/* Services								     */
 	/*-------------------------------------------*/
 	Service<u_int>					m_Textures;
-	Service<ActorGraphics>			m_ActorGraphics;
+	Service<Graphics>				m_ActorGraphics;
 	Service<Physics>				m_Physics;
 	Service<StateStruct>			m_States;
 	Service<ObjectGraphics>			m_ObjectGraphics;

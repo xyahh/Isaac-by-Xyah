@@ -6,6 +6,7 @@ public:
 
 	Sprite() :
 		Size(0.f, 0.f),
+		OffsetY(0.f),
 		FrameRate(1), CurrentFrame(0.f),
 		SpriteInfo(0, 0, 1, 1)
 	{}
@@ -13,7 +14,9 @@ public:
 
 	void SetTexID(const id_type& _TexID);
 	void SetDirection(u_int _State);
-	
+	void SetOffsetY(float offset_y);
+
+	float GetOffsetY() const;
 	u_int GetDirection() const;
 
 	void SetFrameRate(int FrameRate);
@@ -32,6 +35,7 @@ public:
 
 private:
 	id_type		TexID;
+	float		OffsetY;
 	float		FrameRate;
 	float		CurrentFrame;
 	DX XMFLOAT2 Size;
