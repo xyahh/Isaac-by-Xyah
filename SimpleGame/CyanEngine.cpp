@@ -41,14 +41,6 @@ void Cyan::DeleteComponents(WORD Components)
 	}
 	if (Components & STATES)
 	{
-		for (auto Iter = m_States.rbegin(); Iter != m_States.rend(); ++Iter)
-		{
-			Iter->StateID.clear();
-			Iter->ActorID.clear();
-			delete Iter->pState;
-			Iter->pState = nullptr;
-		}
-
 		for (auto Iter = m_StateTypes.rbegin(); Iter != m_StateTypes.rend(); ++Iter)
 		{
 			delete (*Iter);
@@ -59,18 +51,23 @@ void Cyan::DeleteComponents(WORD Components)
 		m_StateTypes.clear();
 		m_StateTypeLocator.clear();
 	}
-	if (Components & ENTITIES)
+	if (Components & OBJECTS)
 	{
+		for (auto Iter = m_States.rbegin(); Iter != m_States.rend(); ++Iter)
+		{
+			Iter->StateID.clear();
+			Iter->ActorID.clear();
+			delete Iter->pState;
+			Iter->pState = nullptr;
+		}
 		m_Physics.clear();
 		m_Graphics.clear();
-		for (auto& i : m_States) //Maybe I have to delete the m_States here as well?
-			i.ActorID.clear();
-		m_EntityLocator.clear();
-	}
-	if (Components & VISUALS)
-	{
-		m_VisualGraphics.clear();
-		m_VisualLocator.clear();
+		m_States.clear();
+
+		m_GraphicsLocator.clear();
+		m_PhysicsLocator.clear();
+		m_StateLocator.clear();
+
 	}
 	if (Components & COMMANDS)
 	{
@@ -89,14 +86,8 @@ void Cyan::DeleteComponents(WORD Components)
 
 void Cyan::Render(float fInterpolation)
 {
-	for (auto& g : m_VisualGraphics)
-		g.Render();
-
 	for (auto& g : m_Graphics)
 		g.Render(fInterpolation);
-
-	for (auto& e : m_EffectGraphics)
-		e.Render(fInterpolation);
 }
 
 void Cyan::Update()
@@ -115,11 +106,11 @@ void Cyan::Update()
 		Obj->SetPosition(DX Add(Obj->GetPrevPosition(), Obj->GetDeltaPosition()));
 	}
 
-	for (auto i = m_EffectLocator.begin(); i != m_EffectLocator.end(); ++i)
-	{
-		if (m_EffectGraphics[i->second].Effect.FrameGridUpdate())
-			AddEvent(EVENT::EFFECT_DELETE, STD to_string(i->first));
-	}
+	//for (auto i = m_EffectLocator.begin(); i != m_EffectLocator.end(); ++i)
+	//{
+	//	if (m_EffectGraphics[i->second].Effect.FrameGridUpdate())
+	//		AddEvent(EVENT::EFFECT_DELETE, STD to_string(i->first));
+	//}
 	HandleEvents();
 }
 
@@ -182,7 +173,7 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 	{
 		Engine.AddActor(d[ID], d[STATE]);
 
-		Graphics& AGraphics = Engine.GetEntityGraphics(d[ID]);
+		Graphics& AGraphics = Engine.GetGraphics(d[ID]);
 		AGraphics.AddSprite("Head");
 		AGraphics.AddSprite("Body");
 
@@ -201,7 +192,7 @@ void Cyan::AddActorsByFile(const STD string & filename, char delimiter, bool ign
 		Body.SetSpriteInfo({ 0, 0, 10, 4 });
 		Body.SetFrameRate(20);
 
-		Physics& APhysics = Engine.GetEntityPhysics(d[ID]);
+		Physics& APhysics = Engine.GetPhysics(d[ID]);
 		APhysics.SetFriction(STD stof(d[FRICTION]));
 		APhysics.SetMass(STD stof(d[MASS]));
 		//0.5f, 0.1f, 0.75f 
@@ -301,7 +292,7 @@ void Cyan::AddStateTypeByString(const id_type & ID, const STD string & Type, con
 
 StateStruct& Cyan::GetActorState(const id_type & ID)
 {
-	return m_States[m_EntityLocator[ID].StateIndex];
+	return m_States[m_StateLocator[ID]];
 }
 
 Command * Cyan::GetCommand(const id_type& ID)
@@ -322,11 +313,9 @@ void Cyan::AddEvent(u_int Event, const id_type & ID)
 void Cyan::ReserveObjects(u_int ActorNumber, u_int BulletNumber, u_int VisualNumber, u_int StateNumber)
 {
 	/* Use Swap if memory needs to be reduced for each Scene */
-	m_VisualGraphics.reserve(VisualNumber);
-	m_EffectGraphics.reserve(ActorNumber);
 	m_States.reserve(ActorNumber + 1);
 	m_StateTypes.reserve(StateNumber);
-	m_Graphics.reserve(ActorNumber + BulletNumber);
+	m_Graphics.reserve(ActorNumber + BulletNumber + VisualNumber);
 	m_Physics.reserve(ActorNumber + BulletNumber);
 }
 
@@ -342,49 +331,42 @@ id_type Cyan::AddObject(const id_type& ObjectType)
 	m_Graphics.emplace_back();
 	m_Graphics[LastIdx(m_Graphics)].SetID(ObjectID);
 	m_Physics.emplace_back();
-	m_EntityLocator[ObjectID].GraphicsIndex = LastIdx(m_Graphics);
-	m_EntityLocator[ObjectID].PhysicsIndex  = LastIdx(m_Physics);
+	m_GraphicsLocator[ObjectID] = LastIdx(m_Graphics);
+	m_PhysicsLocator[ObjectID]  = LastIdx(m_Physics);
 	return ObjectID;
 }
 
-u_int Cyan::AddEffect()
+id_type Cyan::AddEffect()
 {
 	static u_int Idx = 0;
-	m_EffectGraphics.emplace_back();
-	m_EffectLocator[Idx] = m_EffectGraphics.size()-1;
-	return Idx++;
+	id_type EffectID = "Effect" + STD to_string(Idx++);
+	m_Graphics.emplace_back();
+	m_GraphicsLocator[EffectID] = LastIdx(m_Graphics);
+	return EffectID;
 }
 
 void Cyan::AddActor(const id_type & AssignID, const id_type & StartStateID)
 {
 	m_Physics.emplace_back();
 	m_Graphics.emplace_back();
-	m_Graphics[LastIdx(m_Graphics)].SetID(AssignID);
 	m_States.emplace_back(AssignID, StartStateID, GetStateType(StartStateID)->Clone());
-	m_EntityLocator[AssignID].GraphicsIndex = LastIdx(m_Graphics);
-	m_EntityLocator[AssignID].PhysicsIndex = LastIdx(m_Physics);
-	m_EntityLocator[AssignID].StateIndex = LastIdx(m_States);
+
+	m_Graphics[LastIdx(m_Graphics)].SetID(AssignID);
+
+	m_GraphicsLocator[AssignID] = LastIdx(m_Graphics);
+	m_PhysicsLocator[AssignID] = LastIdx(m_Physics);
+	m_StateLocator[AssignID] = LastIdx(m_States);
 }
 
-void Cyan::AddVisual(const id_type& AssignID, WORD config)
+void Cyan::AddVisual(const id_type& AssignID)
 {
-	m_VisualGraphics.emplace_back(config);
-	m_VisualLocator[AssignID] = LastIdx(m_VisualGraphics);
+	m_Graphics.emplace_back();
+	m_GraphicsLocator[AssignID] = LastIdx(m_Graphics);
 }
 
-VisualGraphics& Cyan::GetVisualGraphics(const id_type& ID)
+Graphics& Cyan::GetGraphics(const id_type& ID)
 {
-	return m_VisualGraphics[m_VisualLocator[ID]];
-}
-
-Graphics& Cyan::GetEntityGraphics(const id_type& ID)
-{
-	return m_Graphics[m_EntityLocator[ID].GraphicsIndex];
-}
-
-EffectGraphics & Cyan::GetEffect(u_int ID)
-{
-	return m_EffectGraphics[m_EffectLocator[ID]];
+	return m_Graphics[m_GraphicsLocator[ID]];
 }
 
 u_int Cyan::GetTexture(const id_type & ID)
@@ -392,15 +374,15 @@ u_int Cyan::GetTexture(const id_type & ID)
 	return m_Textures[m_TextureLocator[ID]];
 }
 
-Physics & Cyan::GetEntityPhysics(const id_type& ID)
+Physics & Cyan::GetPhysics(const id_type& ID)
 {
-	return m_Physics[m_EntityLocator[ID].PhysicsIndex];
+	return m_Physics[m_PhysicsLocator[ID]];
 }
 
 void Cyan::UpdateState(const id_type& ActorID, const id_type& NewStateID)
 {
 	if (ActorState != NULL || !NextStateID.empty()) return;
-	ActorState = &m_States[m_EntityLocator[ActorID].StateIndex];
+	ActorState = &m_States[m_StateLocator[ActorID]];
 	NextStateID = NewStateID;
 }
 
@@ -421,13 +403,13 @@ void Cyan::ProcessUpdatedStates()
 
 void Cyan::DeleteEffect(u_int EffectID)
 {
-	u_int Idx = m_EffectLocator[EffectID];
+	/*u_int Idx = m_EffectLocator[EffectID];
 
 	for (auto& l : m_EffectLocator)
 		if (l.second >= Idx)
 			--l.second;
 	m_EffectGraphics.erase(m_EffectGraphics.begin() + Idx);
-	m_EffectLocator.erase(EffectID);
+	m_EffectLocator.erase(EffectID);*/
 }
 
 /* Texture Functions -----------------------------------------------------------------*/

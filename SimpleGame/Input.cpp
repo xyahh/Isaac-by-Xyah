@@ -20,8 +20,11 @@ void Input::AddAnalogInput(const id_type& CommandID)
 
 void Input::HandleInput(const id_type& ActorID)
 {
-	Gamepad1.Update();
-
+	Gamepad1.Update();/*
+	while (!m_PushedKeys.empty()) {
+		cout << ' ' << mystack.top();
+		mystack.pop();
+	}*/
 	for (auto& i : GamepadInput)
 		i.HandleInput(Gamepad1.GetButton(i.Value), ActorID);
 	for (auto& i : KeyboardInput)

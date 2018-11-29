@@ -8,12 +8,12 @@
 
 void ForceCommand::execute(const id_type& ActorID)
 {
-	Engine.GetEntityPhysics(ActorID).ApplyForce(DX3 Load(Force));
+	Engine.GetPhysics(ActorID).ApplyForce(DX3 Load(Force));
 }
 
 void AnalogForceCommand::execute(const id_type& ActorID)
 {
-	Engine.GetEntityPhysics(ActorID).ApplyForce(DX Scale(Gamepad1.GetAnalog(AnalogStick), fForce));
+	Engine.GetPhysics(ActorID).ApplyForce(DX Scale(Gamepad1.GetAnalog(AnalogStick), fForce));
 }
 
 void ShiftSceneCommand::execute(const id_type& ActorID)
@@ -38,7 +38,7 @@ void FxCommand::release(const id_type& ActorID)
 
 void ShootCommand::execute(const id_type& ActorID)
 {
-	Engine.GetEntityGraphics(ActorID).GetSprite("Head").SetDirection(Direction);
+	Engine.GetGraphics(ActorID).GetSprite("Head").SetDirection(Direction);
 }
 
 void ShootCommand::release(const id_type& ActorID)

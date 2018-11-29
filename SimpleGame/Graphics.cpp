@@ -27,25 +27,29 @@ void Graphics::AddSprite(const id_type& SpriteName)
 
 void Graphics::Render(float Interpolation)
 {
-	Physics& ActorPhysics = Engine.GetEntityPhysics(m_Actor);
+	Physics* ActorPhysics = NULL;
+	if(!m_Actor.empty()) ActorPhysics = &Engine.GetPhysics(m_Actor);
+	DX XMVECTOR Position = DX3 Load(m_Position);
 	DX XMVECTOR Color = DX4 Load(m_Color);
-	DX XMVECTOR Position = DX Add
+	
+	if(ActorPhysics)
+	Position = DX Add( Position, DX Add
 	(
-		DX Scale(ActorPhysics.GetPosition(), Interpolation),
-		DX Scale(ActorPhysics.GetPrevPosition(), 1.f - Interpolation)
-	);
+		DX Scale(ActorPhysics->GetPosition(), Interpolation),
+		DX Scale(ActorPhysics->GetPrevPosition(), 1.f - Interpolation)
+	));
+
 #ifdef CYAN_DEBUG_COLLISION
 	DrawBoundingBoxes(Position, ActorPhysics);
 #endif
 
-	World::Convert(Position);
-
+	World::ToPixels(Position);
 	for (auto& Sprite : m_Sprites)
 	{
 		DX XMVECTOR SpriteSize = Sprite.second.GetSize();
 		float SpriteOffset = Sprite.second.GetOffsetY();
-		World::Convert(SpriteOffset);
-		World::Convert(SpriteSize);
+		World::ToPixels(SpriteOffset);
+		World::ToPixels(SpriteSize);
 		RenderDevice.DrawShadow(Position, SpriteSize, Color);
 		RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, SpriteOffset }),
 			SpriteSize, Color, Engine.GetTexture(Sprite.second.GetTexID()), Sprite.second.GetSpriteInfo());
@@ -67,58 +71,7 @@ id_type Graphics::GetActor() const
 	return m_Actor;
 }
 
-/*-------------------------------------------------------------------------*/
-
-void VisualGraphics::SetSize(float x, float y)
-{
-	m_Size = DX XMFLOAT2(x, y);
-}
-
-void VisualGraphics::SetTexID(const id_type& TexID)
-{
-	m_TexID = TexID;
-}
-
-void VisualGraphics::SetOffset(float x, float y)
-{
-	m_Offset = DX XMFLOAT2(x, y);
-}
-
-void VisualGraphics::Render()
-{
-	DX XMVECTOR Size = DX2 Load(m_Size);
-	DX XMVECTOR Color = DX4 Load(m_Color);
-	DX XMVECTOR Position = DX2 Load(m_Offset);
-
-	// Convert the units to pixels if the Visual uses Physical Units.
-	if (m_Config & PHYSICAL_UNITS)
-	{
-		World::Convert(Position);
-		World::Convert(Size);
-	}
-
-	// Change PosZ if configured to draw at the Back or at the Front
-	if (m_Config & FRONT_DRAW & ~BACK_DRAW & ~PHYSICAL_DRAW)
-		Position = DX XMVectorSetZ(Position, NEAREST);
-	if (m_Config & BACK_DRAW & ~FRONT_DRAW & ~PHYSICAL_DRAW)
-		Position = DX XMVectorSetZ(Position, FARTHEST);
-	RenderDevice.DrawTexRect(Position, Size, Color
-		, Engine.GetTexture(m_TexID));
-}
-
-void EffectGraphics::Render(float fInterpolation)
-{
-	DX XMVECTOR Position = DX3 Load(m_Position);
-	DX XMVECTOR Size = Effect.GetSize();
-	DX XMVECTOR Color = DX4 Load(m_Color);
-	World::Convert(Position);
-	World::Convert(Size);
-	RenderDevice.DrawSprite(Position, Size, Color, 
-		Engine.GetTexture(Effect.GetTexID()), Effect.GetSpriteInfo());
-	Effect.FrameGridUpdate();
-}
-
-void EffectGraphics::SetPosition(DX XMVECTOR pos)
+void Graphics::SetPosition(DX XMVECTOR pos)
 {
 	m_Position = DX3 Store(pos);
 }

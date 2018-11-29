@@ -9,10 +9,9 @@
 /* Component IDs ------------- */
 #define SOUNDS		0x01
 #define STATES		0x02
-#define ENTITIES	0x04
-#define VISUALS		0x08
-#define COMMANDS	0x10
-#define TEXTURES	0x20
+#define OBJECTS		0x04
+#define COMMANDS	0x08
+#define TEXTURES	0x10
 /*----------------------------*/
 
 enum EVENT
@@ -47,8 +46,8 @@ public:
 	{
 		for (u_int i = 0; i < m_Physics.size(); ++i)
 			if (&physics == &m_Physics[i])
-				for (auto& l : m_EntityLocator)
-					if (i == l.second.PhysicsIndex)
+				for (auto& l : m_PhysicsLocator)
+					if (i == l.second)
 						return l.first;
 		return id_type("");
 	}
@@ -78,19 +77,17 @@ public:
 	void AddNonActorState(const id_type& AssignID);
 
 	id_type AddObject(const id_type& ObjectType);
-	u_int AddEffect();
+	id_type AddEffect();
 	void AddActor(const id_type& AssignID, const id_type& StartStateID);
-	void AddVisual(const id_type& AssignID, WORD config = 0);
+	void AddVisual(const id_type& AssignID);
 	
 	void AddSound(const id_type& AssignID, const STD string& ImagePath, bool isBGM);
 	void AddTexture(const id_type& TexID, const STD string& ImagePath);
 	
-	VisualGraphics&	GetVisualGraphics(const id_type& ID);
-	Graphics&		GetEntityGraphics(const id_type& ID);
-	EffectGraphics& GetEffect(u_int ID);
+	Graphics&		GetGraphics(const id_type& ID);
 	u_int			GetTexture(const id_type& ID);
 
-	Physics& GetEntityPhysics(const id_type& ID);
+	Physics& GetPhysics(const id_type& ID);
 	
 	void UpdateState(const id_type& ActorID, const id_type& NewStateID);
 
@@ -102,7 +99,7 @@ public:
 	void AddEvent(u_int Event, const id_type& ID);
 
 	void DeleteEffect(u_int EffectID);
-	void DeleteComponents(WORD Components = SOUNDS | STATES | ENTITIES | VISUALS | COMMANDS | TEXTURES);
+	void DeleteComponents(WORD Components = SOUNDS | STATES | OBJECTS | COMMANDS | TEXTURES);
 	/*--------------------------*/
 
 private:
@@ -129,8 +126,6 @@ private:
 	Service<Graphics>				m_Graphics;
 	Service<Physics>				m_Physics;
 	Service<StateStruct>			m_States;
-	Service<EffectGraphics>			m_EffectGraphics;
-	Service<VisualGraphics>			m_VisualGraphics;
 	Service<Command*>				m_Commands;
 	Service<Sound>					m_Sounds;
 	Service<State*>					m_StateTypes;
@@ -140,9 +135,10 @@ private:
 	/* Service Locators                          */
 	/*-------------------------------------------*/
 	ServiceLocator<id_type, u_int>  m_TextureLocator;
-	ServiceLocator<id_type, Entity>	m_EntityLocator;
-	ServiceLocator<u_int,	u_int>	m_EffectLocator;
-	ServiceLocator<id_type, u_int>	m_VisualLocator;
+	ServiceLocator<id_type, u_int>	m_GraphicsLocator;
+	ServiceLocator<id_type, u_int>	m_PhysicsLocator;
+	ServiceLocator<id_type, u_int>	m_StateLocator;
+
 	ServiceLocator<id_type, u_int>	m_CommandLocator;
 	ServiceLocator<id_type, u_int>	m_SoundLocator;
 	ServiceLocator<id_type, u_int>	m_StateTypeLocator;

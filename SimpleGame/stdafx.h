@@ -59,7 +59,6 @@ class Gamepad;
 class Renderer;
 
 /* Components */
-class VisualGraphics;
 class Graphics;
 class Physics;
 class Input;

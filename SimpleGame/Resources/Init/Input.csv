@@ -5,6 +5,10 @@ Idle,Player1,A,StartMoving
 Idle,Player1,D,StartMoving
 Idle,Player1,32,Jump
 Idle,Player1,32,StartInAir
+Moving,Player1,37,ShootLeft
+Moving,Player1,38,ShootUp
+Moving,Player1,39,ShootRight
+Moving,Player1,40,ShootDown
 Idle,Player1,37,StartShooting
 Idle,Player1,38,StartShooting
 Idle,Player1,39,StartShooting
@@ -15,6 +19,10 @@ Moving,Player1,A,MoveLeft
 Moving,Player1,D,MoveRight
 Moving,Player1,32,Jump
 Moving,Player1,32,StartInAir
+Moving,Player1,37,ShootLeft
+Moving,Player1,38,ShootUp
+Moving,Player1,39,ShootRight
+Moving,Player1,40,ShootDown
 Moving,Player1,37,StartShooting
 Moving,Player1,38,StartShooting
 Moving,Player1,39,StartShooting
@@ -25,10 +33,6 @@ Shooting,Player1,A,MoveLeft
 Shooting,Player1,D,MoveRight
 Shooting,Player1,32,Jump
 Shooting,Player1,32,StartInAir
-Shooting,Player1,37,ShootLeft
-Shooting,Player1,38,ShootUp
-Shooting,Player1,39,ShootRight
-Shooting,Player1,40,ShootDown
 Shooting,Player1,37,EndShooting
 Shooting,Player1,38,EndShooting
 Shooting,Player1,39,EndShooting

@@ -236,7 +236,7 @@ private:
 
 private:
 	float SlamForce;
-	u_int EffectID;
+	id_type EffectID;
 	id_type TexID;
 };
 

@@ -13,10 +13,13 @@ void Menu::Init()
 	Engine.GetSound("Menu").Play();
 
 	Engine.AddVisual("Title");
-	Engine.GetVisualGraphics("Title").SetSize( 800.f, 800.f);
-	Engine.GetVisualGraphics("Title").SetOffset( 0.f, 50.f );
+	Graphics& VisualGraphics = Engine.GetGraphics("Title");
 	Engine.AddTexture("Title", "./Resources/title.png");
-	Engine.GetVisualGraphics("Title").SetTexID("Title");
+	VisualGraphics.AddSprite("Title");
+	Sprite& Title = VisualGraphics.GetSprite("Title");
+
+	Title.SetSize({ 20.f, 20.f });
+	Title.SetTexID("Title");
 	
 	Engine.AddCommand("Next", new ShiftSceneCommand(*m_Framework, new Gameplay));
 	
