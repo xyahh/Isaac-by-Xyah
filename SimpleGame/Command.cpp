@@ -6,52 +6,53 @@
 #include "Scene.h"
 
 
-void ForceCommand::execute(const id_type& ActorID)
+void ForceCommand::execute(size_t ObjectIndex)
 {
-	Engine.GetPhysics(ActorID).ApplyForce(DX3 Load(Force));
+	Engine.GetPhysics(ObjectIndex).ApplyForce(DX3 Load(Force));
 }
 
-void AnalogForceCommand::execute(const id_type& ActorID)
+void AnalogForceCommand::execute(size_t ObjectIndex)
 {
-	Engine.GetPhysics(ActorID).ApplyForce(DX Scale(Gamepad1.GetAnalog(AnalogStick), fForce));
+	Engine.GetPhysics(ObjectIndex).ApplyForce(DX Scale(Gamepad1.GetAnalog(AnalogStick), fForce));
 }
 
-void ShiftSceneCommand::execute(const id_type& ActorID)
+void ToSceneCommand::execute(size_t ObjectIndex)
 {
-	m_Framework.ToScene(&*m_Scene);
+	Fw.ToScene(&*m_Scene);
 }
 
-void FxCommand::execute(const id_type& ActorID)
+void ShootCommand::execute(size_t ObjectIndex)
 {
-	if (!exe)
+	//Engine.GetGraphics(ObjectIndex).GetSprite("Head").SetDirection(Direction);
+}
+
+void ShootCommand::release(size_t ObjectIndex)
+{
+}
+
+void StateCommand::execute(size_t ObjectIndex)
+{
+	if (Config & ST_CMD::ON_PRESS)
 	{
-		fx(ActorID);
-		exe = true;
+		if(Config & ST_CMD::PUSH_STATE)
+			return Engine.PushState(ObjectIndex, StateIndex);
+		if (Config & ST_CMD::CHANGE_STATE)
+			return Engine.ChangeState(ObjectIndex, StateIndex);
+		if (Config & ST_CMD::POP_STATE)
+			return Engine.PopState(ObjectIndex);
 	}
 	
 }
 
-void FxCommand::release(const id_type& ActorID)
+void StateCommand::release(size_t ObjectIndex)
 {
-	exe = false;
+	if (Config & ST_CMD::ON_RELEASE)
+	{
+		if (Config & ST_CMD::PUSH_STATE)
+			return Engine.PushState(ObjectIndex, StateIndex);
+		if (Config & ST_CMD::CHANGE_STATE)
+			return Engine.ChangeState(ObjectIndex, StateIndex);
+		if (Config & ST_CMD::POP_STATE)
+			return Engine.PopState(ObjectIndex);
+	}
 }
-
-void ShootCommand::execute(const id_type& ActorID)
-{
-	Engine.GetGraphics(ActorID).GetSprite("Head").SetDirection(Direction);
-}
-
-void ShootCommand::release(const id_type& ActorID)
-{
-}
-
-void NewStateOnPressCommand::execute(const id_type & ActorID)
-{
-	Engine.UpdateState(ActorID, NewStateID);
-}
-
-void NewStateOnReleaseCommand::release(const id_type & ActorID)
-{
-	Engine.UpdateState(ActorID, NewStateID);
-}
-

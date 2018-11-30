@@ -155,11 +155,11 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Entities.h" />
-    <ClInclude Include="File.h" />
     <ClInclude Include="Framework.h" />
     <ClInclude Include="CyanEngine.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Indices.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="LoadPng.h" />
     <ClInclude Include="Math.h" />
@@ -180,11 +180,11 @@
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Entities.cpp" />
-    <ClCompile Include="File.cpp" />
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="CyanEngine.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="Indices.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="LoadPng.cpp" />
     <ClCompile Include="Physics.cpp" />

@@ -2,54 +2,84 @@
 #include "Gameplay.h"
 #include "Framework.h"
 #include "Renderer.h"
+#include "Indices.h"
 
 void Gameplay::Init()
 {
-	Engine.ReserveObjects(4, 100, 1, 10); 
-	Engine.AddSoundsByFile("./Resources/Init/Sounds.csv");
-	Engine.AddTexturesByFile("./Resources/Init/Textures.csv");
-	Engine.AddCommandsByFile("./Resources/Init/Commands.csv");
-	Engine.AddStatesByFile("./Resources/Init/States.csv");
-	Engine.AddInputsByFile("./Resources/Init/Input.csv");
-	Engine.AddActorsByFile("./Resources/Init/Actors.csv");
-	Gamepad1.Connect();
-
+	//Actor
 	{
-		id_type o = Engine.AddObject("Wall");
-		Physics& p = Engine.GetPhysics(o);
-		p.SetCollision(&Collision::Basic);
-		p.GetBox().SetDimensions({ 1.75f, 17.5f, 10.f });
-		p.SetPosition({ 10.f, 0.f, 0.f });
+		size_t BodyTex = Engine.AddTexture("./Resources/Characters/basic_body.png");
+		size_t HeadTex = Engine.AddTexture("./Resources/Characters/isaac_head.png");
+
+		OBJ::PLAYER = Engine.AddObject(ObjectType::Actor);
+		auto& ActorPhysics = Engine.GetPhysics(OBJ::PLAYER);
+		auto& ActorGraphics = Engine.GetGraphics(OBJ::PLAYER);
+
+		size_t BodyIdx = Engine.AddSprite(OBJ::PLAYER);
+		size_t HeadIdx = Engine.AddSprite(OBJ::PLAYER);
+
+		auto& Body = Engine.GetSprite(OBJ::PLAYER, BodyIdx);
+		auto& Head = Engine.GetSprite(OBJ::PLAYER, HeadIdx);
+
+		
+		ActorGraphics.SetColor(1.f, 1.f, 1.f, 1.f);
+		ActorPhysics.SetMass(70.f);
+
+		float HeadSize = 1.25f;
+		float BodySize = 0.75f;
+
+		Body.SetTexture(BodyTex);
+		Body.SetSize({ BodySize, BodySize });
+		Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
+		Body.SetTotal({ 10, 4 });
+		Body.SetDirection(Direction::Down);
+		Body.SetFrameRate(30.f);
+
+		Head.SetTexture(HeadTex);
+		Head.SetSize({ HeadSize, HeadSize });
+		Head.SetTotal({ 2, 4 });
+		Head.SetFrameRate(2.f);
+		Head.SetDirection(Direction::Down);
+		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
+
+		
+		
 	}
 
-	{
-		id_type o = Engine.AddObject("Wall");
-		Physics& p = Engine.GetPhysics(o);
-		p.SetCollision(&Collision::Basic);
-		p.GetBox().SetDimensions({ 17.5f, 3.f, 10.f });
-		p.SetPosition({ 0.f, 10.f, 0.f });
-	}
+	ST::IDLE = Engine.AddStatePrototype(OBJ::PLAYER, new IdleState);
+	ST::MOVING = Engine.AddStatePrototype(OBJ::PLAYER, new MovingState);
+	ST::JUMPING = Engine.AddStatePrototype(OBJ::PLAYER,	new InAirState);
+
+	CMD::MOVE_UP = Engine.AddCommand(new ForceCommand({ 0.f, 1'500.f, 0.f }));
+	CMD::MOVE_DOWN = Engine.AddCommand(new ForceCommand({ 0.f, -1'500.f, 0.f }));
+	CMD::MOVE_LEFT = Engine.AddCommand(new ForceCommand({ -1'500.f, 0.f, 0.f }));
+	CMD::MOVE_RIGHT = Engine.AddCommand(new ForceCommand({ 1'500.f, 0.f, 0.f }));
+	CMD::JUMP = Engine.AddCommand(new ForceCommand({ 0.f, 0.f, 20'000.f }));
+
+	CMD::START_MOVING = Engine.AddCommand(new StateCommand(ST::MOVING, ST_CMD::ON_PRESS | ST_CMD::CHANGE_STATE));
+	CMD::START_JUMPING = Engine.AddCommand(new StateCommand(ST::JUMPING, ST_CMD::ON_PRESS | ST_CMD::CHANGE_STATE));
+
+	auto IdleInput = Engine.GetStateInput(OBJ::PLAYER, ST::IDLE);
+
+	IdleInput->AddKey('W', CMD::START_MOVING);
+	IdleInput->AddKey('A', CMD::START_MOVING);
+	IdleInput->AddKey('S', CMD::START_MOVING);
+	IdleInput->AddKey('D', CMD::START_MOVING);
+	IdleInput->AddKey(VK_SPACE, CMD::JUMP);
+
+	IdleInput->EnableLocalInput();
+
+	auto MoveInput = Engine.GetStateInput(OBJ::PLAYER, ST::MOVING);
+
+	MoveInput->AddKey('W', CMD::MOVE_UP);
+	MoveInput->AddKey('A', CMD::MOVE_LEFT);
+	MoveInput->AddKey('S', CMD::MOVE_DOWN);
+	MoveInput->AddKey('D', CMD::MOVE_RIGHT);
+	MoveInput->AddKey(VK_SPACE, CMD::JUMP);
+
+	MoveInput->EnableLocalInput();
 	
-	{
-		id_type o = Engine.AddObject("Wall");
-		Physics& p = Engine.GetPhysics(o);
-		p.SetCollision(&Collision::Basic);
-		p.GetBox().SetDimensions({ 17.5f, 3.f, 10.f });
-		p.SetPosition({ 0.f, -10.f, 0.f });
-	}
-
-	{
-		id_type o = Engine.AddObject("Wall");
-		Physics& p = Engine.GetPhysics(o);
-		p.SetCollision(&Collision::Basic);
-		p.GetBox().SetDimensions({ 1.75f, 17.5f, 10.f });
-		p.SetPosition({ -10.f, 0.f, 0.f });
-	}
-
-	/* Visuals */
-	//Engine.AddVisual("Map", PHYSICAL_UNITS | BACK_DRAW);
-	//Engine.GetVisualGraphics("Map").SetTexID("Map");
-	//Engine.GetVisualGraphics("Map").SetSize(20.f, 20.f);
+	Engine.ChangeState(OBJ::PLAYER, ST::IDLE);
 }
 
 void Gameplay::Exit()
@@ -64,6 +94,5 @@ void Gameplay::Render(float fInterpolation)
 
 void Gameplay::Update() 
 { 
-	//Engine.GetObjectGraphics(ObjectID).ObjectSprite.FrameLinearAdvance();
 	Engine.Update();
 }

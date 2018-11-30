@@ -1,16 +1,15 @@
 #include "stdafx.h"
 #include "Graphics.h"
 #include "CyanEngine.h"
-#include "Renderer.h"
 #include "World.h"
 
 #ifdef CYAN_DEBUG_COLLISION
-void DrawBoundingBoxes(DX FXMVECTOR Position, Physics& p)
+void DrawBoundingBoxes(const Renderer& RenderDevice,  DX FXMVECTOR Position, Physics& p)
 {
 	DX XMVECTOR Dimensions = p.GetBox().GetDimensions();
 	DX XMVECTOR BoxPosition = p.GetBox().ConvertPosition(Position);
-	World::Convert(Dimensions);
-	World::Convert(BoxPosition);
+	World::ToPixels(Dimensions);
+	World::ToPixels(BoxPosition);
 	RenderDevice.DrawCollisionRect(BoxPosition, Dimensions);
 }	 
 #endif
@@ -20,58 +19,35 @@ void Graphics::SetColor(float r, float g, float b, float a)
 	m_Color = DX XMFLOAT4(r, g, b, a);
 }
 
-void Graphics::AddSprite(const id_type& SpriteName)
+void Graphics::Render (
+	const Renderer& RenderDevice, 
+	Physics& ObjectPhysics, 
+	const STD vector<Sprite>& ObjectSprite, 
+	float Interpolation)
 {
-	m_Sprites[SpriteName];
-}
-
-void Graphics::Render(float Interpolation)
-{
-	Physics* ActorPhysics = NULL;
-	if(!m_Actor.empty()) ActorPhysics = &Engine.GetPhysics(m_Actor);
-	DX XMVECTOR Position = DX3 Load(m_Position);
 	DX XMVECTOR Color = DX4 Load(m_Color);
-	
-	if(ActorPhysics)
-	Position = DX Add( Position, DX Add
+	DX XMVECTOR Position = DX Add
 	(
-		DX Scale(ActorPhysics->GetPosition(), Interpolation),
-		DX Scale(ActorPhysics->GetPrevPosition(), 1.f - Interpolation)
-	));
+		DX Scale(ObjectPhysics.GetPosition(), Interpolation),
+		DX Scale(ObjectPhysics.GetPrevPosition(), 1.f - Interpolation)
+	);
+	World::ToPixels(Position);
 
 #ifdef CYAN_DEBUG_COLLISION
-	DrawBoundingBoxes(Position, ActorPhysics);
+	DrawBoundingBoxes(RenderDevice, Position, ObjectPhysics);
 #endif
 
-	World::ToPixels(Position);
-	for (auto& Sprite : m_Sprites)
+
+	for (auto& Sprite : ObjectSprite)
 	{
-		DX XMVECTOR SpriteSize = Sprite.second.GetSize();
-		float SpriteOffset = Sprite.second.GetOffsetY();
+		DX XMVECTOR SpriteSize = Sprite.GetSize();
+		DX XMVECTOR SpriteOffset = Sprite.GetOffset();
+
 		World::ToPixels(SpriteOffset);
 		World::ToPixels(SpriteSize);
+
 		RenderDevice.DrawShadow(Position, SpriteSize, Color);
-		RenderDevice.DrawSprite(DX Add(Position, { 0.f, 0.f, SpriteOffset }),
-			SpriteSize, Color, Engine.GetTexture(Sprite.second.GetTexID()), Sprite.second.GetSpriteInfo());
+		RenderDevice.DrawSprite(DX Add(Position, SpriteOffset),
+			SpriteSize, Color, Engine.GetTexture(Sprite.GetTexture()), Sprite.GetCurrent(), Sprite.GetTotal());
 	}
-}
-
-Sprite& Graphics::GetSprite(const id_type& SpriteName)
-{
-	return m_Sprites[SpriteName];
-}
-
-void Graphics::SetID(const id_type & ActorID)
-{
-	m_Actor = ActorID;
-}
-
-id_type Graphics::GetActor() const
-{
-	return m_Actor;
-}
-
-void Graphics::SetPosition(DX XMVECTOR pos)
-{
-	m_Position = DX3 Store(pos);
 }

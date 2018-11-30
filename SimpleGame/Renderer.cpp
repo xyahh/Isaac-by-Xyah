@@ -5,9 +5,7 @@
 #include "Dependencies/GL/glew.h"
 #include "LoadPng.h"
 
-Renderer RenderDevice;
-
-DX XMVECTOR XM_CALLCONV Renderer::GetGLPosition(DX FXMVECTOR Position)
+DX XMVECTOR XM_CALLCONV Renderer::GetGLPosition(DX FXMVECTOR Position) const
 {
 	return DX XMVectorMultiply(Position, DX3 Load(
 		{
@@ -75,7 +73,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(texRect), texRect, GL_STATIC_DRAW);
 }
 
-u_int Renderer::CreatePngTexture(const STD string& filePath)
+u_int Renderer::CreatePngTexture(const STD string& filePath) const
 {
 	u_int temp;
 	glGenTextures(1, &temp);
@@ -94,12 +92,12 @@ u_int Renderer::CreatePngTexture(const STD string& filePath)
 	return temp;
 }
 
-void Renderer::DeleteTexture(u_int texID)
+void Renderer::DeleteTexture(u_int texID) const
 {
 	glDeleteTextures(1, &texID);
 }
 
-void Renderer::AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType)
+void Renderer::AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType) const
 {
 	//쉐이더 오브젝트 생성
 	u_int ShaderObj = glCreateShader(ShaderType);
@@ -134,7 +132,7 @@ void Renderer::AddShader(u_int ShaderProgram, const char* pShaderText, u_int Sha
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
-void XM_CALLCONV Renderer::DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID)
+void XM_CALLCONV Renderer::DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -171,7 +169,7 @@ void XM_CALLCONV Renderer::DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size,
 	glDisable(GL_BLEND);
 }
 
-bool Renderer::ReadFile(char* filename, STD string *target)
+bool Renderer::ReadFile(char* filename, STD string *target) const
 {
 	STD ifstream file(filename);
 	if (file.fail())
@@ -188,7 +186,7 @@ bool Renderer::ReadFile(char* filename, STD string *target)
 	return true;
 }
 
-u_int Renderer::CompileShaders(char* filenameVS, char* filenameFS)
+u_int Renderer::CompileShaders(char* filenameVS, char* filenameFS) const
 {
 	u_int ShaderProgram = glCreateProgram(); //빈 쉐이더 프로그램 생성
 
@@ -247,7 +245,7 @@ u_int Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 }
 
 #ifdef CYAN_DEBUG_COLLISION
-void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size)
+void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size) const
 {
 	DX XMVECTOR WDRect = GetGLPosition(Position);
 	DX XMVECTOR WHRect = WDRect;
@@ -263,14 +261,14 @@ void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR
 }
 #endif
 
-void XM_CALLCONV Renderer::DrawTexRect(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID)
+void XM_CALLCONV Renderer::DrawTexRect(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const
 {
 	DX XMVECTOR GLPos = GetGLPosition(Position);
 	DX SetZ(&GLPos, DX GetZ(Position));
 	DrawTexture(GLPos, Size, Color, TexID);
 }
 
-void XM_CALLCONV Renderer::DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color)
+void XM_CALLCONV Renderer::DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color) const
 {
 
 	DX XMVECTOR GLPos = GetGLPosition(Position); //W Is Shadow
@@ -278,7 +276,8 @@ void XM_CALLCONV Renderer::DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, 
 	DrawTexture(GLPos, Size, { 1.f, 1.f, 1.f, DX GetW(Color) }, m_TexShadow);
 }
 
-void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR SpriteInfo)
+void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size, 
+	DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR CurrentSprite, DX HXMVECTOR TotalSprite) const
 {
 	DX XMVECTOR GLPos = GetGLPosition(Position);
 
@@ -312,10 +311,10 @@ void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size, 
 	glUniform3f(u_Trans,		DX GetX(GLPos), DX GetY(GLPos) + DX GetZ(GLPos), DX GetY(GLPos));
 	glUniform2f(u_Size,			DX GetX(Size),  DX GetY(Size));
 	glUniform4f(u_Color,		DX GetX(Color), DX GetY(Color), DX GetZ(Color), DX GetW(Color));
-	glUniform1f(u_CurrSeqX,		DX GetX(SpriteInfo));
-	glUniform1f(u_CurrSeqY,		DX GetY(SpriteInfo));
-	glUniform1f(u_TotalSeqX,	DX GetZ(SpriteInfo));
-	glUniform1f(u_TotalSeqY,	DX GetW(SpriteInfo));
+	glUniform1f(u_CurrSeqX,		DX GetX(CurrentSprite));
+	glUniform1f(u_CurrSeqY,		DX GetY(CurrentSprite));
+	glUniform1f(u_TotalSeqX,	DX GetX(TotalSprite));
+	glUniform1f(u_TotalSeqY,	DX GetY(TotalSprite));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TexID);

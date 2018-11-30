@@ -1,34 +1,30 @@
 #include "stdafx.h"
 #include "Sprite.h"
 
-void Sprite::SetTexID(const id_type& _TexID)
+
+void Sprite::SetTexture(size_t TexIdx)
 {
-	TexID = _TexID;
+	TexIndex = TexIdx;
 }
 
 void Sprite::SetDirection(u_int _State)
 {
-	SpriteInfo.y = _State;
+	Current.y = _State;
 }
 
-void Sprite::SetOffsetY(float offset_y)
+void Sprite::SetOffset(const DX XMFLOAT3 & _Offset)
 {
-	OffsetY = offset_y;
+	Offset = _Offset;
 }
 
-float Sprite::GetOffsetY() const
+void Sprite::SetSpriteType(SPRITETYPE Type)
 {
-	return OffsetY;
+	SpriteType = Type;
 }
 
-u_int Sprite::GetDirection() const
+void Sprite::SetFrameRate(float FrameRate_)
 {
-	return SpriteInfo.y;
-}
-
-void Sprite::SetFrameRate(int FrameRate_)
-{
-	FrameRate = static_cast<float>(FrameRate_);
+	FrameRate = FrameRate_;
 }
 
 void Sprite::SetSize(const DX XMFLOAT2 & _Size)
@@ -36,45 +32,61 @@ void Sprite::SetSize(const DX XMFLOAT2 & _Size)
 	Size = _Size;
 }
 
-void Sprite::SetSpriteInfo(const DX XMINT4 & _SpriteInfo)
+void Sprite::SetTotal(const DX XMUINT2& _Total)
 {
-	SpriteInfo = _SpriteInfo;
-	CurrentFrame = (float) SpriteInfo.x;
+	Total = _Total;
 }
 
 void Sprite::ResetSprite()
 {
-	SpriteInfo.x = 0;
+	Current.x = 0;
 	CurrentFrame = 0.f;
 }
 
-bool Sprite::FrameLinearNext()
+bool Sprite::Update()
 {
-	SpriteInfo.x = (SpriteInfo.x + 1) % SpriteInfo.z;
-	return SpriteInfo.x > SpriteInfo.z;
+	switch (SpriteType)
+	{
+	case SPRITETYPE::LINEAR:return LinearUpdate();
+	case SPRITETYPE::GRID: return GridUpdate();
+	}
 }
 
-bool Sprite::FrameLinearUpdate()
+bool Sprite::LinearNext()
+{
+	Current.x = (Current.x + 1) % Total.x;
+	return Current.x > Total.x;
+}
+
+float Sprite::GetFrameRate() const
+{
+	return FrameRate;
+}
+
+bool Sprite::LinearUpdate()
 {
 	CurrentFrame += UPDATE_TIME *  FrameRate;
-	SpriteInfo.x = (int)(CurrentFrame) % SpriteInfo.z;
-	return CurrentFrame > SpriteInfo.z;
+	Current.x = (int)(CurrentFrame) % Total.x;
+	return CurrentFrame > Total.x;
 }
 
-bool Sprite::FrameGridUpdate()
+bool Sprite::GridUpdate()
 {
 	CurrentFrame += UPDATE_TIME * FrameRate;
-	SpriteInfo.x = (int)(CurrentFrame) % SpriteInfo.z;
-
-	int Vframes = (int)(CurrentFrame) / SpriteInfo.z;
-
-	SpriteInfo.y = Vframes % SpriteInfo.w;
-	return Vframes >= SpriteInfo.w;
+	Current.x = (int)(CurrentFrame) % Total.x;
+	int Vframes = (int)(CurrentFrame) / Total.x;
+	Current.y = Vframes % Total.y;
+	return Vframes >= Total.y;
 }
 
-id_type Sprite::GetTexID() const
+size_t Sprite::GetTexture() const
 {
-	return TexID;
+	return TexIndex;
+}
+
+u_int Sprite::GetDirection() const
+{
+	return Current.y;
 }
 
 DX XMVECTOR XM_CALLCONV Sprite::GetSize() const
@@ -82,7 +94,17 @@ DX XMVECTOR XM_CALLCONV Sprite::GetSize() const
 	return DX2 Load(Size);
 }
 
-DX XMVECTOR XM_CALLCONV Sprite::GetSpriteInfo() const
+DX XMVECTOR XM_CALLCONV Sprite::GetCurrent() const
 {
-	return DX4 LoadInt(SpriteInfo);
+	return DX2 LoadUINT(Current);
+}
+
+DX XMVECTOR XM_CALLCONV Sprite::GetTotal() const
+{
+	return DX2 LoadUINT(Total);
+}
+
+DX XMVECTOR XM_CALLCONV Sprite::GetOffset() const
+{
+	return DX3 Load(Offset);
 }

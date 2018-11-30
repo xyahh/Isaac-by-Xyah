@@ -12,24 +12,19 @@
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 
+#include <functional>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <stack>
 #include <set>
 #include <map>
 
 #include "Math.h"
 
-//#define CYAN_DEBUG_STATES
-//#define CYAN_DEBUG_COLLISION
+#define CYAN_DEBUG_STATES
+#define CYAN_DEBUG_COLLISION
 
-enum DIRECTION
-{
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT
-};
 
 /* Depth Test */
 #define FARTHEST 1.f
@@ -40,12 +35,17 @@ enum DIRECTION
 constexpr float UPDATE_FREQUENCY	{ 120.f };
 constexpr float UPDATE_TIME			{ 1.f / UPDATE_FREQUENCY };
 
-using id_type = STD string;
-
 template<class T>
-inline u_int LastIdx(STD vector<T> v)
+inline u_int Last(STD vector<T> v)
 {
 	return static_cast<u_int>(v.size() - 1);
+}
+
+template<class T>
+void SafeDelete(T*& Object)
+{
+	delete Object;
+	Object = NULL;
 }
 
 /* Core */
@@ -62,6 +62,7 @@ class Renderer;
 class Graphics;
 class Physics;
 class Input;
+class Sprite;
 
 namespace FMOD
 {

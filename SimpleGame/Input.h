@@ -4,61 +4,46 @@
 /* Devices */
 #define KEYBOARD	0x01
 #define GAMEPAD		0x02
-#define IS_PRESSED(key) (GetAsyncKeyState(key) & 0x8000)
+#define KEY_PRESSED(key) (GetAsyncKeyState(key) & 0x8000)
 
-class Key
+
+struct KeyInfo
 {
-	friend Input;
-public:
-	Key(int Value, const id_type& CommandID) :
-		Value(Value),
-		Released(true),
-		CommandID(CommandID) {}
-
-	void HandleInput(bool Pressed, const id_type & ActorID);
-
-private:
-
-	int Value;
-	int Released;
-	id_type CommandID;
-
+	int		Value;
+	bool	Pressed;
+	int		ClientNum;
 };
 
-using Button = Key;
-
-class Analog
+struct KeyState
 {
-	friend Input;
-public:
-	Analog(const id_type& CommandID) :
-		CommandID(CommandID) {}
-
-	void HandleInput(const id_type & ActorID);
-
-private:
-	id_type CommandID;
+	bool Pressed;
+	bool Released;
 };
 
 class Input
 {
-	friend Cyan;
 	friend State;
+	friend Cyan;
 
 public:
 	Input()  {}
 	~Input() {}
 
-	void AddKeyboardInput(int value, const id_type& CommandID);
-	void AddGamepadInput(int value, const id_type& CommandID);
-	void AddAnalogInput(const id_type& CommandID);
+	void AddKey(int Value, size_t CommandIndex);
+	void EnableLocalInput();
+	void DisableLocalInput();
 
 private:
 
-	void HandleInput(const id_type& ActorID);
+	void ReceiveLocalInput(); 
+	void ReceiveForeignInput(const KeyInfo& Key); //Network Support
+	void ProcessInput(size_t ObjectIndex);
 
 private:
-	STD vector<Key>		KeyboardInput;	// Keyboard Key Input
-	STD vector<Button>	GamepadInput;	// Gamepad Key (button) Input
-	STD vector<Analog>	AnalogInput;	// Analog Input
+	STD map<int, KeyState>		m_LocalInput;
+	STD multimap<int, size_t>	m_Controls;
+	STD set<int>	m_Input;
+	STD stack<int>	m_PushedKeys;
+	STD stack<int>	m_ReleasedKeys;
+
 };

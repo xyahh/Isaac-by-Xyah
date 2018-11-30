@@ -15,6 +15,7 @@ public:
 		m_Position(0.f, 0.f, 0.f),
 		m_PrevPos(0.f, 0.f, 0.f),
 		m_Force(0.f, 0.f, 0.f),
+		m_Friction(1.f),
 		m_Gravity(EARTH_GRAVITY),
 		m_Collision(NULL)
 	{}
@@ -45,12 +46,14 @@ public:
 	void SetGravity(float Gravity);
 
 	void SetCollision(BasicCollision* collision);
-	BasicCollision* GetCollision() const;
 
-	void HandleCollision(Physics* OtherPhysics);
+	BasicCollision* GetCollision() const;
 	Collision::Box& GetBox();
 
 
+private:
+
+	void HandleCollision(Physics* OtherPhysics);
 	void Update();
 
 private:

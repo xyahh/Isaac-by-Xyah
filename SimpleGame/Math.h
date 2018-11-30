@@ -152,6 +152,12 @@ namespace V2
 		return XMLoadFloat2(&v);
 	}
 
+	inline XMVECTOR XM_CALLCONV LoadUINT(const XMUINT2& v)
+	{
+		return XMLoadUInt2(&v);
+	}
+
+
 	inline float XM_CALLCONV Dot(FXMVECTOR v1, FXMVECTOR v2)
 	{
 		return XMVectorGetX(XMVector2Dot(v1, v2));
@@ -261,11 +267,6 @@ namespace V4
 	inline float XM_CALLCONV MagnitudeSQ(FXMVECTOR v)
 	{
 		return XMVectorGetX(XMVector4LengthSq(v));
-	}
-
-	inline XMVECTOR XM_CALLCONV LoadInt(const XMINT4& v)
-	{
-		return XMLoadSInt4(&v);
 	}
 
 	inline XMVECTOR XM_CALLCONV Load(const XMFLOAT4& v)

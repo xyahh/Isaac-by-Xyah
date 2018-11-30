@@ -1,43 +1,62 @@
 #pragma once
 
+enum SPRITETYPE
+{
+	LINEAR,
+	GRID
+};
+
 class Sprite
 {
+	friend Cyan;
+
 public:
 
 	Sprite() :
+		SpriteType(SPRITETYPE::LINEAR),
+		FrameRate(0),
+		CurrentFrame(0.f),
+		Current(0, 0),
+		Total(1, 1),
 		Size(0.f, 0.f),
-		OffsetY(0.f),
-		FrameRate(1), CurrentFrame(0.f),
-		SpriteInfo(0, 0, 1, 1)
+		Offset(0.f, 0.f, 0.f)
 	{}
+
+
 	~Sprite() {}
 
-	void SetTexID(const id_type& _TexID);
+	void SetTexture(size_t TexIdx);
 	void SetDirection(u_int _State);
-	void SetOffsetY(float offset_y);
-
-	float GetOffsetY() const;
-	u_int GetDirection() const;
-
-	void SetFrameRate(int FrameRate);
 	void SetSize(const DX XMFLOAT2& _Size);
-	void SetSpriteInfo(const DX XMINT4& _SpriteInfo);
 	void ResetSprite();
+	void SetTotal(const DX XMUINT2& _Total);
+	void SetOffset(const DX XMFLOAT3& _Offset);
 
-	bool FrameLinearNext();
+	void SetSpriteType(SPRITETYPE Type);
+	void SetFrameRate(float FrameRate);
+	
+	bool Update();
 
-	bool FrameLinearUpdate();
-	bool FrameGridUpdate();
+	bool LinearUpdate();
+	bool GridUpdate();
+	bool LinearNext();
 
-	id_type GetTexID() const;
+	float GetFrameRate() const;
+
+	size_t GetTexture() const;
+	u_int GetDirection() const;
 	DX XMVECTOR XM_CALLCONV GetSize() const;
-	DX XMVECTOR XM_CALLCONV GetSpriteInfo() const;
+	DX XMVECTOR XM_CALLCONV GetCurrent() const;
+	DX XMVECTOR XM_CALLCONV GetTotal() const;
+	DX XMVECTOR XM_CALLCONV GetOffset() const;
 
 private:
-	id_type		TexID;
-	float		OffsetY;
+	SPRITETYPE	SpriteType;
+	size_t		TexIndex;
 	float		FrameRate;
 	float		CurrentFrame;
+	DX XMUINT2	Current;
+	DX XMUINT2	Total; //How many Columns/Rows in SpriteSheet
 	DX XMFLOAT2 Size;
-	DX XMINT4	SpriteInfo;
+	DX XMFLOAT3	Offset;
 };

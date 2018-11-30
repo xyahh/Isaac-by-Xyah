@@ -12,35 +12,36 @@ but WITHOUT ANY WSTD vectorANTY.
 
 class Renderer
 {
+	friend Cyan;
+
 public:
 	Renderer() {}
 	~Renderer() {}
 
-	bool Initialize(int windowSizeX, int windowSizeY);
-
 #ifdef CYAN_DEBUG_COLLISION
-	void XM_CALLCONV DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size);
+	void XM_CALLCONV DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size) const;
 #endif
-	void XM_CALLCONV DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR SpriteInfo);
-	void XM_CALLCONV DrawTexRect(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID);
-	void XM_CALLCONV DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color);
+	void XM_CALLCONV DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
+		DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR CurrentSprite, DX HXMVECTOR TotalSprite) const;
+	void XM_CALLCONV DrawTexRect(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const;
+	void XM_CALLCONV DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color) const;
 
-	u_int CreatePngTexture(const STD string& filePath);
-	void DeleteTexture(u_int texID);
+	u_int CreatePngTexture(const STD string& filePath) const;
+	void DeleteTexture(u_int texID) const;
 
 
 private:
 
-
-	void XM_CALLCONV DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID);
-	bool ReadFile(char* filename, STD string *target);
-	void AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType);
-	u_int CompileShaders(char* filenameVS, char* filenameFS);
+	bool Initialize(int windowSizeX, int windowSizeY);
+	void XM_CALLCONV DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const;
+	bool ReadFile(char* filename, STD string *target) const;
+	void AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType) const;
+	u_int CompileShaders(char* filenameVS, char* filenameFS) const;
 	void CreateVertexBufferObjects();
-
-	DX XMVECTOR XM_CALLCONV GetGLPosition(DX FXMVECTOR Position);
+	DX XMVECTOR XM_CALLCONV GetGLPosition(DX FXMVECTOR Position) const;
 	
 private:	
+
 	bool m_Initialized = false;
 	
 	u_int m_WindowSizeX = 0;
@@ -59,5 +60,3 @@ private:
 	u_int m_TextureRectShader = 0;
 	u_int m_TextureRectSeqShader = 0;
 };
-
-extern Renderer RenderDevice;

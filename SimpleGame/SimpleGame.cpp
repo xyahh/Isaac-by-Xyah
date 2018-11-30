@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 	
 	/* Game Loop */
 	Fw.Initialize("The Binding of Isaac", 800, 800, argc, argv);
-	Fw.ToScene(new Logo);
+	Fw.ToScene(new Gameplay);
 	Fw.Run();
 	Fw.Close();
 
