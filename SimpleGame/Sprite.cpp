@@ -4,7 +4,7 @@
 
 void Sprite::SetTexture(size_t TexIdx)
 {
-	TexIndex = TexIdx;
+ 	TexIndex = TexIdx;
 }
 
 void Sprite::SetDirection(u_int _State)
@@ -12,9 +12,9 @@ void Sprite::SetDirection(u_int _State)
 	Current.y = _State;
 }
 
-void Sprite::SetOffset(const DX XMFLOAT3 & _Offset)
+void XM_CALLCONV Sprite::SetOffset(DX FXMVECTOR _Offset)
 {
-	Offset = _Offset;
+	Offset = DX3 Store(_Offset);
 }
 
 void Sprite::SetSpriteType(SPRITETYPE Type)
@@ -27,14 +27,14 @@ void Sprite::SetFrameRate(float FrameRate_)
 	FrameRate = FrameRate_;
 }
 
-void Sprite::SetSize(const DX XMFLOAT2 & _Size)
+void XM_CALLCONV Sprite::SetSize(DX FXMVECTOR _Size)
 {
-	Size = _Size;
+	Size = DX2 Store(_Size);
 }
 
-void Sprite::SetTotal(const DX XMUINT2& _Total)
+void XM_CALLCONV Sprite::SetTotal(DX FXMVECTOR _Total)
 {
-	Total = _Total;
+	Total = DX2 StoreUINT(_Total);
 }
 
 void Sprite::ResetSprite()
@@ -52,10 +52,9 @@ bool Sprite::Update()
 	}
 }
 
-bool Sprite::LinearNext()
+void Sprite::NextFrame()
 {
-	Current.x = (Current.x + 1) % Total.x;
-	return Current.x > Total.x;
+	CurrentFrame += 1.f;
 }
 
 float Sprite::GetFrameRate() const

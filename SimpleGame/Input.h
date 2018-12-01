@@ -30,8 +30,8 @@ public:
 	~Input() {}
 
 	void AddKey(int Value, size_t CommandIndex);
-	void EnableLocalInput();
-	void DisableLocalInput();
+	void EmplaceLocalInput();
+	void ClearLocalInput();
 
 private:
 

@@ -34,7 +34,6 @@ inline float XM_CALLCONV GetZ(FXMVECTOR v)
 	return XMVectorGetZ(v);
 }
 
-
 inline float XM_CALLCONV GetW(FXMVECTOR v)
 {
 	return XMVectorGetW(v);
@@ -72,6 +71,11 @@ inline XMVECTOR XM_CALLCONV Greater(FXMVECTOR v1, FXMVECTOR v2)
 	return XMVectorGreater(v1, v2);
 }
 
+inline XMVECTOR XM_CALLCONV GreaterOrEqual(FXMVECTOR v1, FXMVECTOR v2)
+{
+	return XMVectorGreaterOrEqual(v1, v2);
+}
+
 inline XMVECTOR XM_CALLCONV Less(FXMVECTOR v1, FXMVECTOR v2)
 {
 	return XMVectorLess(v1, v2);
@@ -107,21 +111,10 @@ inline XMVECTOR XM_CALLCONV Scale(FXMVECTOR v, float scale)
 	return XMVectorScale(v, scale);
 }
 
-inline void XM_CALLCONV Scale(XMVECTOR* out, float scale)
-{
-	*out = XMVectorScale(*out, scale);
-}
-
 inline XMVECTOR XM_CALLCONV Add(FXMVECTOR v1, FXMVECTOR v2)
 {
 	return XMVectorAdd(v1, v2);
 }
-
-inline void XM_CALLCONV Add(XMVECTOR* out, FXMVECTOR v)
-{
-	*out = XMVectorAdd(*out, v);
-}
-
 
 inline XMVECTOR XM_CALLCONV Subtract(FXMVECTOR v1, FXMVECTOR v2)
 {
@@ -132,6 +125,7 @@ inline XMVECTOR XM_CALLCONV Multiply(FXMVECTOR v1, FXMVECTOR v2)
 {
 	return XMVectorMultiply(v1, v2);
 }
+
 
 inline XMVECTOR XM_CALLCONV Evaluate(FXMVECTOR v1) //Checks if each component is NOT A Zero
 {
@@ -144,6 +138,13 @@ namespace V2
 	{
 		XMFLOAT2 Storage;
 		XMStoreFloat2(&Storage, v);
+		return Storage;
+	}
+
+	inline XMUINT2 XM_CALLCONV StoreUINT(FXMVECTOR v)
+	{
+		XMUINT2 Storage;
+		XMStoreUInt2(&Storage, v);
 		return Storage;
 	}
 

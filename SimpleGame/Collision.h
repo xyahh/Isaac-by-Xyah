@@ -8,7 +8,7 @@ public:
 	BasicCollision() {}
 	virtual ~BasicCollision() {}
 
-	virtual void XM_CALLCONV OnCollision(Physics& MyBody, Physics& CollidingBody, DX FXMVECTOR CollisionNormal);
+	virtual void XM_CALLCONV OnCollision(Physics* MyBody, Physics* CollidingBody, DX FXMVECTOR CollisionNormal);
 
 private:
 };
@@ -19,7 +19,7 @@ public:
 	ActorCollision() {}
 	virtual ~ActorCollision() {}
 
-	virtual void XM_CALLCONV OnCollision(Physics& MyBody, Physics& CollidingBody, DX FXMVECTOR CollisionNormal);
+	virtual void XM_CALLCONV OnCollision(Physics* MyBody, Physics* CollidingBody, DX FXMVECTOR CollisionNormal);
 
 };
 class BulletCollision : public BasicCollision
@@ -28,7 +28,7 @@ public:
 	BulletCollision() {}
 	virtual	~BulletCollision() {}
 
-	virtual void XM_CALLCONV OnCollision(Physics& MyBody, Physics& CollidingBody, DX FXMVECTOR CollisionNormal);
+	virtual void XM_CALLCONV OnCollision(Physics* MyBody, Physics* CollidingBody, DX FXMVECTOR CollisionNormal);
 };
 
 
@@ -38,28 +38,28 @@ static BasicCollision	Basic;
 static ActorCollision	Actor;
 static BulletCollision	Bullet;
 
-class Box
+class BBox
 	{
 	public:
-		Box() :
+		BBox() :
 			Size(0.f, 0.f, 0.f) {}
 
 		void XM_CALLCONV SetDimensions(DX FXMVECTOR v);
 		DX XMVECTOR XM_CALLCONV GetDimensions() const;
 
-		friend void XM_CALLCONV GetExtents(DX XMVECTOR* Min, DX XMVECTOR* Max, DX FXMVECTOR position, const Box& box);
-		DX XMVECTOR XM_CALLCONV ConvertPosition(DX FXMVECTOR Position) const;
+		friend void XM_CALLCONV GetExtents(DX XMVECTOR* Min, DX XMVECTOR* Max, DX FXMVECTOR position, const BBox& box);
+		DX XMVECTOR XM_CALLCONV ConvertPosition(DX FXMVECTOR Position, DX FXMVECTOR Size) const;
 
 	private:
 		DX XMFLOAT3	Size;
 	};
 
-inline void XM_CALLCONV GetExtents(DX XMVECTOR* Min, DX XMVECTOR* Max, DX FXMVECTOR position, const Box& box)
+inline void XM_CALLCONV GetExtents(DX XMVECTOR* Min, DX XMVECTOR* Max, DX FXMVECTOR position, const BBox& box)
 {
 	DX XMVECTOR Half = DX Scale({ box.Size.x, box.Size.y }, 0.5f);
 	*Max = DX Add(position, Half);
 	*Min = DX Subtract(position, Half);
-	DX Add(Max, { 0.f, 0.f, box.Size.z });
+	*Max = DX Add(*Max, { 0.f, 0.f, box.Size.z });
 }
 
 inline bool XM_CALLCONV HandleCollision(DX FXMVECTOR A_Min, DX FXMVECTOR A_Max, DX FXMVECTOR B_Min, DX GXMVECTOR B_Max)

@@ -30,13 +30,13 @@ void Physics::HandleCollision(Physics * OtherPhysics)
 	{
 		DX XMVECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
 		if (m_Collision)
-			m_Collision->OnCollision(*this, *OtherPhysics, Normal);
+			m_Collision->OnCollision(this, OtherPhysics, Normal);
 		if (OtherPhysics->m_Collision)
-			OtherPhysics->GetCollision()->OnCollision(*OtherPhysics, *this, Normal);
+			OtherPhysics->GetCollision()->OnCollision(OtherPhysics, this, Normal);
 	}
 }
 
-Collision::Box & Physics::GetBox()
+Collision::BBox & Physics::Box()
 {
 	return m_Box;
 }
@@ -54,9 +54,10 @@ float Physics::GetMass() const
 }
 
 
-void XM_CALLCONV Physics::ApplyForce(DX FXMVECTOR force)
+void XM_CALLCONV Physics::ApplyForce(DX FXMVECTOR Force)
 {
-	m_Force = DX3 Store(DX Add(DX3 Load(m_Force), force));
+	DX XMVECTOR AddedAccel = DX Scale(Force, 1.f / m_Mass);
+	m_Acceleration = DX3 Store(DX Add(DX3 Load(m_Acceleration), AddedAccel));
 }
 
 void Physics::SetPosition(float x, float y, float z)
@@ -76,14 +77,14 @@ DX XMVECTOR XM_CALLCONV Physics::GetPrevPosition() const
 	return DX3 Load(m_PrevPos);
 }
 
-void XM_CALLCONV Physics::SetForce(DX FXMVECTOR force)
+void XM_CALLCONV Physics::SetForce(DX FXMVECTOR Force)
 {
-	m_Force = DX3 Store(force);
+	m_Acceleration = DX3 Store(DX Scale(Force, 1.f / m_Mass));
 }
 
 DX XMVECTOR Physics::GetForce() const
 {
-	return DX3 Load(m_Force);
+	return DX Scale(DX3 Load(m_Acceleration), m_Mass);
 }
 
 DX XMVECTOR XM_CALLCONV Physics::GetDeltaPosition() const
@@ -118,55 +119,59 @@ float Physics::GetFriction() const
 
 float Physics::GetGravity() const
 {
-	return m_Gravity;
+	return -1.f * m_Gravity;
 }
 
 void Physics::SetGravity(float Gravity)
 {
-	m_Gravity = Gravity;
+	m_Gravity = -1.f * Gravity;
 }
 
 void Physics::Update()
 {
-	//For Interpolation
+	/* Interpolation */
 	m_PrevPos = m_Position;
 
-	DX XMVECTOR Position =	DX3 Load(m_Position);
-	DX XMVECTOR Velocity =	DX3 Load(m_Velocity);
-	DX XMVECTOR Force =		DX3 Load(m_Force);
+	DX XMVECTOR Position = DX3 Load(m_Position);
+	DX XMVECTOR Velocity = DX3 Load(m_Velocity);
+	DX XMVECTOR Acceleration = DX3 Load(m_Acceleration);
 
-	//DX Print(Force);
-	//Apply Gravity Force
-	DX Add(&Force, { 0.f, 0.f, -m_Gravity * m_Mass });
+	/* --- Gravity -----------------------------------------------------------------------------*/
+	Acceleration = DX Add(Acceleration, { 0.f, 0.f, m_Gravity });
+	/* -----------------------------------------------------------------------------------------*/
 
-	//2D Friction
-	{
-		float Speed = DX2 Magnitude(Velocity);
-		if (!Zero(Speed))
-		{
-			float GroundFrictionForce = -m_Friction * m_Gravity;
-			DX XMVECTOR FrictionV = DX Scale(DX2 Normalize(Velocity), GroundFrictionForce * UPDATE_TIME);
-			DX Add(&Velocity, FrictionV);
-			if (DX GetX(Velocity) * m_Velocity.x < 0.f) DX SetX(&Velocity, 0.f);
-			if (DX GetY(Velocity) * m_Velocity.y < 0.f) DX SetY(&Velocity, 0.f);
-			DX SetZ(&Velocity, m_Velocity.z);
-		}
-	}
+	/* --- Friction ----------------------------------------------------------------------------*/
+	float FrictionAccel = m_Friction * m_Gravity;
+	float FrictionSpeed = FrictionAccel * UPDATE_TIME;
 
-	DX Add(&Velocity, DX Scale(Force, UPDATE_TIME / m_Mass));
-	DX Add(&Position, DX Scale(Velocity, UPDATE_TIME));
+	DX XMVECTOR FrictionVelocity = DX Scale(DX3 Normalize(Velocity), FrictionSpeed);
+	DX XMVECTOR PreviousVelocity = Velocity;
 
-	//Reset Force to 0
-	Force = DX XMVectorZero();
+	Velocity = DX Add(Velocity, FrictionVelocity);
 
-	//For now since there are no Bounding Boxes
+	DX XMVECTOR FrictionError = DX GreaterOrEqual
+	(
+		DX Multiply(Velocity, PreviousVelocity),
+		DX XMVectorZero()
+	);
+	Velocity = DX Multiply(Velocity, DX Evaluate(FrictionError));
+	/* -----------------------------------------------------------------------------------------*/
+
+	Velocity = DX Add(Velocity, DX Scale(Acceleration, UPDATE_TIME));
+	Position = DX Add(Position, DX Scale(Velocity, UPDATE_TIME));
+
+	/* --- Reset & Store For Next Physics Cycle -----------------------------------------------*/
+	Acceleration = DX XMVectorZero();
+
 	if (DX GetZ(Position) < 0.f)
 	{
 		DX SetZ(&Position, 0.f);
 		DX SetZ(&Velocity, 0.f);
 	}
-
-	m_Force =	 DX3 Store(Force);
+	m_Acceleration = DX3 Store(Acceleration);
 	m_Velocity = DX3 Store(Velocity);
 	m_Position = DX3 Store(Position);
+	/* -----------------------------------------------------------------------------------------*/
+
+	
 }

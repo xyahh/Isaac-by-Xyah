@@ -85,15 +85,15 @@ void Cyan::Update()
 	FlushActionQueue();
 }
 
-size_t Cyan::AddObject(ObjectType Type)
+size_t Cyan::AddObject()
 {
 	m_Graphics.emplace_back();
 	m_Physics.emplace_back();
 	m_States.emplace_back();
 	m_Sprites.emplace_back();
-	m_ObjectDesc.emplace_back(Type);
+	m_Descriptors.emplace_back();
 	m_StatePrototypes.emplace_back();
-	return Last(m_ObjectDesc);
+	return Last(m_Descriptors);
 }
 
 size_t Cyan::AddSprite(size_t ObjectIndex)
@@ -127,6 +127,11 @@ size_t Cyan::AddSound(const STD string & ImagePath, bool isBGM)
 {
 	m_Sounds.emplace_back(ImagePath, isBGM);
 	return Last(m_Sounds);
+}
+
+Descriptor & Cyan::GetDescriptor(size_t Index)
+{
+	return m_Descriptors[Index];
 }
 
 Graphics& Cyan::GetGraphics(size_t Index)
@@ -202,7 +207,7 @@ void Cyan::DeleteComponents()
 	m_Graphics.clear();
 	m_States.clear();
 	m_Sprites.clear();
-	m_ObjectDesc.clear();
+	m_Descriptors.clear();
 	
 	for (auto& Commands : m_Commands)
 		SafeDelete(Commands);

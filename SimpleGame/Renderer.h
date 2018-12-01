@@ -38,7 +38,7 @@ private:
 	void AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType) const;
 	u_int CompileShaders(char* filenameVS, char* filenameFS) const;
 	void CreateVertexBufferObjects();
-	DX XMVECTOR XM_CALLCONV GetGLPosition(DX FXMVECTOR Position) const;
+	DX XMVECTOR XM_CALLCONV ToGL(DX FXMVECTOR Position) const;
 	
 private:	
 

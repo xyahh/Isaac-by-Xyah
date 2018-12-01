@@ -154,7 +154,7 @@
   <ItemGroup>
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Command.h" />
-    <ClInclude Include="Entities.h" />
+    <ClInclude Include="Descriptor.h" />
     <ClInclude Include="Framework.h" />
     <ClInclude Include="CyanEngine.h" />
     <ClInclude Include="Gamepad.h" />
@@ -179,7 +179,7 @@
   <ItemGroup>
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Command.cpp" />
-    <ClCompile Include="Entities.cpp" />
+    <ClCompile Include="Descriptor.cpp" />
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="CyanEngine.cpp" />
     <ClCompile Include="Gamepad.cpp" />

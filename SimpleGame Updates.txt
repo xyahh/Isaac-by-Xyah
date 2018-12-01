@@ -1,14 +1,22 @@
 ---------------------------------------------------------------------
-
 New Features
 ---------------------------------------------------------------------
-Collision Works in General
-
++) Code Cleanup - Engine Remade
+-) Deleted Locators. Now Object IDs are the Indices (will change
+later to Locators again if deletions are required. But this time
+NO STRINGS)
++) Input changed for Network Support
++) Descriptors Added (Identifies Objects + has a value like
+HP, Friction or Damage)
++) Action Queue Added (performed at the end of every 
+update cycle)
++) Added new Visual for Collision Box drawing (4 boxes now
+instead of only 2).
 ---------------------------------------------------------------------
 Features Pending (In order of Priority)
 --------------------------------------------
-+) Have a way to identify Objects as BULLETS, WALLS, etc. + 
-BULLETS need to have a "Who shot" it variable.
++) Cleanup Collision Box Drawing
+
 +) Event Dispatcher
 +) Button UI Interface Class
 +) Text Support

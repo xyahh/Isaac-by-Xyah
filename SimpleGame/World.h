@@ -9,10 +9,10 @@ public:
 	~World() {}
 
 	static void SetScale(float meter, unsigned int pixels);
-	static void ToPixels(float& fValue);
-	static void XM_CALLCONV ToPixels(DX XMVECTOR& v);
-	static void ToMeters(float& fValue);
-	static void XM_CALLCONV ToMeters(DX XMVECTOR& v);
+	static float ToPixels(float fValue);
+	static DX XMVECTOR XM_CALLCONV ToPixels(DX FXMVECTOR v);
+	static float ToMeters(float fValue);
+	static DX XMVECTOR XM_CALLCONV ToMeters(DX FXMVECTOR v);
 
 	void SetFOV(int Meters) {}
 

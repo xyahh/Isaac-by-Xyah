@@ -27,10 +27,10 @@ public:
 
 	void SetTexture(size_t TexIdx);
 	void SetDirection(u_int _State);
-	void SetSize(const DX XMFLOAT2& _Size);
+	void XM_CALLCONV SetSize(DX FXMVECTOR _Size);
 	void ResetSprite();
-	void SetTotal(const DX XMUINT2& _Total);
-	void SetOffset(const DX XMFLOAT3& _Offset);
+	void XM_CALLCONV SetTotal(DX FXMVECTOR _Total);
+	void XM_CALLCONV SetOffset(DX FXMVECTOR _Offset);
 
 	void SetSpriteType(SPRITETYPE Type);
 	void SetFrameRate(float FrameRate);
@@ -39,7 +39,8 @@ public:
 
 	bool LinearUpdate();
 	bool GridUpdate();
-	bool LinearNext();
+
+	void NextFrame();
 
 	float GetFrameRate() const;
 

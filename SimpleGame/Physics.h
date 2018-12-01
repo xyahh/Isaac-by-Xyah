@@ -11,12 +11,12 @@ public:
 
 	Physics() :
 		m_Mass(1.f),
-		m_Velocity(0.f, 0.f, 0.f),
-		m_Position(0.f, 0.f, 0.f),
 		m_PrevPos(0.f, 0.f, 0.f),
-		m_Force(0.f, 0.f, 0.f),
+		m_Position(0.f, 0.f, 0.f),
+		m_Velocity(0.f, 0.f, 0.f),
+		m_Acceleration(0.f, 0.f, 0.f),
 		m_Friction(1.f),
-		m_Gravity(EARTH_GRAVITY),
+		m_Gravity(-1.f * EARTH_GRAVITY),
 		m_Collision(NULL)
 	{}
 	~Physics() {}
@@ -48,7 +48,7 @@ public:
 	void SetCollision(BasicCollision* collision);
 
 	BasicCollision* GetCollision() const;
-	Collision::Box& GetBox();
+	Collision::BBox& Box();
 
 
 private:
@@ -62,11 +62,11 @@ private:
 	DX XMFLOAT3		m_Position;
 	DX XMFLOAT3		m_DeltaPos; //For Collision
 	DX XMFLOAT3		m_PrevPos;  //For Interpolation
-	DX XMFLOAT3		m_Force;
+	DX XMFLOAT3		m_Acceleration;
 	DX XMFLOAT3		m_Velocity;
 	float			m_Gravity;
 	float			m_Friction;
-	Collision::Box	m_Box;
+	Collision::BBox	m_Box;
 	BasicCollision*	m_Collision;
 	
 };

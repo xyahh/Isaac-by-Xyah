@@ -80,7 +80,7 @@ enum ST_CMD
 class StateCommand : public Command
 {
 public:
-	StateCommand(size_t StateID, DWORD Config) :
+	StateCommand(size_t StateID, DWORD Config = ST_CMD::ON_PRESS | ST_CMD::CHANGE_STATE) :
 		StateIndex(StateID),
 		Config(Config) {}
 	~StateCommand() {}

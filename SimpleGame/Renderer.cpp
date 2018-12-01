@@ -4,8 +4,9 @@
 #include <fstream>
 #include "Dependencies/GL/glew.h"
 #include "LoadPng.h"
+#include "World.h"
 
-DX XMVECTOR XM_CALLCONV Renderer::GetGLPosition(DX FXMVECTOR Position) const
+DX XMVECTOR XM_CALLCONV Renderer::ToGL(DX FXMVECTOR Position) const
 {
 	return DX XMVectorMultiply(Position, DX3 Load(
 		{
@@ -247,39 +248,54 @@ u_int Renderer::CompileShaders(char* filenameVS, char* filenameFS) const
 #ifdef CYAN_DEBUG_COLLISION
 void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size) const
 {
-	DX XMVECTOR WDRect = GetGLPosition(Position);
-	DX XMVECTOR WHRect = WDRect;
-	DX SetY(&WHRect, DX GetY(WHRect) + DX GetZ(WHRect));
+	DX XMVECTOR PixelPos = World::ToPixels(Position);
+	DX XMVECTOR GLPos = ToGL(PixelPos);
+	DX XMVECTOR PixelSize = World::ToPixels(Size);
+	DX XMVECTOR GLSize = ToGL(PixelSize);
 
-	DX XMVECTOR SizeZ = DX Swizzle(Size, 0, 2, 2, 3);
+	DX XMVECTOR RedRect = GLPos;
+	DX XMVECTOR BlueRect = GLPos;
+	DX XMVECTOR GreenRect = GLPos;
+	DX XMVECTOR YellowRect = GLPos;
 
-	DX SetZ(&WHRect, NEAREST);
-	DX SetZ(&WDRect, FARTHEST);
-	DrawTexture(WHRect, SizeZ, { 0.f, 0.f, 1.f, 1.f }, m_DebugRect);
-	DrawTexture(WDRect, Size,  { 1.f, 0.f, 0.f, 1.f}, m_DebugRect);
+	DX SetY(&BlueRect, DX GetY(BlueRect) + DX GetZ(BlueRect));
 
+	DX XMVECTOR BlueSize = DX Swizzle(PixelSize, 0, 2, 2, 3);
+
+	float Offset = 0.5f * DX GetZ(GLSize);
+	DX SetY(&GreenRect,   DX GetY(BlueRect) + Offset);
+	DX SetY(&YellowRect,  DX GetY(BlueRect) - Offset);
+
+	/* ToDo Cleanup*/
+
+	DrawTexture(RedRect, PixelSize,  { 1.f, 0.f, 0.f, 1.f}, m_DebugRect);
+	DrawTexture(BlueRect, BlueSize, { 0.f, 0.f, 1.f, 1.f }, m_DebugRect);
+	DrawTexture(GreenRect, PixelSize, { 0.f, 1.f, 0.f, 1.f }, m_DebugRect);
+	DrawTexture(YellowRect, PixelSize, { 1.f, 1.f, 0.f, 1.f }, m_DebugRect);
 }
 #endif
 
 void XM_CALLCONV Renderer::DrawTexRect(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const
 {
-	DX XMVECTOR GLPos = GetGLPosition(Position);
+	DX XMVECTOR GLPos = ToGL(World::ToPixels(Position));
+	DX XMVECTOR GLSize = World::ToPixels(Size);
 	DX SetZ(&GLPos, DX GetZ(Position));
-	DrawTexture(GLPos, Size, Color, TexID);
+	DrawTexture(GLPos, GLSize, Color, TexID);
 }
 
 void XM_CALLCONV Renderer::DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color) const
 {
-
-	DX XMVECTOR GLPos = GetGLPosition(Position); //W Is Shadow
+	DX XMVECTOR GLPos = ToGL(World::ToPixels(Position));
+	DX XMVECTOR PixelSize = World::ToPixels(Size);
 	DX SetZ(&GLPos, FARTHEST);
-	DrawTexture(GLPos, Size, { 1.f, 1.f, 1.f, DX GetW(Color) }, m_TexShadow);
+	DrawTexture(GLPos, PixelSize, { 1.f, 1.f, 1.f, DX GetW(Color) }, m_TexShadow);
 }
 
 void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size, 
 	DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR CurrentSprite, DX HXMVECTOR TotalSprite) const
 {
-	DX XMVECTOR GLPos = GetGLPosition(Position);
+	DX XMVECTOR GLPos = ToGL(World::ToPixels(Position));
+	DX XMVECTOR PixelSize = World::ToPixels(Size);
 
 	u_int shader = m_TextureRectSeqShader;
 
@@ -309,7 +325,7 @@ void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
 
 	//Render Object
 	glUniform3f(u_Trans,		DX GetX(GLPos), DX GetY(GLPos) + DX GetZ(GLPos), DX GetY(GLPos));
-	glUniform2f(u_Size,			DX GetX(Size),  DX GetY(Size));
+	glUniform2f(u_Size,			DX GetX(PixelSize),  DX GetY(PixelSize));
 	glUniform4f(u_Color,		DX GetX(Color), DX GetY(Color), DX GetZ(Color), DX GetW(Color));
 	glUniform1f(u_CurrSeqX,		DX GetX(CurrentSprite));
 	glUniform1f(u_CurrSeqY,		DX GetY(CurrentSprite));

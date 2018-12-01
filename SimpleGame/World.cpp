@@ -9,22 +9,22 @@ void World::SetScale(float meters, unsigned int pixels)
 	Scale = static_cast<float>(pixels) / meters;
 }
 
-void World::ToPixels(float& fValue)
+float World::ToPixels(float fValue)
 {
-	fValue *= Scale;
+	return fValue * Scale;
 }
 
-void XM_CALLCONV World::ToPixels(DX XMVECTOR & v)
+DX XMVECTOR XM_CALLCONV World::ToPixels(DX FXMVECTOR v)
 {
-	v = DX Scale(v, Scale);
+	return DX Scale(v, Scale);
 }
 
-void World::ToMeters(float & fValue)
+float World::ToMeters(float fValue)
 {
-	fValue /= Scale;
+	return fValue / Scale;
 }
 
-void XM_CALLCONV World::ToMeters(DX XMVECTOR & v)
+DX XMVECTOR XM_CALLCONV World::ToMeters(DX FXMVECTOR v)
 {
-	v = DX Scale(v, 1.f / Scale);
+	return DX Scale(v, 1.f / Scale);
 }

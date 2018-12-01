@@ -8,14 +8,14 @@ void Input::AddKey(int Value, size_t CommandIndex)
 	m_Controls.emplace(Value, CommandIndex);
 }
 
-void Input::EnableLocalInput()
+void Input::EmplaceLocalInput()
 {
 	m_LocalInput.clear();
 	for (auto& Keys : m_Controls)
 		m_LocalInput.emplace(Keys.first, KeyState{ false, true });
 }
 
-void Input::DisableLocalInput()
+void Input::ClearLocalInput()
 {
 	m_LocalInput.clear();
 }

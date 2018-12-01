@@ -44,9 +44,9 @@ public:
 
 private:
 
-	virtual void Enter(size_t ActorID);
-	virtual void Update(size_t ActorID);
-	virtual void Exit(size_t ActorID);
+	virtual void Enter(size_t ObjectIndex);
+	virtual void Update(size_t ObjectIndex);
+	virtual void Exit(size_t ObjectIndex);
 
 	virtual State* Make()	{	return Assemble(new NullState); }
 };
@@ -70,24 +70,24 @@ public:
 
 private:
 
-	virtual void Enter(size_t ActorID);
-	virtual void Update(size_t ActorID);
-	virtual void Exit(size_t ActorID);
+	virtual void Enter(size_t ObjectIndex);
+	virtual void Update(size_t ObjectIndex);
+	virtual void Exit(size_t ObjectIndex);
 
 	virtual State* Make()	{ return Assemble(new IdleState); }
 };
 
-class MovingState : public State
+class MoveState : public State
 {
 public:
 
-	MovingState() 
+	MoveState() 
 	{
 #ifdef CYAN_DEBUG_STATES
 		printf("MoveState Created!\n");
 #endif 
 	}
-	virtual ~MovingState() 
+	virtual ~MoveState() 
 	{ 
 #ifdef CYAN_DEBUG_STATES
 		printf("MoveState Destroyed!\n"); 
@@ -96,84 +96,85 @@ public:
 
 private:
 
-	virtual void Enter(size_t ActorID);
-	virtual void Update(size_t ActorID);
-	virtual void Exit(size_t ActorID);
+	virtual void Enter(size_t ObjectIndex);
+	virtual void Update(size_t ObjectIndex);
+	virtual void Exit(size_t ObjectIndex);
 
-	virtual State* Make() { return Assemble(new MovingState); }
+	virtual State* Make() { return Assemble(new MoveState); }
 };
 
-class JumpState : public State
+class ChargeJumpState : public State
 {
 public:
 
-	JumpState(float RageRate) : RageRate(RageRate)
+	ChargeJumpState(float RageRate, float Force) : RageRate(RageRate), Force(Force)
 	{
 #ifdef CYAN_DEBUG_STATES
-		printf("JumpState Created!\n");
+		printf("ChargeJumpState Created!\n");
 #endif 
 	}
-	virtual ~JumpState()
+	virtual ~ChargeJumpState()
 	{
 #ifdef CYAN_DEBUG_STATES
-		printf("JumpState Destroyed!\n");
+		printf("ChargeJumpState Destroyed!\n");
 #endif 
 	}
 
 private:
 
-	virtual void Enter(size_t ActorID);
-	virtual void Update(size_t ActorID);
-	virtual void Exit(size_t ActorID);
+	virtual void Enter(size_t ObjectIndex);
+	virtual void Update(size_t ObjectIndex);
+	virtual void Exit(size_t ObjectIndex);
 
-	virtual State* Make() { return Assemble(new JumpState(RageRate)); }
+	virtual State* Make() { return Assemble(new ChargeJumpState(RageRate, Force)); }
 
 private:
 	float	RageRate;
 	float	RageAmount;
+	float	Force;
 };
 
 class InAirState : public State
 {
 public:
 
-	InAirState()
+	InAirState(float AirResistance)
 	{ 
 #ifdef CYAN_DEBUG_STATES
-		printf("JumpState Created!\n"); 
+		printf("InAirState Created!\n"); 
 #endif
 	}
 	virtual ~InAirState()
 	{ 
 #ifdef CYAN_DEBUG_STATES
-		printf("JumpState Destroyed!\n"); 
+		printf("InAirState Destroyed!\n"); 
 #endif
 	}
 
 private:
 
-	virtual void Enter(size_t ActorID);
-	virtual void Update(size_t ActorID);
-	virtual void Exit(size_t ActorID);
+	virtual void Enter(size_t ObjectIndex);
+	virtual void Update(size_t ObjectIndex);
+	virtual void Exit(size_t ObjectIndex);
 
-	virtual State* Make() { return Assemble(new InAirState); }
+	virtual State* Make() { return Assemble(new InAirState(AirResistance)); }
 
 private:
-
+	float AirResistance;
 	float GroundFriction;
 };
 
-class SlamChargingState : public State
+class ChargeSlamState : public State
 {
 public:
-	SlamChargingState(float RageRate, size_t GroundSlamStateID) :
-		RageRate(RageRate), GroundSlamStateID(GroundSlamStateID)
+	ChargeSlamState(float RageRate) :
+		RageRate(RageRate)
 	{
 #ifdef CYAN_DEBUG_STATES
 		printf("ChargeSlamState Created!\n");
 #endif
 	}
-	virtual ~SlamChargingState()
+	virtual ~ChargeSlamState()
 	{
 #ifdef CYAN_DEBUG_STATES
 		printf("ChargeSlamState Destroyed!\n");
@@ -181,82 +182,79 @@ public:
 	}
 
 private:
-	virtual void Enter(size_t ActorID);
-	virtual void Update(size_t ActorID);
-	virtual void Exit(size_t ActorID);
+	virtual void Enter(size_t ObjectIndex);
+	virtual void Update(size_t ObjectIndex);
+	virtual void Exit(size_t ObjectIndex);
 
-	virtual State* Make() { return Assemble(new SlamChargingState(RageRate, GroundSlamStateID)); }
+	virtual State* Make() { return Assemble(new ChargeSlamState(RageRate)); }
 
 private:
-
-	float	RageRate;
-	float	RageAmount;
-	float	Gravity;
-	size_t GroundSlamStateID;
+	float Force;
+	float RageRate;
+	float RageAmount;
+	float ObjGravity;
 };
 
-class SlammingState : public State
+class SlamState : public State
 {
 public:
 
-	SlammingState(size_t TexID, float SlamForce) :
-		TexID(TexID), SlamForce(SlamForce)
+	SlamState(float SlamForce) :
+		SlamForce(SlamForce)
 	{
 #ifdef CYAN_DEBUG_STATES
-		printf("GroundSlamState Created!\n");
+		printf("SlamState Created!\n");
 #endif
 	}
-	virtual ~SlammingState()
+	virtual ~SlamState()
 	{
 #ifdef CYAN_DEBUG_STATES
-		printf("GroundSlamState Destroyed!\n");
+		printf("SlamState Destroyed!\n");
 #endif
 	}
 
-	virtual void Enter(size_t ActorID);
-	virtual void Update(size_t ActorID);
-	virtual void Exit(size_t ActorID);
+	virtual void Enter(size_t ObjectIndex);
+	virtual void Update(size_t ObjectIndex);
+	virtual void Exit(size_t ObjectIndex);
 
 
 private:
 
-	virtual State* Make() { return Assemble(new SlammingState(TexID, SlamForce)); }
+	virtual State* Make() { return Assemble(new SlamState(SlamForce)); }
 
 private:
 	float SlamForce;
-	size_t EffectID;
-	size_t TexID;
 };
 
-class ShootingState : public State
+class ShootState : public State
 {
 public:
 
-	ShootingState(size_t TexID, float ShootingRate, float Force) :
-		TexID(TexID), GrowingRate(ShootingRate), Force(Force)
+	ShootState(float ShootingRate, float ShootingForce) :
+		TexID(TexID), ShootingRate(ShootingRate), ShootingForce(ShootingForce)
 	{
 #ifdef CYAN_DEBUG_STATES
 		printf("ShootingState Created!\n");
 #endif
 	}
-	virtual ~ShootingState()
+	virtual ~ShootState()
 	{
 #ifdef CYAN_DEBUG_STATES
 		printf("ShootingState Destroyed!\n");
 #endif
 	}
 
-	virtual void Enter(size_t ActorID);
-	virtual void Update(size_t ActorID);
-	virtual void Exit(size_t ActorID);
+	virtual void Enter(size_t ObjectIndex);
+	virtual void Update(size_t ObjectIndex);
+	virtual void Exit(size_t ObjectIndex);
 
 
 private:
-	virtual State* Make() { return Assemble(new ShootingState(TexID, GrowingRate, Force)); }
+	virtual State* Make() { return Assemble(new ShootState(ShootingRate, ShootingForce)); }
 	
-	float Growth;
-	float GrowingRate;
-	float Force;
+	float Time;
+	float ShootingRate;
+	float ShootingForce;
 	size_t BulletID;
 	size_t TexID;
 };
