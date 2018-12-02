@@ -19,7 +19,7 @@ BasicCollision * Physics::GetCollision() const
 	return m_Collision;
 }
 
-void Physics::HandleCollision(Physics * OtherPhysics)
+void Physics::HandleCollision(size_t MyID, Physics* OtherPhysics, size_t OtherID)
 {
 
 	DX XMVECTOR Min, Max, OtherMin, OtherMax;
@@ -30,9 +30,9 @@ void Physics::HandleCollision(Physics * OtherPhysics)
 	{
 		DX XMVECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
 		if (m_Collision)
-			m_Collision->OnCollision(this, OtherPhysics, Normal);
+			m_Collision->OnCollision(MyID, this, OtherID, OtherPhysics, Normal);
 		if (OtherPhysics->m_Collision)
-			OtherPhysics->GetCollision()->OnCollision(OtherPhysics, this, Normal);
+			OtherPhysics->GetCollision()->OnCollision(OtherID, OtherPhysics, MyID, this, Normal);
 	}
 }
 
@@ -162,15 +162,17 @@ void Physics::Update()
 
 	/* --- Reset & Store For Next Physics Cycle -----------------------------------------------*/
 	Acceleration = DX XMVectorZero();
+	m_Friction = 0.f;
 
-	if (DX GetZ(Position) < 0.f)
+	if (DX GetZ(Position) < -1.f)
 	{
-		DX SetZ(&Position, 0.f);
+		DX SetZ(&Position, -1.f);
 		DX SetZ(&Velocity, 0.f);
 	}
+
 	m_Acceleration = DX3 Store(Acceleration);
-	m_Velocity = DX3 Store(Velocity);
-	m_Position = DX3 Store(Position);
+	m_Velocity		= DX3 Store(Velocity);
+	m_Position		= DX3 Store(Position);
 	/* -----------------------------------------------------------------------------------------*/
 
 	

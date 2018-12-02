@@ -36,9 +36,9 @@ constexpr float UPDATE_FREQUENCY	{ 120.f };
 constexpr float UPDATE_TIME			{ 1.f / UPDATE_FREQUENCY };
 
 template<class T>
-inline u_int Last(STD vector<T> v)
+inline size_t Last(STD vector<T> v)
 {
-	return static_cast<u_int>(v.size() - 1);
+	return v.size() - 1;
 }
 
 template<class T>

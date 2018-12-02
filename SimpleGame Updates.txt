@@ -1,21 +1,16 @@
----------------------------------------------------------------------
+--------------------------------------------
 New Features
----------------------------------------------------------------------
+--------------------------------------------
 +) Code Cleanup - Engine Remade
--) Deleted Locators. Now Object IDs are the Indices (will change
-later to Locators again if deletions are required. But this time
-NO STRINGS)
-+) Input changed for Network Support
-+) Descriptors Added (Identifies Objects + has a value like
-HP, Friction or Damage)
-+) Action Queue Added (performed at the end of every 
-update cycle)
-+) Added new Visual for Collision Box drawing (4 boxes now
-instead of only 2).
----------------------------------------------------------------------
++) Added new Visual for Collision Box drawing (4 boxes now)
++) StructureCollision Added.
+Structure Collisions put Friction onto the Object
+(e.g. Floors). If an Object is not colliding with
+a Structure, then the Friction is Zero.
++) Friction now defaults to zero every cycle
+--------------------------------------------
 Features Pending (In order of Priority)
 --------------------------------------------
-+) Cleanup Collision Box Drawing
 
 +) Event Dispatcher
 +) Button UI Interface Class
@@ -24,9 +19,9 @@ Features Pending (In order of Priority)
 +) Engine to have an Optional Periodical try to reconnect Controller.
 +) Support for Multiple Controllers
 
----------------------------------------------------------------------
+--------------------------------------------
 Current Bugs
----------------------------------------------------------------------
+--------------------------------------------
 
 GetAsyncKeyState does not check if the Window is active 
 ***Possible FIX: Think about a state to check if Game is in active 

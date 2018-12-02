@@ -6,6 +6,7 @@
 #include "Dependencies/GL/glew.h"
 #include "Dependencies/GL/freeglut.h"
 #include "Scene.h"
+#include "CyanEngine.h"
 
 Framework Fw;
 
@@ -35,7 +36,7 @@ void Framework::Initialize(const STD string & strWindowsTitle, int width, int he
 	DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
 	dwStyle &= ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
 	SetWindowLong(hWnd, GWL_STYLE, dwStyle);
-
+	
 	glewInit();
 }
 
@@ -154,7 +155,7 @@ void Framework::Loop()
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClearDepth(FARTHEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 	m_CurrentTime = Time::now();
 	m_TimeFrame = TimeDuration(m_CurrentTime - m_PreviousTime).count();
 	m_PreviousTime = m_CurrentTime;

@@ -2,13 +2,11 @@
 #include "Graphics.h"
 #include "CyanEngine.h"
 
-
 #ifdef CYAN_DEBUG_COLLISION
-void DrawBoundingBoxes(const Renderer& RenderDevice,  DX FXMVECTOR Position, Physics& p)
+void DrawBoundingBoxes(const Renderer& RenderDevice,  DX FXMVECTOR Position, DX FXMVECTOR Size)
 {
-	DX XMVECTOR Dimensions = p.Box().GetDimensions();
-	DX XMVECTOR BoxPosition = p.Box().ConvertPosition(Position, Dimensions);
-	RenderDevice.DrawCollisionRect(BoxPosition, Dimensions);
+	DX XMVECTOR BBoxCenter = Collision::GetBBoxCenter(Position, DX GetZ(Size));
+	RenderDevice.DrawCollisionRect(BBoxCenter, Size);
 }	 
 #endif
 
@@ -34,12 +32,20 @@ void Graphics::Render (
 	{
 		DX XMVECTOR SpriteSize = Sprite.GetSize();
 		DX XMVECTOR SpriteOffset = Sprite.GetOffset();
+
 		RenderDevice.DrawShadow(Position, SpriteSize, Color);
-		RenderDevice.DrawSprite(DX Add(Position, SpriteOffset),
-			SpriteSize, Color, Engine.GetTexture(Sprite.GetTexture()), Sprite.GetCurrent(), Sprite.GetTotal());
+		RenderDevice.DrawSprite
+		(
+			DX Add(Position, SpriteOffset)
+			, SpriteSize
+			, Color
+			, Engine.GetTexture(Sprite.GetTexture())
+			, Sprite.GetCurrent()
+			, Sprite.GetTotal()
+		);
 	}
 
 #ifdef CYAN_DEBUG_COLLISION
-	DrawBoundingBoxes(RenderDevice, Position, ObjectPhysics);
+	DrawBoundingBoxes(RenderDevice, Position, ObjectPhysics.Box().GetDimensions());
 #endif
 }

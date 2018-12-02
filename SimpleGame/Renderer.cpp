@@ -6,13 +6,32 @@
 #include "LoadPng.h"
 #include "World.h"
 
-DX XMVECTOR XM_CALLCONV Renderer::ToGL(DX FXMVECTOR Position) const
+DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 {
-	return DX XMVectorMultiply(Position, DX3 Load(
+	float Scale = World::GetScale();
+	return DX Multiply
+	(
+		Position,
 		{
-			2.f / m_WindowSizeX,
-			2.f / m_WindowSizeY,
-			2.f / m_WindowSizeY	}));
+			2.f * Scale / m_WindowSizeX,
+			2.f * Scale / m_WindowSizeY,
+			2.f * Scale / m_WindowSizeY 
+		}
+	);
+}
+
+DX XMVECTOR XM_CALLCONV Renderer::GetGLSize(DX FXMVECTOR Size) const
+{
+	float Scale = World::GetScale();
+	return DX Multiply
+	(
+		Size,
+		{ 
+			Scale / m_WindowSizeX, 
+			Scale / m_WindowSizeY,
+			Scale / m_WindowSizeY
+		}
+	);
 }
 
 bool Renderer::Initialize(int windowSizeX, int windowSizeY)
@@ -22,7 +41,6 @@ bool Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_WindowSizeY = windowSizeY;
 
 	//Load shaders
-	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_TextureRectShader = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
 	m_TextureRectSeqShader = CompileShaders("./Shaders/TextureRectSeq.vs", "./Shaders/TextureRectSeq.fs");
 
@@ -35,38 +53,20 @@ bool Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create VBOs
 	CreateVertexBufferObjects();
 
-	return (m_SolidRectShader > 0 && m_VBORect > 0);
+	return (m_TextureRectSeqShader > 0 && m_VBOTexRect > 0);
 }
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float x = 1.f / m_WindowSizeX;
-	float y = 1.f / m_WindowSizeY;
-
-	float rect[]
-		=
-	{
-		-x, -y, 0.f,
-		-x, +y, 0.f,
-		+x, +y, 0.f, //Triangle1
-		-x, -y, 0.f,
-		+x, +y, 0.f,
-		+x, -y, 0.f, //Triangle2
-	};
-
-	glGenBuffers(1, &m_VBORect);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
-
 	float texRect[]
 		=
 	{
-		-x, -y, 0.f, 0.f, 1.f,
-		-x, +y, 0.f, 0.f, 0.f,
-		+x, +y, 0.f, 1.f, 0.f, //Triangle1
-		-x, -y, 0.f, 0.f, 1.f,
-		+x, +y, 0.f, 1.f, 0.f,
-		+x, -y, 0.f, 1.f, 1.f //Triangle2
+		-1.f, -1.f, 0.f, 0.f, 1.f,
+		-1.f, +1.f, 0.f, 0.f, 0.f,
+		+1.f, +1.f, 0.f, 1.f, 0.f, //Triangle1
+		-1.f, -1.f, 0.f, 0.f, 1.f,
+		+1.f, +1.f, 0.f, 1.f, 0.f,
+		+1.f, -1.f, 0.f, 1.f, 1.f //Triangle2
 	};
 
 	glGenBuffers(1, &m_VBOTexRect);
@@ -137,13 +137,13 @@ void XM_CALLCONV Renderer::DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size,
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+	
 	//Program select
 	glUseProgram(m_TextureRectShader);
 
 	//Shadow to render last (thus Z depth will be "FARTHEST")
 	glUniform3f(glGetUniformLocation(m_TextureRectShader, "u_Trans"), DX GetX(Position), DX GetY(Position), DX GetZ(Position));
-	glUniform2f(glGetUniformLocation(m_TextureRectShader, "u_Size"),  DX GetX(Size),  DX GetY(Size));
+	glUniform2f(glGetUniformLocation(m_TextureRectShader, "u_Size"), DX GetX(Size), DX GetY(Size));
 	glUniform4f(glGetUniformLocation(m_TextureRectShader, "u_Color"), DX GetX(Color), DX GetY(Color), DX GetZ(Color), DX GetW(Color));
 	int texUniform = glGetUniformLocation(m_TextureRectShader, "u_Texture");
 	glUniform1i(texUniform, 0);
@@ -248,54 +248,52 @@ u_int Renderer::CompileShaders(char* filenameVS, char* filenameFS) const
 #ifdef CYAN_DEBUG_COLLISION
 void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size) const
 {
-	DX XMVECTOR PixelPos = World::ToPixels(Position);
-	DX XMVECTOR GLPos = ToGL(PixelPos);
-	DX XMVECTOR PixelSize = World::ToPixels(Size);
-	DX XMVECTOR GLSize = ToGL(PixelSize);
+	DX XMVECTOR GLSize = GetGLSize(Size);
 
-	DX XMVECTOR RedRect = GLPos;
+	DX XMVECTOR GLPos = GetGLPos(Position);
 	DX XMVECTOR BlueRect = GLPos;
 	DX XMVECTOR GreenRect = GLPos;
 	DX XMVECTOR YellowRect = GLPos;
 
 	DX SetY(&BlueRect, DX GetY(BlueRect) + DX GetZ(BlueRect));
+	DX XMVECTOR BlueSize = DX Swizzle(GLSize, 0, 2, 2, 3);
+	DX SetY(&GreenRect, DX GetY(BlueRect) + DX GetZ(GLSize));
+	DX SetY(&YellowRect, DX GetY(BlueRect) - DX GetZ(GLSize));
 
-	DX XMVECTOR BlueSize = DX Swizzle(PixelSize, 0, 2, 2, 3);
+	float Depth = DX GetY(GLPos);
 
-	float Offset = 0.5f * DX GetZ(GLSize);
-	DX SetY(&GreenRect,   DX GetY(BlueRect) + Offset);
-	DX SetY(&YellowRect,  DX GetY(BlueRect) - Offset);
+	DX SetZ(&GLPos, Depth);
+	DX SetZ(&BlueRect, Depth);
+	DX SetZ(&GreenRect, Depth);
+	DX SetZ(&YellowRect, Depth);
 
-	/* ToDo Cleanup*/
-
-	DrawTexture(RedRect, PixelSize,  { 1.f, 0.f, 0.f, 1.f}, m_DebugRect);
+	DrawTexture(YellowRect, GLSize, { 1.f, 1.f, 0.f, 1.f }, m_DebugRect);
+	DrawTexture(GLPos, GLSize, { 1.f, 0.f, 0.f, 1.f }, m_DebugRect);
 	DrawTexture(BlueRect, BlueSize, { 0.f, 0.f, 1.f, 1.f }, m_DebugRect);
-	DrawTexture(GreenRect, PixelSize, { 0.f, 1.f, 0.f, 1.f }, m_DebugRect);
-	DrawTexture(YellowRect, PixelSize, { 1.f, 1.f, 0.f, 1.f }, m_DebugRect);
+	DrawTexture(GreenRect, GLSize, { 0.f, 1.f, 0.f, 1.f }, m_DebugRect);
 }
 #endif
 
 void XM_CALLCONV Renderer::DrawTexRect(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const
 {
-	DX XMVECTOR GLPos = ToGL(World::ToPixels(Position));
-	DX XMVECTOR GLSize = World::ToPixels(Size);
-	DX SetZ(&GLPos, DX GetZ(Position));
+	DX XMVECTOR GLPos = GetGLPos(Position);
+	DX XMVECTOR GLSize = GetGLSize(Size);
 	DrawTexture(GLPos, GLSize, Color, TexID);
 }
 
 void XM_CALLCONV Renderer::DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color) const
 {
-	DX XMVECTOR GLPos = ToGL(World::ToPixels(Position));
-	DX XMVECTOR PixelSize = World::ToPixels(Size);
+	DX XMVECTOR GLPos = GetGLPos(Position);
+	DX XMVECTOR GLSize = GetGLSize(Size);
 	DX SetZ(&GLPos, FARTHEST);
-	DrawTexture(GLPos, PixelSize, { 1.f, 1.f, 1.f, DX GetW(Color) }, m_TexShadow);
+	DrawTexture(GLPos, GLSize, { 1.f, 1.f, 1.f, DX GetW(Color) }, m_TexShadow);
 }
 
-void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size, 
+void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
 	DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR CurrentSprite, DX HXMVECTOR TotalSprite) const
 {
-	DX XMVECTOR GLPos = ToGL(World::ToPixels(Position));
-	DX XMVECTOR PixelSize = World::ToPixels(Size);
+	DX XMVECTOR GLPos = GetGLPos(Position);
+	DX XMVECTOR GLSize = GetGLSize(Size);
 
 	u_int shader = m_TextureRectSeqShader;
 
@@ -305,13 +303,13 @@ void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	u_int u_Trans		= glGetUniformLocation(shader, "u_Trans");
-	u_int u_Size		= glGetUniformLocation(shader, "u_Size");
-	u_int u_Color		= glGetUniformLocation(shader, "u_Color");
-	u_int u_TotalSeqX	= glGetUniformLocation(shader, "u_TotalSeqX");
-	u_int u_TotalSeqY	= glGetUniformLocation(shader, "u_TotalSeqY");
-	u_int u_CurrSeqX	= glGetUniformLocation(shader, "u_CurrSeqX");
-	u_int u_CurrSeqY	= glGetUniformLocation(shader, "u_CurrSeqY");
+	u_int u_Trans = glGetUniformLocation(shader, "u_Trans");
+	u_int u_Size = glGetUniformLocation(shader, "u_Size");
+	u_int u_Color = glGetUniformLocation(shader, "u_Color");
+	u_int u_TotalSeqX = glGetUniformLocation(shader, "u_TotalSeqX");
+	u_int u_TotalSeqY = glGetUniformLocation(shader, "u_TotalSeqY");
+	u_int u_CurrSeqX = glGetUniformLocation(shader, "u_CurrSeqX");
+	u_int u_CurrSeqY = glGetUniformLocation(shader, "u_CurrSeqY");
 
 	glUniform1f(glGetUniformLocation(shader, "u_Depth"), 0.5f);
 	int texUniform = glGetUniformLocation(m_TextureRectShader, "u_Texture");
@@ -324,13 +322,13 @@ void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
 	glEnableVertexAttribArray(attribTexture);
 
 	//Render Object
-	glUniform3f(u_Trans,		DX GetX(GLPos), DX GetY(GLPos) + DX GetZ(GLPos), DX GetY(GLPos));
-	glUniform2f(u_Size,			DX GetX(PixelSize),  DX GetY(PixelSize));
-	glUniform4f(u_Color,		DX GetX(Color), DX GetY(Color), DX GetZ(Color), DX GetW(Color));
-	glUniform1f(u_CurrSeqX,		DX GetX(CurrentSprite));
-	glUniform1f(u_CurrSeqY,		DX GetY(CurrentSprite));
-	glUniform1f(u_TotalSeqX,	DX GetX(TotalSprite));
-	glUniform1f(u_TotalSeqY,	DX GetY(TotalSprite));
+	glUniform3f(u_Trans, DX GetX(GLPos), DX GetY(GLPos) + DX GetZ(GLPos), DX GetY(GLPos));
+	glUniform2f(u_Size, DX GetX(GLSize), DX GetY(GLSize));
+	glUniform4f(u_Color, DX GetX(Color), DX GetY(Color), DX GetZ(Color), DX GetW(Color));
+	glUniform1f(u_CurrSeqX, DX GetX(CurrentSprite));
+	glUniform1f(u_CurrSeqY, DX GetY(CurrentSprite));
+	glUniform1f(u_TotalSeqX, DX GetX(TotalSprite));
+	glUniform1f(u_TotalSeqY, DX GetY(TotalSprite));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TexID);

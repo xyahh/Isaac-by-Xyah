@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CyanEngine.h"
+#include "World.h"
 
 Cyan Engine;
 
@@ -78,7 +79,7 @@ void Cyan::Update()
 		m_Physics[i].Update();
 		m_Physics[i].SetDeltaPosition(DX Subtract(m_Physics[i].GetPosition(), m_Physics[i].GetPrevPosition())); //Change this to a local Variable "Delta".
 		for (size_t j = i + 1; j < m_Physics.size(); ++j)
-			m_Physics[i].HandleCollision(&m_Physics[j]);
+			m_Physics[i].HandleCollision(i, &m_Physics[j], j);
 		m_Physics[i].SetPosition(DX Add(m_Physics[i].GetPrevPosition(), m_Physics[i].GetDeltaPosition()));
 	END_FOR
 
@@ -217,25 +218,3 @@ void Cyan::DeleteComponents()
 		m_Renderer.DeleteTexture(Texture);
 	m_Textures.clear();
 }
-
-//void Cyan::UpdateState(const id_type& ActorID, const id_type& NewStateID)
-//{
-//	if (ActorState != NULL || !NextStateID.empty()) return;
-//	ActorState = &m_States[m_StateLocator[ActorID]];
-//	NextStateID = NewStateID;
-//}
-//
-//void Cyan::ProcessUpdatedStates()
-//{
-//	if (ActorState == NULL || NextStateID.empty() || NextStateID == ActorState->StateID) return;
-//
-//	ActorState->pState->Exit(ActorState->ObjectID);	
-//	size_t CopyDir = ActorState->pState->m_Direction;
-//	delete ActorState->pState;
-//	ActorState->pState = GetStateType(NextStateID)->Clone();
-//	ActorState->StateID = NextStateID;
-//	ActorState->pState->Enter(ActorState->ObjectID);
-//	ActorState->pState->m_Direction = CopyDir;
-//	ActorState = NULL;
-//	NextStateID.clear();
-//}

@@ -86,11 +86,7 @@ void MoveState::Exit(size_t ObjectIndex)
 void ChargeJumpState::Enter(size_t ObjectIndex)
 {
 	RageAmount = 0.f;
-	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
 	Sprite& HeadSprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD);
-	BodySprite.SetFrameRate(0.f);
-	BodySprite.ResetSprite();
-
 	HeadSprite.ResetSprite();
 	HeadSprite.NextFrame();
 }
@@ -99,6 +95,19 @@ void ChargeJumpState::Update(size_t ObjectIndex)
 {
 	HandleInput(ObjectIndex);
 	RageAmount += UPDATE_TIME * RageRate;
+
+
+	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
+	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	if (!Zero(DX2 Magnitude(Velocity)))
+		BodySprite.SetFrameRate(10.f);
+	else
+	{
+		BodySprite.SetFrameRate(0.f);
+		BodySprite.ResetSprite();
+	}
+		
+
 	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f);
 	Clamp(0.f, &RageAmount, 1.f);
 }
@@ -117,6 +126,10 @@ void InAirState::Enter(size_t ObjectIndex)
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
 	GroundFriction = ObjPhysics.GetFriction();
 	ObjPhysics.SetFriction(AirResistance);
+
+	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
+	BodySprite.SetFrameRate(0.f);
+	BodySprite.ResetSprite();
 }
 
 void InAirState::Update(size_t ObjectIndex)
@@ -183,7 +196,7 @@ void SlamState::Update(size_t ObjectIndex)
 
 void SlamState::Exit(size_t ObjectIndex)
 {
-	//size_t Effect = Engine.AddObject(ObjectType::Projectile);
+	//size_t Effect = Engine.AddObject();
 	//
 	//size_t EffSpIdx = Engine.AddSprite(Effect);
 	//Sprite& EffectSprite = Engine.GetSprite(Effect, EffSpIdx);

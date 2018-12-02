@@ -13,7 +13,6 @@ public:
 	Framework() {}
 	~Framework();
 
-
 	void Initialize(const STD string& strWindowsTitle, int width, int height, int argc, char* argv[]);
 	void Fullscreen();
 	void Close();
@@ -23,6 +22,7 @@ public:
 
 	void Loop();
 	void Run();
+
 
 	BOOL WINAPI ConsoleHandler(DWORD dwCtrlType);
 
@@ -38,7 +38,6 @@ private:
 	
 private:
 
-	bool		m_CloseLoop		{ false };
 	STD string  m_WindowTitle	{ "Default Title" };
 	int			m_WindowWidth	{ 500 };
 	int			m_WindowHeight	{ 500 };

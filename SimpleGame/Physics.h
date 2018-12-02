@@ -53,7 +53,7 @@ public:
 
 private:
 
-	void HandleCollision(Physics* OtherPhysics);
+	void HandleCollision(size_t MyID, Physics* OtherPhysics, size_t OtherID);
 	void Update();
 
 private:

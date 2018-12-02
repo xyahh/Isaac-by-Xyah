@@ -1,10 +1,8 @@
 #pragma once
 /*
 Copyright 2017 Lee Taek Hee (Korea Polytech University)
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the What The Hell License. Do it plz.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WSTD vectorANTY.
 */
@@ -38,12 +36,13 @@ private:
 	void AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType) const;
 	u_int CompileShaders(char* filenameVS, char* filenameFS) const;
 	void CreateVertexBufferObjects();
-	DX XMVECTOR XM_CALLCONV ToGL(DX FXMVECTOR Position) const;
-	
-private:	
+	DX XMVECTOR XM_CALLCONV GetGLPos(DX FXMVECTOR Position) const;
+	DX XMVECTOR XM_CALLCONV GetGLSize(DX FXMVECTOR Size) const;
+
+private:
 
 	bool m_Initialized = false;
-	
+
 	u_int m_WindowSizeX = 0;
 	u_int m_WindowSizeY = 0;
 
@@ -52,9 +51,6 @@ private:
 #ifdef CYAN_DEBUG_COLLISION
 	u_int m_DebugRect = 0;
 #endif
-
-	u_int m_VBORect = 0;
-	u_int m_SolidRectShader = 0;
 
 	u_int m_VBOTexRect = 0;
 	u_int m_TextureRectShader = 0;
