@@ -1,10 +1,12 @@
 #pragma once
 
+#pragma comment(lib, "ws2_32")
 #include "targetver.h"
 
 #include <stdio.h>
 #include <tchar.h>
-
+#include <winsock2.h>
+#include <stdlib.h>
 #include <Windows.h>
 #include <iostream>
 #include <float.h>
@@ -25,6 +27,8 @@
 #define CYAN_DEBUG_STATES
 #define CYAN_DEBUG_COLLISION
 
+#define SERVERPORT 9000
+#define BUFSIZE 4096
 
 /* Depth Test */
 #define FARTHEST 1.f

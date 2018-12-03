@@ -66,9 +66,6 @@ void XM_CALLCONV StructureCollision::OnCollision
 	float MyFriction = Engine.GetDescriptor(MyID).GetValue();
 	float CollidingFriction = CollidingBody->GetFriction();
 	if (MyFriction > CollidingFriction)
-	{
-		CollidingBody->SetFriction(MyFriction);
-		printf("Friction: %f\n", MyFriction);
-	}
+		CollidingBody->SetFriction(MyFriction); 
 		
 }

@@ -49,7 +49,11 @@ void StateCommand::release(size_t ObjectIndex)
 	if (Config & ST_CMD::ON_RELEASE)
 	{
 		if (Config & ST_CMD::CHANGE_STATE)
+		{
+			printf("CHANGE ON RELEASE!\n");
 			return Engine.ChangeState(ObjectIndex, StateIndex);
+		}
+			
 		if (Config & ST_CMD::PUSH_STATE)
 			return Engine.PushState(ObjectIndex, StateIndex);
 		if (Config & ST_CMD::POP_STATE)

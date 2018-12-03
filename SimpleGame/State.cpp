@@ -179,6 +179,7 @@ void ChargeSlamState::Exit(size_t ObjectIndex)
 	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).ResetSprite();
 }
 
+
 /* Slam State*/
 
 void SlamState::Enter(size_t ObjectIndex)

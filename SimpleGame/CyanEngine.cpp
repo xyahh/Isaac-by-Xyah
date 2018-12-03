@@ -66,6 +66,7 @@ void Cyan::Update()
 {
 	FOR_EACH_OBJECT
 		if (m_States[i].empty()) continue;
+		//m_States[i].top()->pInput->ReceiveForeignInput(KeyInfo{VK_SPACE, true, 0});
 		m_States[i].top()->Update(i);
 		FlushActionQueue();
 	END_FOR

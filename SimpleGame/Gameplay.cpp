@@ -120,34 +120,7 @@ void Gameplay::Init()
 		Engine.ChangeState(OBJ::PLAYER, ST::IDLE);
 	}
 
-	//Test Obj
-	{
-		size_t TestObj = Engine.AddObject();
-		
-		Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
-		
-		TestDesc.SetType(ObjectType::Structure);
-		TestDesc.SetValue(0.2f); //Friction
-		
-		Physics& ObjPhysics = Engine.GetPhysics(TestObj);
-		ObjPhysics.Box().SetDimensions({ 2.f, 2.f, 2.f });
-		ObjPhysics.SetCollision(&Collision::Basic);
-		ObjPhysics.SetPosition({ 5.f, 0.f, 0.f });
-	}
 
-	{
-		size_t TestObj = Engine.AddObject();
-
-		Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
-
-		TestDesc.SetType(ObjectType::Structure);
-		TestDesc.SetValue(0.2f); //Friction
-
-		Physics& ObjPhysics = Engine.GetPhysics(TestObj);
-		ObjPhysics.Box().SetDimensions({ 7.f, 5.f, 3.f });
-		ObjPhysics.SetCollision(&Collision::Basic);
-		ObjPhysics.SetPosition({ -10.f, 0.f, 0.f });
-	}
 	//Floor
 	{
 		size_t Floor = Engine.AddObject();
@@ -158,11 +131,54 @@ void Gameplay::Init()
 		TestDesc.SetValue(1.f); //Friction
 
 		Physics& ObjPhysics = Engine.GetPhysics(Floor);
-		ObjPhysics.Box().SetDimensions({ 10.f, 10.f, 1.f });
+		ObjPhysics.Box().SetDimensions({ 10.f, 10.f, 0.f });
 		ObjPhysics.SetGravity(0.f);
 		ObjPhysics.SetCollision(&Collision::Structure);
-		ObjPhysics.SetPosition({ 0.f, 0.f, -1.f });
+		ObjPhysics.SetPosition({ 0.f, 0.f, 0.f });
 	}
+
+	//Test Obj
+	{
+		size_t TestObj = Engine.AddObject();
+		
+		Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
+		
+		TestDesc.SetType(ObjectType::Structure);
+		TestDesc.SetValue(1.f); //Friction
+		
+		Physics& ObjPhysics = Engine.GetPhysics(TestObj);
+		ObjPhysics.Box().SetDimensions({ 2.f, 2.f, 2.f });
+		ObjPhysics.SetCollision(&Collision::Structure);
+		ObjPhysics.SetPosition({ 5.f, 0.f, 0.f });
+	}
+
+	{
+		size_t TestObj = Engine.AddObject();
+
+		Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
+
+		TestDesc.SetType(ObjectType::Structure);
+		TestDesc.SetValue(1.f); //Friction
+
+		Physics& ObjPhysics = Engine.GetPhysics(TestObj);
+		ObjPhysics.Box().SetDimensions({ 7.f, 5.f, 3.f });
+		ObjPhysics.SetCollision(&Collision::Structure);
+		ObjPhysics.SetPosition({ -10.f, 0.f, 0.f });
+	}
+	{
+		size_t TestObj = Engine.AddObject();
+
+		Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
+
+		TestDesc.SetType(ObjectType::Structure);
+		TestDesc.SetValue(1.f); //Friction
+
+		Physics& ObjPhysics = Engine.GetPhysics(TestObj);
+		ObjPhysics.Box().SetDimensions({ 7.f, 5.f, 3.f });
+		ObjPhysics.SetCollision(&Collision::Structure);
+		ObjPhysics.SetPosition({ -2.75f, -5.f, 0.f });
+	}
+	
 	
 }
 
