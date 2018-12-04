@@ -5,8 +5,11 @@
 
 void State::HandleInput(size_t ObjectIndex)
 {
-	pInput->ReceiveLocalInput();
-	pInput->ProcessInput(ObjectIndex);
+	if (pInput)
+	{
+		pInput->ReceiveLocalInput();
+		pInput->ProcessInput(ObjectIndex);
+	}
 }
 
 /*--------------------------------------------------------------------------------------*/

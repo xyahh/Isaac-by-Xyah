@@ -29,7 +29,7 @@ void Physics::HandleCollision(size_t MyID, Physics* OtherPhysics, size_t OtherID
 	if (Collision::HandleCollision(Min, Max, OtherMin, OtherMax))
 	{
 		DX XMVECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
-		DX Print(Normal, '\n');
+		
 		if (m_Collision)
 			m_Collision->OnCollision(MyID, this, OtherID, OtherPhysics, Normal);
 		if (OtherPhysics->m_Collision)
@@ -163,7 +163,7 @@ void Physics::Update()
 
 	/* --- Reset & Store For Next Physics Cycle -----------------------------------------------*/
 	Acceleration = DX XMVectorZero();
-	m_Friction = 0.f;
+	//m_Friction = 0.f;
 
 	if (DX GetZ(Position) < 0.f)
 	{

@@ -8,9 +8,6 @@
 #include "Sound.h"
 #include "Sprite.h"
 
-#define FOR_EACH_OBJECT for (size_t i = 0; i < m_Descriptors.size(); ++i) {
-#define END_FOR   }
-
 enum Direction
 {
 	Up,
@@ -85,8 +82,9 @@ public:
 
 private:
 
-	bool Initialize(int WindowWidth, int WindowHeight);
+	bool Initialize();
 	void Destroy();
+	void ReleaseData();
 
 private:
 	Renderer						m_Renderer;

@@ -1,5 +1,14 @@
 #pragma once
 
+enum ST_CMD
+{
+	ON_PRESS = 0x01,
+	ON_RELEASE = 0x02,
+	PUSH_STATE = 0x04,
+	CHANGE_STATE = 0x08,
+	POP_STATE = 0x10
+};
+
 class Command
 {
 public:
@@ -25,33 +34,18 @@ private:
 	DX XMFLOAT3 Force;
 };
 
-class AnalogForceCommand : public Command
+class FaceCommand : public Command
 {
 public:
-	AnalogForceCommand(int AnalogStick, float fForce) : 
-		AnalogStick(AnalogStick),
-		fForce(fForce)
-	{}
-	virtual ~AnalogForceCommand() {}
-
-	virtual void execute(size_t Index);
-
-private:
-	int		AnalogStick;
-	float	fForce;
-};
-
-class ShootCommand : public Command
-{
-public:
-	ShootCommand(u_int Direction) :
-		Direction(Direction) {}
-	virtual ~ShootCommand() {}
+	FaceCommand(size_t SpriteIndex, u_int Direction) :
+		Direction(Direction), SpriteIndex(SpriteIndex){}
+	virtual ~FaceCommand() {}
 
 	virtual void execute(size_t Index);
 	virtual void release(size_t Index);
 
 private:
+	size_t SpriteIndex;
 	u_int Direction;
 };
 
@@ -66,15 +60,6 @@ public:
 
 private:
 	Scene*		m_Scene;
-};
-
-enum ST_CMD
-{
-	ON_PRESS		= 0x01,
-	ON_RELEASE		= 0x02,
-	PUSH_STATE		= 0x04,
-	CHANGE_STATE	= 0x08,
-	POP_STATE		= 0x10
 };
 
 class StateCommand : public Command

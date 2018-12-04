@@ -7,8 +7,8 @@ class State
 
 public:
 
-	State() {}
-	virtual	~State() {}
+	State() = default;
+	virtual	~State() = default;
 
 	virtual void Enter(size_t Index) = 0;
 	virtual void Exit(size_t Index) = 0;
@@ -39,8 +39,8 @@ class NullState : public State
 {
 public:
 
-	NullState() {}
-	virtual ~NullState() {}
+	NullState() = default;
+	virtual ~NullState() = default;
 
 private:
 

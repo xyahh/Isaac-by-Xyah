@@ -19,7 +19,8 @@ public:
 		Current(0, 0),
 		Total(1, 1),
 		Size(0.f, 0.f),
-		Offset(0.f, 0.f, 0.f)
+		Offset(0.f, 0.f, 0.f),
+		TexIndex(0)
 	{}
 
 
@@ -53,7 +54,7 @@ public:
 
 private:
 	SPRITETYPE	SpriteType;
-	size_t		TexIndex;
+	size_t			TexIndex;
 	float		FrameRate;
 	float		CurrentFrame;
 	DX XMUINT2	Current;

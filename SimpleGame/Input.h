@@ -26,8 +26,8 @@ class Input
 	friend Cyan;
 
 public:
-	Input()  {}
-	~Input() {}
+	Input() = default;
+	~Input() = default;
 
 	void AddKey(int Value, size_t CommandIndex);
 	void EmplaceLocalInput();

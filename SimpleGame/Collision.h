@@ -124,6 +124,7 @@ inline DX XMVECTOR XM_CALLCONV GetNormal(DX FXMVECTOR A_Min, DX FXMVECTOR A_Max,
 		MinA = DX Multiply(MinA, DX Evaluate(DX Less(DiffA, DX ShiftLeft(DiffA, i))));
 		MinB = DX Multiply(MinB, DX Evaluate(DX Less(DiffB, DX ShiftLeft(DiffB, i))));
 	}
+
 	float FA = DX4 MagnitudeSQ(DX Multiply(DiffA, MinA));
 	float FB = DX4 MagnitudeSQ(DX Multiply(DiffB, MinB));
 	if (FA < FB) return 

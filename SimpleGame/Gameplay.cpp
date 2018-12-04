@@ -6,15 +6,16 @@
 
 void Gameplay::Init()
 {
+	
 	//Actor
 	{
 		TEX::BASIC_BODY = Engine.AddTexture("./Resources/Characters/basic_body.png");
 		TEX::ISAAC_HEAD = Engine.AddTexture("./Resources/Characters/isaac_head.png");
 
 		TEX::EXPLOSION = Engine.AddTexture("./Resources/explosion.png");
-
+		
 		OBJ::PLAYER = Engine.AddObject();
-
+	
 		auto& ActorDescriptor = Engine.GetDescriptor(OBJ::PLAYER);
 		auto& ActorPhysics = Engine.GetPhysics(OBJ::PLAYER);
 		auto& ActorGraphics = Engine.GetGraphics(OBJ::PLAYER);
@@ -33,7 +34,7 @@ void Gameplay::Init()
 
 		ActorGraphics.SetColor(1.f, 1.f, 1.f, 1.f);
 		ActorPhysics.SetMass(70.f);
-
+		
 		float HeadSize = 1.25f;
 		float BodySize = 0.75f;
 
@@ -48,9 +49,9 @@ void Gameplay::Init()
 		Head.SetTotal({ 2, 4 });
 		Head.SetDirection(Direction::Down);
 		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
-
 	}
 
+	
 	//Actor States
 	{
 		ST::IDLE = Engine.AddStatePrototype(OBJ::PLAYER, new IdleState);
@@ -80,6 +81,7 @@ void Gameplay::Init()
 		CMD::START_IN_AIR = Engine.AddCommand(new StateCommand(ST::IN_AIR, ST_CMD::ON_RELEASE | ST_CMD::CHANGE_STATE));
 		CMD::START_CHARGE_SLAM = Engine.AddCommand(new StateCommand(ST::CHARGE_SLAM));
 	}
+
 
 	//Actor Input
 	{
@@ -120,22 +122,22 @@ void Gameplay::Init()
 		Engine.ChangeState(OBJ::PLAYER, ST::IDLE);
 	}
 
-
+	
 	//Floor
-	{
-		size_t Floor = Engine.AddObject();
-
-		Descriptor& TestDesc = Engine.GetDescriptor(Floor);
-
-		TestDesc.SetType(ObjectType::Structure);
-		TestDesc.SetValue(1.f); //Friction
-
-		Physics& ObjPhysics = Engine.GetPhysics(Floor);
-		ObjPhysics.Box().SetDimensions({ 10.f, 10.f, 0.f });
-		ObjPhysics.SetGravity(0.f);
-		ObjPhysics.SetCollision(&Collision::Structure);
-		ObjPhysics.SetPosition({ 0.f, 0.f, 0.f });
-	}
+	//{
+	//	size_t Floor = Engine.AddObject();
+	//
+	//	Descriptor& TestDesc = Engine.GetDescriptor(Floor);
+	//
+	//	TestDesc.SetType(ObjectType::Structure);
+	//	TestDesc.SetValue(1.f); //Friction
+	//
+	//	Physics& ObjPhysics = Engine.GetPhysics(Floor);
+	//	ObjPhysics.Box().SetDimensions({ 10.f, 10.f, 0.f });
+	//	ObjPhysics.SetGravity(0.f);
+	//	ObjPhysics.SetCollision(&Collision::Structure);
+	//	ObjPhysics.SetPosition({ 0.f, 0.f, 0.f });
+	//}
 
 	//Test Obj
 	{
@@ -152,32 +154,32 @@ void Gameplay::Init()
 		ObjPhysics.SetPosition({ 5.f, 0.f, 0.f });
 	}
 
-	{
-		size_t TestObj = Engine.AddObject();
-
-		Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
-
-		TestDesc.SetType(ObjectType::Structure);
-		TestDesc.SetValue(1.f); //Friction
-
-		Physics& ObjPhysics = Engine.GetPhysics(TestObj);
-		ObjPhysics.Box().SetDimensions({ 7.f, 5.f, 3.f });
-		ObjPhysics.SetCollision(&Collision::Structure);
-		ObjPhysics.SetPosition({ -10.f, 0.f, 0.f });
-	}
-	{
-		size_t TestObj = Engine.AddObject();
-
-		Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
-
-		TestDesc.SetType(ObjectType::Structure);
-		TestDesc.SetValue(1.f); //Friction
-
-		Physics& ObjPhysics = Engine.GetPhysics(TestObj);
-		ObjPhysics.Box().SetDimensions({ 7.f, 5.f, 3.f });
-		ObjPhysics.SetCollision(&Collision::Structure);
-		ObjPhysics.SetPosition({ -2.75f, -5.f, 0.f });
-	}
+	//{
+	//	size_t TestObj = Engine.AddObject();
+	//
+	//	Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
+	//
+	//	TestDesc.SetType(ObjectType::Structure);
+	//	TestDesc.SetValue(1.f); //Friction
+	//
+	//	Physics& ObjPhysics = Engine.GetPhysics(TestObj);
+	//	ObjPhysics.Box().SetDimensions({ 7.f, 5.f, 3.f });
+	//	ObjPhysics.SetCollision(&Collision::Structure);
+	//	ObjPhysics.SetPosition({ -10.f, 0.f, 0.f });
+	//}
+	//{
+	//	size_t TestObj = Engine.AddObject();
+	//
+	//	Descriptor& TestDesc = Engine.GetDescriptor(TestObj);
+	//
+	//	TestDesc.SetType(ObjectType::Structure);
+	//	TestDesc.SetValue(1.f); //Friction
+	//
+	//	Physics& ObjPhysics = Engine.GetPhysics(TestObj);
+	//	ObjPhysics.Box().SetDimensions({ 7.f, 5.f, 3.f });
+	//	ObjPhysics.SetCollision(&Collision::Structure);
+	//	ObjPhysics.SetPosition({ -2.75f, -5.f, 0.f });
+	//}
 	
 	
 }

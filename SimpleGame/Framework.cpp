@@ -49,18 +49,6 @@ void Framework::Fullscreen()
 
 void Framework::Close()
 {
-	SafeClose();
-}
-
-void Framework::SafeClose()
-{
-	if (m_CurrentScene)
-	{
-		m_CurrentScene->Exit();
-		delete m_CurrentScene;
-	}
-	m_CurrentScene = NULL;
-	m_ShiftScene = NULL;
 	Engine.Destroy();
 }
 
@@ -68,7 +56,7 @@ void Framework::BindFunctions()
 {
 	SetConsoleCtrlHandler([](DWORD dw)->BOOL
 	{
-		return Fw.ConsoleHandler(dw);
+		return Fw.CloseConsole(dw);
 	}, TRUE);
 	glutDisplayFunc([]()
 	{
@@ -108,10 +96,9 @@ void Framework::GetWindowSizef(float * WinWidth, float * WinHeight) const
 	*WinHeight = static_cast<float>(m_WindowHeight);
 }
 
-BOOL WINAPI Framework::ConsoleHandler(DWORD dwCtrlType)
+BOOL WINAPI Framework::CloseConsole(DWORD dwCtrlType)
 {
-	if (dwCtrlType == CTRL_CLOSE_EVENT)
-		Close();
+	Close();
 	return TRUE;
 }
 
@@ -134,8 +121,8 @@ void Framework::ChangeScenes()
 
 void Framework::Run()
 {
-	Engine.Initialize(m_WindowWidth, m_WindowHeight);
 	Scene::m_Framework = this;
+	Engine.Initialize();
 	BindFunctions();
 	ChangeScenes();
 

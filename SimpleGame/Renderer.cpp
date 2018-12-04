@@ -5,17 +5,20 @@
 #include "Dependencies/GL/glew.h"
 #include "LoadPng.h"
 #include "World.h"
+#include "Framework.h"
 
 DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 {
 	float Scale = World::GetScale();
+	float WinX, WinY;
+	Fw.GetWindowSizef(&WinX, &WinY);
 	return DX Multiply
 	(
 		Position,
 		{
-			2.f * Scale / m_WindowSizeX,
-			2.f * Scale / m_WindowSizeY,
-			2.f * Scale / m_WindowSizeY 
+			2.f * Scale / WinX,
+			2.f * Scale / WinY,
+			2.f * Scale / WinY
 		}
 	);
 }
@@ -23,23 +26,21 @@ DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 DX XMVECTOR XM_CALLCONV Renderer::GetGLSize(DX FXMVECTOR Size) const
 {
 	float Scale = World::GetScale();
+	float WinX, WinY;
+	Fw.GetWindowSizef(&WinX, &WinY);
 	return DX Multiply
 	(
 		Size,
 		{ 
-			Scale / m_WindowSizeX, 
-			Scale / m_WindowSizeY,
-			Scale / m_WindowSizeY
+			Scale / WinX,
+			Scale / WinY,
+			Scale / WinY
 		}
 	);
 }
 
-bool Renderer::Initialize(int windowSizeX, int windowSizeY)
+bool Renderer::Initialize()
 {
-	//Set window size
-	m_WindowSizeX = windowSizeX;
-	m_WindowSizeY = windowSizeY;
-
 	//Load shaders
 	m_TextureRectShader = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
 	m_TextureRectSeqShader = CompileShaders("./Shaders/TextureRectSeq.vs", "./Shaders/TextureRectSeq.fs");

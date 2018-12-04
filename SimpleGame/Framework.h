@@ -24,7 +24,7 @@ public:
 	void Run();
 
 
-	BOOL WINAPI ConsoleHandler(DWORD dwCtrlType);
+	BOOL WINAPI CloseConsole(DWORD dwCtrlType);
 
 	void ToScene(Scene*& pScene) = delete;
 	void ToScene(Scene*&& pScene);
@@ -34,7 +34,6 @@ private:
 	void BindFunctions();
 	void ResetClock();
 	void ChangeScenes();
-	void SafeClose();
 	
 private:
 

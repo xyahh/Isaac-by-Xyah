@@ -30,7 +30,7 @@ public:
 
 private:
 
-	bool Initialize(int windowSizeX, int windowSizeY);
+	bool Initialize();
 	void XM_CALLCONV DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const;
 	bool ReadFile(char* filename, STD string *target) const;
 	void AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType) const;
@@ -42,9 +42,6 @@ private:
 private:
 
 	bool m_Initialized = false;
-
-	u_int m_WindowSizeX = 0;
-	u_int m_WindowSizeY = 0;
 
 	u_int m_TexShadow = 0;
 

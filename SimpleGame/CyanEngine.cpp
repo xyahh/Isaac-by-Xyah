@@ -4,17 +4,19 @@
 
 Cyan Engine;
 
-bool Cyan::Initialize(int WindowWidth, int WindowHeight)
+bool Cyan::Initialize()
 {
 	Sound::Initialize();
-	return m_Renderer.Initialize(WindowWidth, WindowHeight);
+	return m_Renderer.Initialize();
 }
 
 void Cyan::Destroy()
 {
-	DeleteComponents();
+	ReleaseData();
 	Sound::Destroy();
 }
+
+
 
 void Cyan::PushState(size_t ObjectIndex, size_t StateIndex)
 {
@@ -34,7 +36,7 @@ void Cyan::PopState(size_t ObjectIndex)
 	QueueAction([this, ObjectIndex]()
 	{
 		m_States[ObjectIndex].top()->Exit(ObjectIndex);
-		SafeDelete(m_States[ObjectIndex].top());
+		delete m_States[ObjectIndex].top();
 		m_States[ObjectIndex].pop();
 		m_States[ObjectIndex].top()->Enter(ObjectIndex);
 	});
@@ -47,7 +49,7 @@ void Cyan::ChangeState(size_t ObjectIndex, size_t StateIndex)
 		if (!m_States[ObjectIndex].empty())
 		{
 			m_States[ObjectIndex].top()->Exit(ObjectIndex);
-			SafeDelete(m_States[ObjectIndex].top());
+			delete m_States[ObjectIndex].top();
 			m_States[ObjectIndex].pop();
 		}
 		m_States[ObjectIndex].emplace(m_StatePrototypes[ObjectIndex][StateIndex]->Make());
@@ -57,32 +59,35 @@ void Cyan::ChangeState(size_t ObjectIndex, size_t StateIndex)
 
 void Cyan::Render(float fInterpolation)
 {
-	FOR_EACH_OBJECT
+	for(size_t i = 0; i < m_Graphics.size(); ++i)
 		m_Graphics[i].Render(m_Renderer, m_Physics[i], m_Sprites[i], fInterpolation);
-	END_FOR
 }
 
 void Cyan::Update()
 {
-	FOR_EACH_OBJECT
+	for (size_t i = 0; i < m_States.size(); ++i)
+	{
 		if (m_States[i].empty()) continue;
 		//m_States[i].top()->pInput->ReceiveForeignInput(KeyInfo{VK_SPACE, true, 0});
 		m_States[i].top()->Update(i);
 		FlushActionQueue();
-	END_FOR
+	}
 
-	FOR_EACH_OBJECT 
-		for (auto& Sprite : m_Sprites[i]) 
+	for (size_t i = 0; i < m_Sprites.size(); ++i)
+	{
+		for (auto& Sprite : m_Sprites[i])
 			Sprite.Update();
-	END_FOR
+	}
 
-	FOR_EACH_OBJECT
+	for (size_t i = 0; i < m_Physics.size(); ++i)
+	{
+
 		m_Physics[i].Update();
 		m_Physics[i].SetDeltaPosition(DX Subtract(m_Physics[i].GetPosition(), m_Physics[i].GetPrevPosition())); //Change this to a local Variable "Delta".
 		for (size_t j = i + 1; j < m_Physics.size(); ++j)
 			m_Physics[i].HandleCollision(i, &m_Physics[j], j);
 		m_Physics[i].SetPosition(DX Add(m_Physics[i].GetPrevPosition(), m_Physics[i].GetDeltaPosition()));
-	END_FOR
+	}
 
 	FlushActionQueue();
 }
@@ -176,46 +181,58 @@ Sound & Cyan::GetSound(size_t Index)
 	return m_Sounds[Index];
 }
 
-void Cyan::DeleteComponents()
+void Cyan::ReleaseData()
 {
 	for (auto& Sound : m_Sounds)
-		Sound.Release();
-	m_Sounds.clear();
-
-	for (auto& ObjState : m_StatePrototypes)
 	{
-		for (auto& StatePrototype : ObjState)
-		{
-			SafeDelete(StatePrototype->pInput);
-			SafeDelete(StatePrototype);
-		}
-		ObjState.clear();
+		Sound.Release();
 	}
 
 	for (auto& ObjStateStack : m_States)
 	{
 		while (!ObjStateStack.empty())
 		{
-			SafeDelete(ObjStateStack.top());
+			State* pState = ObjStateStack.top();
+			pState->pInput = nullptr;
+			delete pState;
 			ObjStateStack.pop();
 		}
 	}
-		
 
-	m_States.clear();
-	m_StatePrototypes.clear();
-	
-	m_Physics.clear();
-	m_Graphics.clear();
-	m_States.clear();
-	m_Sprites.clear();
-	m_Descriptors.clear();
-	
+	for (auto& ObjState : m_StatePrototypes)
+	{
+		for (auto& StatePrototype : ObjState)
+		{
+			delete StatePrototype->pInput;
+			StatePrototype->pInput = nullptr;
+			delete StatePrototype;
+			StatePrototype = nullptr;
+		}
+	}
+
 	for (auto& Commands : m_Commands)
-		SafeDelete(Commands);
-	m_Commands.clear();
+	{
+		delete Commands;
+		Commands = nullptr;
+	}
 
 	for (auto& Texture : m_Textures)
+	{
 		m_Renderer.DeleteTexture(Texture);
+	}
+}
+
+void Cyan::DeleteComponents()
+{
+	ReleaseData();
+
+	m_Sprites.clear();
+	m_Sounds.clear();
+	m_States.clear();
+	m_StatePrototypes.clear();
+	m_Physics.clear();
+	m_Graphics.clear();
+	m_Descriptors.clear();
+	m_Commands.clear();
 	m_Textures.clear();
 }
