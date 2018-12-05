@@ -21,10 +21,9 @@ public:
 #endif
 	void XM_CALLCONV DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
 		DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR CurrentSprite, DX HXMVECTOR TotalSprite) const;
-	void XM_CALLCONV DrawTexRect(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const;
 	void XM_CALLCONV DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color) const;
 
-	u_int CreatePngTexture(const STD string& filePath) const;
+	u_int GenerateTexture(const STD string& filePath) const;
 	void DeleteTexture(u_int texID) const;
 
 
@@ -32,16 +31,14 @@ private:
 
 	bool Initialize();
 	void XM_CALLCONV DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const;
-	bool ReadFile(char* filename, STD string *target) const;
-	void AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType) const;
-	u_int CompileShaders(char* filenameVS, char* filenameFS) const;
+	bool ReadFile(const STD string& filename, STD string *target) const;
+	void AddShader(u_int ShaderProgram, const STD string& pShaderText, u_int ShaderType) const;
+	u_int CompileShaders(const STD string&  filenameVS, const STD string& filenameFS) const;
 	void CreateVertexBufferObjects();
 	DX XMVECTOR XM_CALLCONV GetGLPos(DX FXMVECTOR Position) const;
 	DX XMVECTOR XM_CALLCONV GetGLSize(DX FXMVECTOR Size) const;
 
 private:
-
-	bool m_Initialized = false;
 
 	u_int m_TexShadow = 0;
 
@@ -51,5 +48,5 @@ private:
 
 	u_int m_VBOTexRect = 0;
 	u_int m_TextureRectShader = 0;
-	u_int m_TextureRectSeqShader = 0;
+	u_int m_TextureSpriteShader = 0;
 };

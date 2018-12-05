@@ -8,12 +8,13 @@
 #include "Sound.h"
 #include "Sprite.h"
 
+/* Reversed order from Image TopDown. It is read from Bottom to Top */
 enum Direction
 {
-	Up,
-	Down,
+	Right,
 	Left,
-	Right
+	Down,
+	Up,
 };
 
 class Cyan
@@ -27,23 +28,30 @@ public:
 	~Cyan() {}
  
 	/*---------Game Loop--------------------------------*/
-
-	void Render(float fInterpolation);
 	void Update();
+	void Render(float fInterpolation);
+	void HandleInput(int KeyValue, bool Pressed);
 	/*--------------------------------------------------*/
 
 	/*---------Components Functions---------------------*/
-	size_t AddObject();
-	size_t AddSprite(size_t ObjectIndex);
+	void AddObject(size_t * Out);
+	void AddSprite(size_t * Out, size_t ObjectIndex);
+	void AddObjectState(size_t ObjectIndex, size_t StatePrototypeIndex); //Map of Object's Input
 
-	size_t AddStatePrototype(size_t ObjectIndex, State*&& pState);
-	size_t AddStatePrototype(size_t ObjectIndex, State*& pState) = delete;
+	template<class T, class... Args>
+	void AddStatePrototype(size_t* Out, Args&&... Ax)
+	{
+		Add<T>(m_StatePrototypes, Out, Ax...);
+	}
 
-	size_t AddCommand(Command*&& pCommand);
-	size_t AddCommand(Command*& pCommand) = delete;
-	
-	size_t AddTexture(const STD string& ImagePath);
-	size_t AddSound(const STD string& ImagePath, bool isBGM);
+	template<class T, class... Args>
+	void AddCommand(size_t* Out, Args&&... Ax)
+	{
+		Add<T>(m_Commands, Out, Ax...);
+	}
+
+	void AddTexture(size_t * Out, const STD string& ImagePath);
+	void AddSound(size_t * Out, const STD string& ImagePath, bool isBGM);
 	
 	void PushState(size_t ObjectIndex, size_t StateIndex);
 	void PopState(size_t ObjectIndex);
@@ -68,12 +76,12 @@ public:
 	Graphics& GetGraphics(size_t Index);
 	Physics& GetPhysics(size_t Index);
 	State*& GetCurrentState(size_t Index);
+	Input& GetStateInput(size_t ObjectIndex, size_t StateIndex);
 
 	Sprite& GetSprite(size_t Index, size_t SpriteNumber);
 
-	Input* GetStateInput(size_t ObjectIndex, size_t StateIndex);
 	Command*& GetCommand(size_t Index);
-	size_t GetTexture(size_t Index);
+	u_int GetTexture(size_t Index);
 	Sound& GetSound(size_t Index);
 
 	/*--------------------------------------------------*/
@@ -81,6 +89,14 @@ public:
 	/*--------------------------------------------------*/
 
 private:
+
+	template<class T, class V, class... Args>
+	void Add(STD vector<V>& v, size_t* Out, Args&&... Ax)
+	{
+		v.emplace_back(new T(STD forward<Args>(Ax)...));
+		*Out = Last(v);
+	}
+
 
 	bool Initialize();
 	void Destroy();
@@ -90,18 +106,20 @@ private:
 	Renderer						m_Renderer;
 
 	/* Object Components */
-	STD vector<Descriptor>			m_Descriptors;
-	STD vector<Graphics>			m_Graphics;
-	STD vector<Physics>				m_Physics;
-	STD vector<STD vector<Sprite>>  m_Sprites;
-	STD vector<STD stack<State*>>	m_States;
-	STD vector<STD vector<State*>>	m_StatePrototypes;
+	STD vector<Descriptor>				m_Descriptors;
+	STD vector<Graphics>				m_Graphics;
+	STD vector<Physics>					m_Physics;
+	STD vector<STD vector<Sprite>>		m_Sprites;
+	STD vector<STD stack<State*>>		m_States;
+	STD vector<STD map<size_t, Input>>	m_Input;
+
 
 	/* Integral Components */
-	STD vector<Command*>			m_Commands;
-	STD vector<u_int>				m_Textures;
-	STD vector<Sound>				m_Sounds;
-	STD vector<Action>				m_Actions;
+	STD vector<State*>		m_StatePrototypes;
+	STD vector<Command*>	m_Commands;
+	STD vector<u_int>		m_Textures;
+	STD vector<Sound>		m_Sounds;
+	STD vector<Action>		m_Actions;
 };
 
 extern Cyan Engine;

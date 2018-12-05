@@ -1,19 +1,6 @@
 #include "stdafx.h"
 #include "State.h"
 #include "CyanEngine.h"
-#include "Indices.h"
-
-void State::HandleInput(size_t ObjectIndex)
-{
-	if (pInput)
-	{
-		pInput->ReceiveLocalInput();
-		pInput->ProcessInput(ObjectIndex);
-	}
-}
-
-/*--------------------------------------------------------------------------------------*/
-
 /*Null State */
 
 void NullState::Enter(size_t ObjectIndex)
@@ -22,7 +9,6 @@ void NullState::Enter(size_t ObjectIndex)
 
 void NullState::Update(size_t ObjectIndex)
 {
-	HandleInput(ObjectIndex);
 }
 
 void NullState::Exit(size_t ObjectIndex)
@@ -40,8 +26,7 @@ void IdleState::Enter(size_t ObjectIndex)
 
 void IdleState::Update(size_t ObjectIndex)
 {
-	HandleInput(ObjectIndex);
-	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetForce();
 	if (!Zero(DX GetZ(Velocity)))
 		Engine.ChangeState(ObjectIndex, ST::IN_AIR);
 	else if (!Zero(DX2 Magnitude(Velocity)))
@@ -64,8 +49,6 @@ void MoveState::Enter(size_t ObjectIndex)
 
 void MoveState::Update(size_t ObjectIndex)
 {
-	HandleInput(ObjectIndex);
-
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
 	DX XMVECTOR Velocity = ObjPhysics.GetVelocity();
 	DX XMVECTOR Force = ObjPhysics.GetForce();
@@ -96,9 +79,7 @@ void ChargeJumpState::Enter(size_t ObjectIndex)
 
 void ChargeJumpState::Update(size_t ObjectIndex)
 {
-	HandleInput(ObjectIndex);
 	RageAmount += UPDATE_TIME * RageRate;
-
 
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
 	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
@@ -119,7 +100,8 @@ void ChargeJumpState::Exit(size_t ObjectIndex)
 {
 	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).ResetSprite();
 	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f, 1.f, 1.f);
-	Engine.GetPhysics(ObjectIndex).ApplyForce({ 0.f, 0.f, Force * (1.f + RageAmount) });
+	float Amount = Force * (1.f + RageAmount);
+	Engine.GetPhysics(ObjectIndex).ApplyForce({ 0.f, 0.f,  Amount});
 }
 
 /* In Air State */
@@ -137,7 +119,6 @@ void InAirState::Enter(size_t ObjectIndex)
 
 void InAirState::Update(size_t ObjectIndex)
 {
-	HandleInput(ObjectIndex);
 	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
 	if (Zero(DX GetZ(Velocity)))
 	{

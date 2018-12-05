@@ -161,7 +161,6 @@
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Indices.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="LoadPng.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Renderer.h" />
@@ -186,7 +185,6 @@
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Indices.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="LoadPng.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Logo.cpp" />

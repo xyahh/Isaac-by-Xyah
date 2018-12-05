@@ -15,6 +15,8 @@ namespace ST
 	extern size_t IN_AIR;
 	extern size_t CHARGE_SLAM;
 	extern size_t SLAM;
+
+	extern size_t SHOOT;
 }
 
 namespace CMD
@@ -29,12 +31,20 @@ namespace CMD
 	extern size_t SLOW_MOVE_LEFT;
 	extern size_t SLOW_MOVE_RIGHT;
 
-
-	extern size_t CHARGE_JUMP;
+	extern size_t START_CHARGE_JUMP;
 
 	extern size_t START_MOVE;
 	extern size_t START_IN_AIR;
 	extern size_t START_CHARGE_SLAM;
+	extern size_t START_SHOOT;
+	extern size_t END_SHOOT;
+
+	extern size_t FACE_UP;
+	extern size_t FACE_DOWN;
+	extern size_t FACE_RIGHT;
+	extern size_t FACE_LEFT;
+
+
 }
 
 namespace OBJ

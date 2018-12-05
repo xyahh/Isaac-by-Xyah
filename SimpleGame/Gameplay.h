@@ -9,6 +9,7 @@ public:
 
 	virtual void Init();
 	virtual void Exit();
+	virtual void HandleInput(int Value, bool Pressed);
 	virtual void Render(float fInterpolation);
 	virtual void Update();
 

@@ -37,6 +37,8 @@ void Framework::Initialize(const STD string & strWindowsTitle, int width, int he
 	dwStyle &= ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
 	SetWindowLong(hWnd, GWL_STYLE, dwStyle);
 	
+
+
 	glewInit();
 }
 
@@ -74,6 +76,28 @@ void Framework::BindFunctions()
 	{
 		Fw.Close();
 	});
+
+	glutKeyboardFunc([](unsigned char Key, int, int) 
+	{
+		printf("PRESS\n");
+		Fw.KeyboardInput(Key, true);
+	});
+
+	glutKeyboardUpFunc([](unsigned char Key, int, int)
+	{
+		printf("RELEASE\n");
+		Fw.KeyboardInput(Key, false);
+	});
+
+	//glutSpecialFunc([](int Key, int, int)
+	//{
+	//	Fw.KeyboardInput(Key, true);
+	//});
+	//
+	//glutSpecialUpFunc([](int Key, int, int)
+	//{
+	//	Fw.KeyboardInput(Key, false);
+	//});
 }
 
 void Framework::ResetClock()
@@ -94,6 +118,12 @@ void Framework::GetWindowSizef(float * WinWidth, float * WinHeight) const
 {
 	*WinWidth = static_cast<float>(m_WindowWidth);
 	*WinHeight = static_cast<float>(m_WindowHeight);
+}
+
+void Framework::KeyboardInput(int Value, bool Pressed)
+{
+	if (!m_CurrentScene) return;
+	m_CurrentScene->HandleInput(Value, Pressed);
 }
 
 BOOL WINAPI Framework::CloseConsole(DWORD dwCtrlType)
@@ -125,6 +155,8 @@ void Framework::Run()
 	Engine.Initialize();
 	BindFunctions();
 	ChangeScenes();
+	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+	GLUT_KEY_UP;
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_ALPHA_TEST);
@@ -142,17 +174,18 @@ void Framework::Loop()
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClearDepth(FARTHEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	m_CurrentTime = Time::now();
 	m_TimeFrame = TimeDuration(m_CurrentTime - m_PreviousTime).count();
 	m_PreviousTime = m_CurrentTime;
 	m_TimeAccumulator += m_TimeFrame;
-	
+
 	while (m_TimeAccumulator >= UPDATE_TIME)
 	{
 		m_CurrentScene->Update(); 
 		m_TimeAccumulator -= UPDATE_TIME;
 	}
+
 	m_CurrentScene->Render(m_TimeAccumulator * UPDATE_FREQUENCY);
 
 	if(m_ShiftScene != NULL)

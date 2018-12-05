@@ -23,8 +23,8 @@ public:
 class ForceCommand : public Command
 {
 public:
-	ForceCommand(DX FXMVECTOR force) :
-		Force(DX3 Store(force)) {}
+	ForceCommand(float x, float y, float z) :
+		Force(x, y, z) {}
 	virtual ~ForceCommand() {}
 	
 	virtual void execute(size_t Index);

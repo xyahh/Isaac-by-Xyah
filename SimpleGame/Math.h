@@ -1,4 +1,5 @@
 #pragma once
+#include <float.h>
 #define DX		DirectX::
 #define DX2		DX V2::
 #define DX3		DX V3::
@@ -10,6 +11,11 @@
 inline bool Zero(float fValue)
 {
 	return  fabsf(fValue) < FLT_EPSILON;
+}
+
+inline int Less(float fA, float fB)
+{
+	return fA - fB < -FLT_EPSILON;
 }
 
 inline void Clamp(float lowest, float * n, float highest)

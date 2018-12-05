@@ -137,6 +137,7 @@ void Physics::Update()
 	DX XMVECTOR Velocity = DX3 Load(m_Velocity);
 	DX XMVECTOR Acceleration = DX3 Load(m_Acceleration);
 
+
 	/* --- Gravity -----------------------------------------------------------------------------*/
 	Acceleration = DX Add(Acceleration, { 0.f, 0.f, m_Gravity });
 	/* -----------------------------------------------------------------------------------------*/
@@ -144,6 +145,7 @@ void Physics::Update()
 	/* --- Friction ----------------------------------------------------------------------------*/
 	float FrictionAccel = m_Friction * m_Gravity;
 	float FrictionSpeed = FrictionAccel * UPDATE_TIME;
+	//printf("%f\n", m_Friction);
 
 	DX XMVECTOR FrictionVelocity = DX Scale(DX3 Normalize(Velocity), FrictionSpeed);
 	DX XMVECTOR PreviousVelocity = Velocity;
@@ -155,6 +157,7 @@ void Physics::Update()
 		DX Multiply(Velocity, PreviousVelocity),
 		DX XMVectorZero()
 	);
+	
 	Velocity = DX Multiply(Velocity, DX Evaluate(FrictionError));
 	/* -----------------------------------------------------------------------------------------*/
 

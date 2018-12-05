@@ -15,24 +15,21 @@ public:
 	virtual void Update(size_t Index) = 0;
 	virtual State* Make() = 0;
 
+	virtual size_t Name() const = 0;
+
 protected:
 
-	void HandleInput(size_t ObjectIndex);
 
 	State* Assemble(State* pState)
 	{
-		pState->pInput = pInput;
 		return pState;
 	}
 
 	/* 
-		Prototypes hold the Data for Input. 
-		ObjectStates will only hold a pointer to
-		that Data because we do not want to manage the memory
-		of Input each time  a State is deleted
-		into every Object's state.
+		Prototypes hold the Data for Storage when 
+		next State is created of the same Type. 
+		(Note: Non-prototype State pointers are deleted after change / pop!)
 	*/
-	Input* pInput;
 };
 
 class NullState : public State
@@ -47,6 +44,8 @@ private:
 	virtual void Enter(size_t ObjectIndex);
 	virtual void Update(size_t ObjectIndex);
 	virtual void Exit(size_t ObjectIndex);
+
+	virtual size_t Name() const { return size_t(); }
 
 	virtual State* Make()	{	return Assemble(new NullState); }
 };
@@ -74,6 +73,8 @@ private:
 	virtual void Update(size_t ObjectIndex);
 	virtual void Exit(size_t ObjectIndex);
 
+	virtual size_t Name() const { return ST::IDLE; }
+
 	virtual State* Make()	{ return Assemble(new IdleState); }
 };
 
@@ -100,6 +101,8 @@ private:
 	virtual void Update(size_t ObjectIndex);
 	virtual void Exit(size_t ObjectIndex);
 
+	virtual size_t Name() const { return ST::MOVE; }
+
 	virtual State* Make() { return Assemble(new MoveState); }
 };
 
@@ -125,6 +128,8 @@ private:
 	virtual void Enter(size_t ObjectIndex);
 	virtual void Update(size_t ObjectIndex);
 	virtual void Exit(size_t ObjectIndex);
+	
+	virtual size_t Name() const { return ST::CHARGE_JUMP; }
 
 	virtual State* Make() { return Assemble(new ChargeJumpState(RageRate, Force)); }
 
@@ -138,7 +143,8 @@ class InAirState : public State
 {
 public:
 
-	InAirState(float AirResistance)
+	InAirState(float AirResistance) :
+		AirResistance(AirResistance)
 	{ 
 #ifdef CYAN_DEBUG_STATES
 		printf("InAirState Created!\n"); 
@@ -156,6 +162,8 @@ private:
 	virtual void Enter(size_t ObjectIndex);
 	virtual void Update(size_t ObjectIndex);
 	virtual void Exit(size_t ObjectIndex);
+
+	virtual size_t Name() const { return ST::IN_AIR; }
 
 	virtual State* Make() { return Assemble(new InAirState(AirResistance)); }
 
@@ -186,6 +194,8 @@ private:
 	virtual void Update(size_t ObjectIndex);
 	virtual void Exit(size_t ObjectIndex);
 
+	virtual size_t Name() const { return ST::CHARGE_SLAM; }
+
 	virtual State* Make() { return Assemble(new ChargeSlamState(RageRate)); }
 
 private:
@@ -213,12 +223,13 @@ public:
 #endif
 	}
 
+private:
+
 	virtual void Enter(size_t ObjectIndex);
 	virtual void Update(size_t ObjectIndex);
 	virtual void Exit(size_t ObjectIndex);
 
-
-private:
+	virtual size_t Name() const { return ST::SLAM; }
 
 	virtual State* Make() { return Assemble(new SlamState(SlamForce)); }
 
@@ -244,12 +255,14 @@ public:
 #endif
 	}
 
+private:
+
 	virtual void Enter(size_t ObjectIndex);
 	virtual void Update(size_t ObjectIndex);
 	virtual void Exit(size_t ObjectIndex);
 
+	virtual size_t Name() const { return ST::SHOOT; }
 
-private:
 	virtual State* Make() { return Assemble(new ShootState(ShootingRate, ShootingForce)); }
 	
 	float Time;

@@ -16,7 +16,7 @@ public:
 		m_Velocity(0.f, 0.f, 0.f),
 		m_Acceleration(0.f, 0.f, 0.f),
 		m_Friction(1.f),
-		m_Gravity(-1.f * EARTH_GRAVITY),
+		m_Gravity(EARTH_GRAVITY * -1.f),
 		m_Collision(NULL)
 	{}
 	~Physics() {}

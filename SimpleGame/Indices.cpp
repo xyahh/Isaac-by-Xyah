@@ -17,6 +17,7 @@ namespace ST
 	size_t IN_AIR;
 	size_t CHARGE_SLAM;
 	size_t SLAM;
+	size_t SHOOT;
 }
 
 namespace CMD
@@ -31,11 +32,19 @@ namespace CMD
 	size_t SLOW_MOVE_LEFT;
 	size_t SLOW_MOVE_RIGHT;
 
-	size_t CHARGE_JUMP;
+	size_t START_CHARGE_JUMP;
 
 	size_t START_MOVE;
 	size_t START_IN_AIR;
 	size_t START_CHARGE_SLAM;
+	size_t START_SHOOT;
+	size_t END_SHOOT;
+
+	size_t FACE_UP;
+	size_t FACE_DOWN;
+	size_t FACE_RIGHT;
+	size_t FACE_LEFT;
+
 }
 
 namespace OBJ

@@ -20,9 +20,10 @@ public:
 	void GetWindowSizei(int* WinWidth, int * WinHeight) const;
 	void GetWindowSizef(float * WinWidth, float * WinHeight) const;
 
+	void KeyboardInput(int Value, bool Pressed);
+
 	void Loop();
 	void Run();
-
 
 	BOOL WINAPI CloseConsole(DWORD dwCtrlType);
 
@@ -36,6 +37,7 @@ private:
 	void ChangeScenes();
 	
 private:
+
 
 	STD string  m_WindowTitle	{ "Default Title" };
 	int			m_WindowWidth	{ 500 };

@@ -1,9 +1,9 @@
 #pragma once
 
-enum SPRITETYPE
+enum SpriteType
 {
-	LINEAR,
-	GRID
+	Linear,
+	Grid
 };
 
 class Sprite
@@ -13,7 +13,7 @@ class Sprite
 public:
 
 	Sprite() :
-		SpriteType(SPRITETYPE::LINEAR),
+		Type(SpriteType::Linear),
 		FrameRate(0),
 		CurrentFrame(0.f),
 		Current(0, 0),
@@ -33,7 +33,7 @@ public:
 	void XM_CALLCONV SetTotal(DX FXMVECTOR _Total);
 	void XM_CALLCONV SetOffset(DX FXMVECTOR _Offset);
 
-	void SetSpriteType(SPRITETYPE Type);
+	void SetSpriteType(SpriteType Type);
 	void SetFrameRate(float FrameRate);
 	
 	bool Update();
@@ -53,8 +53,8 @@ public:
 	DX XMVECTOR XM_CALLCONV GetOffset() const;
 
 private:
-	SPRITETYPE	SpriteType;
-	size_t			TexIndex;
+	SpriteType	Type;
+	size_t		TexIndex;
 	float		FrameRate;
 	float		CurrentFrame;
 	DX XMUINT2	Current;

@@ -21,9 +21,6 @@
     <ClInclude Include="CyanEngine.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="LoadPng.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Gameplay.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -144,9 +141,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Collision.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="LoadPng.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Descriptor.cpp">

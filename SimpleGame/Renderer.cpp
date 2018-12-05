@@ -1,11 +1,35 @@
 #include "stdafx.h"
 #include "Renderer.h"
 
+
+#include <atlimage.h>
 #include <fstream>
 #include "Dependencies/GL/glew.h"
-#include "LoadPng.h"
 #include "World.h"
 #include "Framework.h"
+
+
+/* CImage to Unsigned Char Vector */
+STD vector<unsigned char> GetImageBits(const CImage & Image)
+{
+	STD vector<GLubyte> ImageBits;
+	BITMAP BMP;
+	GetObject(Image, sizeof(BITMAP), &BMP);
+	BITMAPINFOHEADER BMPHeader{ 0 };
+	BMPHeader.biSize = sizeof(BITMAPINFOHEADER);
+	BMPHeader.biWidth = BMP.bmWidth;
+	BMPHeader.biHeight = BMP.bmHeight;
+	BMPHeader.biPlanes = 1;
+	BMPHeader.biBitCount = Image.GetBPP();
+	BMPHeader.biCompression = (BI_RGB);
+
+	HDC hDC = ::GetDC(NULL);
+	GetDIBits(hDC, Image, 0, BMP.bmHeight, NULL, (LPBITMAPINFO)&BMPHeader, DIB_RGB_COLORS);
+	ImageBits.resize(BMPHeader.biSizeImage);
+	GetDIBits(hDC, Image, 0, BMP.bmHeight, &(ImageBits[0]), (LPBITMAPINFO)&BMPHeader, DIB_RGB_COLORS);
+	ReleaseDC(NULL, hDC);
+	return ImageBits;
+}
 
 DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 {
@@ -43,63 +67,69 @@ bool Renderer::Initialize()
 {
 	//Load shaders
 	m_TextureRectShader = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
-	m_TextureRectSeqShader = CompileShaders("./Shaders/TextureRectSeq.vs", "./Shaders/TextureRectSeq.fs");
+	m_TextureSpriteShader = CompileShaders("./Shaders/TextureRectSeq.vs", "./Shaders/TextureRectSeq.fs");
 
 	//Load shadow texture
-	m_TexShadow = CreatePngTexture("./Resources/shadow.png");
+	m_TexShadow = GenerateTexture("./Resources/shadow.png");
 #ifdef CYAN_DEBUG_COLLISION
-	m_DebugRect = CreatePngTexture("./Resources/debug_rect.png");
+	m_DebugRect = GenerateTexture("./Resources/debug_rect.png");
 #endif
 
 	//Create VBOs
 	CreateVertexBufferObjects();
 
-	return (m_TextureRectSeqShader > 0 && m_VBOTexRect > 0);
+	return (m_TextureSpriteShader > 0 && m_VBOTexRect > 0);
 }
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float texRect[]
+	float TexRect[]
 		=
 	{
-		-1.f, -1.f, 0.f, 0.f, 1.f,
-		-1.f, +1.f, 0.f, 0.f, 0.f,
-		+1.f, +1.f, 0.f, 1.f, 0.f, //Triangle1
-		-1.f, -1.f, 0.f, 0.f, 1.f,
-		+1.f, +1.f, 0.f, 1.f, 0.f,
-		+1.f, -1.f, 0.f, 1.f, 1.f //Triangle2
+		-1.f, -1.f, 0.f, 0.f, 0.f,
+		-1.f, +1.f, 0.f, 0.f, 1.f,
+		+1.f, +1.f, 0.f, 1.f, 1.f, //Triangle1
+		-1.f, -1.f, 0.f, 0.f, 0.f,
+		+1.f, +1.f, 0.f, 1.f, 1.f,
+		+1.f, -1.f, 0.f, 1.f, 0.f //Triangle2
 	};
 
 	glGenBuffers(1, &m_VBOTexRect);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTexRect);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(texRect), texRect, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TexRect), TexRect, GL_STATIC_DRAW);
 }
 
-u_int Renderer::CreatePngTexture(const STD string& filePath) const
+u_int Renderer::GenerateTexture(const STD string& filePath) const
 {
-	u_int temp;
-	glGenTextures(1, &temp);
+	u_int TexID;
 
-	//Load Pngs
-	// Load file and decode image.
-	STD vector<unsigned char> image;
-	unsigned width, height;
-	unsigned error = lodepng::decode(image, width, height, filePath);
+	CImage Image;
+	STD wstring Path{ filePath.begin(), filePath.end() };
+	Image.Load(Path.c_str());
 
-	glBindTexture(GL_TEXTURE_2D, temp);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
+	glGenTextures(1, &TexID);
+	glBindTexture(GL_TEXTURE_2D, TexID);
 
-	return temp;
+	int BitsPerPixel = Image.GetBPP() / 8;
+
+	GLenum Format = GL_BGR_EXT;
+	if (BitsPerPixel == 4)
+		Format = GL_BGRA_EXT;
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, BitsPerPixel, Image.GetWidth(), Image.GetHeight(), 0, Format, GL_UNSIGNED_BYTE, GetImageBits(Image).data());
+	return TexID;
+	
 }
 
-void Renderer::DeleteTexture(u_int texID) const
+void Renderer::DeleteTexture(u_int TexID) const
 {
-	glDeleteTextures(1, &texID);
+	glDeleteTextures(1, &TexID);
 }
 
-void Renderer::AddShader(u_int ShaderProgram, const char* pShaderText, u_int ShaderType) const
+void Renderer::AddShader(u_int ShaderProgram, const STD string& pShaderText, u_int ShaderType) const
 {
 	//쉐이더 오브젝트 생성
 	u_int ShaderObj = glCreateShader(ShaderType);
@@ -108,12 +138,10 @@ void Renderer::AddShader(u_int ShaderProgram, const char* pShaderText, u_int Sha
 		fprintf(stderr, "Error creating shader type %d\n", ShaderType);
 	}
 
-	const GLchar* p[1];
-	p[0] = pShaderText;
-	GLint Lengths[1];
-	Lengths[0] = strlen(pShaderText);
+	GLchar const* files[] = { pShaderText.c_str() };
+	GLint lengths[] = { static_cast<GLint>(pShaderText.size()) };
 	//쉐이더 코드를 쉐이더 오브젝트에 할당
-	glShaderSource(ShaderObj, 1, p, Lengths);
+	glShaderSource(ShaderObj, 1, files, lengths);
 
 	//할당된 쉐이더 코드를 컴파일
 	glCompileShader(ShaderObj);
@@ -121,13 +149,13 @@ void Renderer::AddShader(u_int ShaderProgram, const char* pShaderText, u_int Sha
 	GLint success;
 	// ShaderObj 가 성공적으로 컴파일 되었는지 확인
 	glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
-	if (!success) {
+	if (!success) 
+	{
 		GLchar InfoLog[1024];
-
 		//OpenGL 의 shader log 데이터를 가져옴
 		glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
 		fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
-		printf("%s \n", pShaderText);
+		printf("%s \n", pShaderText.c_str());
 	}
 
 	// ShaderProgram 에 attach!!
@@ -171,44 +199,33 @@ void XM_CALLCONV Renderer::DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size,
 	glDisable(GL_BLEND);
 }
 
-bool Renderer::ReadFile(char* filename, STD string *target) const
+bool Renderer::ReadFile(const STD string& filename, STD string *target) const
 {
 	STD ifstream file(filename);
-	if (file.fail())
-	{
-		STD cout << filename << " file loading failed.. \n";
-		file.close();
-		return false;
-	}
 	STD string line;
-	while (getline(file, line)) {
-		target->append(line.c_str());
-		target->append("\n");
-	}
+	if (!file)
+		return (STD cout << filename << " file loading failed.. \n" << STD endl, false);
+	while (getline(file, line)) 
+		target->append(line +  "\n");
 	return true;
 }
 
-u_int Renderer::CompileShaders(char* filenameVS, char* filenameFS) const
+u_int Renderer::CompileShaders(const STD string& filenameVS, const STD string&  filenameFS) const
 {
 	u_int ShaderProgram = glCreateProgram(); //빈 쉐이더 프로그램 생성
 
-	if (ShaderProgram == 0) { //쉐이더 프로그램이 만들어졌는지 확인
+	if (ShaderProgram == 0) 
+	{ //쉐이더 프로그램이 만들어졌는지 확인
 		fprintf(stderr, "Error creating shader program\n");
 	}
 
 	STD string vs, fs;
 
 	//shader.vs 가 vs 안으로 로딩됨
-	if (!ReadFile(filenameVS, &vs)) {
-		printf("Error compiling vertex shader\n");
-		return -1;
-	};
+	if (!ReadFile(filenameVS, &vs)) return (printf("Error compiling vertex shader\n"), -1);
 
 	//shader.fs 가 fs 안으로 로딩됨
-	if (!ReadFile(filenameFS, &fs)) {
-		printf("Error compiling fragment shader\n");
-		return -1;
-	};
+	if (!ReadFile(filenameFS, &fs)) return (printf("Error compiling fragment shader\n"), -1);
 
 	// ShaderProgram 에 vs.c_str() 버텍스 쉐이더를 컴파일한 결과를 attach함
 	AddShader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
@@ -256,10 +273,12 @@ void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR
 	DX XMVECTOR GreenRect = GLPos;
 	DX XMVECTOR YellowRect = GLPos;
 
-	DX SetY(&BlueRect, DX GetY(BlueRect) + DX GetZ(BlueRect));
 	DX XMVECTOR BlueSize = DX Swizzle(GLSize, 0, 2, 2, 3);
-	DX SetY(&GreenRect, DX GetY(BlueRect) + DX GetZ(GLSize));
-	DX SetY(&YellowRect, DX GetY(BlueRect) - DX GetZ(GLSize));
+	float BlueRectY = DX GetY(BlueRect) + DX GetZ(BlueRect);
+	float BlueSizeY = DX GetY(BlueSize);
+	DX SetY(&BlueRect, BlueRectY );
+	DX SetY(&GreenRect, BlueRectY + BlueSizeY);
+	DX SetY(&YellowRect, BlueRectY - BlueSizeY);
 
 	float Depth = DX GetY(GLPos);
 
@@ -275,13 +294,6 @@ void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR
 }
 #endif
 
-void XM_CALLCONV Renderer::DrawTexRect(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const
-{
-	DX XMVECTOR GLPos = GetGLPos(Position);
-	DX XMVECTOR GLSize = GetGLSize(Size);
-	DrawTexture(GLPos, GLSize, Color, TexID);
-}
-
 void XM_CALLCONV Renderer::DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color) const
 {
 	DX XMVECTOR GLPos = GetGLPos(Position);
@@ -296,7 +308,7 @@ void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
 	DX XMVECTOR GLPos = GetGLPos(Position);
 	DX XMVECTOR GLSize = GetGLSize(Size);
 
-	u_int shader = m_TextureRectSeqShader;
+	u_int shader = m_TextureSpriteShader;
 
 	//Program select
 	glUseProgram(shader);
