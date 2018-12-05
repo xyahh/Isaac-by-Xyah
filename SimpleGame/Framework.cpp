@@ -3,43 +3,45 @@
 
 #include <iostream>
 
-#include "Dependencies/GL/glew.h"
-#include "Dependencies/GL/freeglut.h"
 #include "Scene.h"
 #include "CyanEngine.h"
 
 Framework Fw;
+
+
+
 
 Framework::~Framework()
 {
 	Close();
 }
 
-void Framework::Initialize(const STD string & strWindowsTitle, int width, int height, int argc, char* argv[])
+BOOL Framework::Initialize(const STD string & strWindowsTitle, int width, int height, int argc, char* argv[])
 {
 	m_WindowTitle = strWindowsTitle;
 	m_WindowWidth = width;
 	m_WindowHeight = height;
 
-	// Initialize GL stuff
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(
-		(glutGet(GLUT_SCREEN_WIDTH) - m_WindowWidth) / 2,
-		(glutGet(GLUT_SCREEN_HEIGHT) - m_WindowHeight) / 2
-	);
-	glutInitWindowSize(m_WindowWidth, m_WindowHeight);
-	glutCreateWindow(m_WindowTitle.c_str());
+	//// Initialize GL stuff
+	//glutInit(&argc, argv);
+	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	//glutInitWindowPosition(
+	//	(glutGet(GLUT_SCREEN_WIDTH) - m_WindowWidth) / 2,
+	//	(glutGet(GLUT_SCREEN_HEIGHT) - m_WindowHeight) / 2
+	//);
+	//glutInitWindowSize(m_WindowWidth, m_WindowHeight);
+	//glutCreateWindow(m_WindowTitle.c_str());
+	//
+	////Disable Maximize and Resizing
+	//HWND hWnd = FindWindowA(NULL, m_WindowTitle.c_str());
+	//DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
+	//dwStyle &= ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
+	//SetWindowLong(hWnd, GWL_STYLE, dwStyle);
 
-	//Disable Maximize and Resizing
-	HWND hWnd = FindWindowA(NULL, m_WindowTitle.c_str());
-	DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
-	dwStyle &= ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
-	SetWindowLong(hWnd, GWL_STYLE, dwStyle);
-	
 
 
-	glewInit();
+	return 1;
+
 }
 
 void Framework::Fullscreen()
@@ -51,43 +53,96 @@ void Framework::Fullscreen()
 
 void Framework::Close()
 {
+	if (m_HRC)                                // Do We Have A Rendering Context?
+	{
+		if (!wglMakeCurrent(NULL, NULL))  
+			MessageBox
+			(
+				NULL, 
+				L"Release Of DC And RC Failed.", 
+				L"SHUTDOWN ERROR", 
+				MB_OK | MB_ICONINFORMATION
+			);
+		if (!wglDeleteContext(m_HRC))  
+			MessageBox
+			(
+				NULL, 
+				L"Release Rendering Context Failed.", 
+				L"SHUTDOWN ERROR", 
+				MB_OK | MB_ICONINFORMATION
+			);
+		m_HRC = NULL;                           // Set RC To NULL
+	}
+	if (m_HDC && !ReleaseDC(m_HWND, m_HDC))                    // Are We Able To Release The DC
+	{
+		MessageBox
+		(
+			NULL, 
+			L"Release Device Context Failed.", 
+			L"SHUTDOWN ERROR", 
+			MB_OK | MB_ICONINFORMATION
+		);
+		m_HDC = NULL;                           // Set DC To NULL
+	}
+	if (m_HWND && !DestroyWindow(m_HWND))                   // Are We Able To Destroy The Window?
+	{
+		MessageBox
+		(
+			NULL, 
+			L"Could Not Release hWnd.", 
+			L"SHUTDOWN ERROR", 
+			MB_OK | MB_ICONINFORMATION
+		);
+		m_HWND = NULL;                          // Set hWnd To NULL
+	}
+	if (!UnregisterClass(L"OpenGL", m_hInstance))               // Are We Able To Unregister Class
+	{
+		MessageBox
+		(
+			NULL, 
+			L"Could Not Unregister Class.", 
+			L"SHUTDOWN ERROR", 
+			MB_OK | MB_ICONINFORMATION
+		);
+		m_hInstance = NULL;                         // Set hInstance To NULL
+	}
 	Engine.Destroy();
 }
 
 void Framework::BindFunctions()
 {
-	SetConsoleCtrlHandler([](DWORD dw)->BOOL
-	{
-		return Fw.CloseConsole(dw);
-	}, TRUE);
-	glutDisplayFunc([]()
-	{
-		Fw.Loop();
-	});
-	glutIdleFunc([]()
-	{
-		Fw.Loop();
-	});
-	glutCloseFunc([]()
-	{
-		Fw.Close();
-	});
-	atexit([]()
-	{
-		Fw.Close();
-	});
+	//SetConsoleCtrlHandler([](DWORD dw)->BOOL
+	//{
+	//	return Fw.CloseConsole(dw);
+	//}, TRUE);
+	//glutDisplayFunc([]()
+	//{
+	//	Fw.Loop();
+	//});
+	//glutIdleFunc([]()
+	//{
+	//	Fw.Loop();
+	//});
+	//glutCloseFunc([]()
+	//{
+	//	Fw.Close();
+	//});
+	//atexit([]()
+	//{
+	//	Fw.Close();
+	//});
 
-	glutKeyboardFunc([](unsigned char Key, int, int) 
-	{
-		printf("PRESS\n");
-		Fw.KeyboardInput(Key, true);
-	});
+	//glutKeyboardFunc([](unsigned char Key, int, int) 
+	//{
+	//	printf("PRESS\n");
+	//	Fw.KeyboardInput(Key, true);
+	//});
 
-	glutKeyboardUpFunc([](unsigned char Key, int, int)
-	{
-		printf("RELEASE\n");
-		Fw.KeyboardInput(Key, false);
-	});
+	//glutKeyboardUpFunc([](unsigned char Key, int, int)
+	//{
+	//	printf("RELEASE\n");
+	//	Fw.KeyboardInput(Key, false);
+	//});
 
 	//glutSpecialFunc([](int Key, int, int)
 	//{
@@ -153,10 +208,10 @@ void Framework::Run()
 {
 	Scene::m_Framework = this;
 	Engine.Initialize();
-	BindFunctions();
+	//BindFunctions();
 	ChangeScenes();
-	glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
-	GLUT_KEY_UP;
+	//glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+	//GLUT_KEY_UP;
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_ALPHA_TEST);
@@ -166,7 +221,7 @@ void Framework::Run()
 	glDepthRange(NEAREST, FARTHEST);
 
 	ResetClock();
-	glutMainLoop();
+	//glutMainLoop();
 }
 
 void Framework::Loop()
@@ -190,5 +245,4 @@ void Framework::Loop()
 
 	if(m_ShiftScene != NULL)
 		ChangeScenes();
-	glutSwapBuffers();
 }	

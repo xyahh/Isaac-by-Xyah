@@ -1,5 +1,7 @@
 #pragma once
 #include <chrono>
+#include "Dependencies/GL/glew.h"
+#include "Dependencies/GL/freeglut.h"
 
 class Framework
 {
@@ -13,7 +15,7 @@ public:
 	Framework() {}
 	~Framework();
 
-	void Initialize(const STD string& strWindowsTitle, int width, int height, int argc, char* argv[]);
+	BOOL Initialize(const STD string& strWindowsTitle, int width, int height, int argc, char* argv[]);
 	void Fullscreen();
 	void Close();
 
@@ -37,7 +39,10 @@ private:
 	void ChangeScenes();
 	
 private:
-
+	HGLRC		m_HRC{ NULL };
+	HDC			m_HDC{ NULL };
+	HWND		m_HWND{ NULL };
+	HINSTANCE	m_hInstance;
 
 	STD string  m_WindowTitle	{ "Default Title" };
 	int			m_WindowWidth	{ 500 };
