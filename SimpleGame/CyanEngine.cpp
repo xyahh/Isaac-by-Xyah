@@ -113,7 +113,8 @@ void Cyan::HandleInput(int KeyValue, bool Pressed)
 
 	KeyInfo Key{ KeyValue, Pressed, 0 };
 	for (size_t i = 0; i < m_States.size(); ++i)
-		m_Input[i][m_States[i].top()->Name()].ReceiveInput(Key);
+		if(!m_States[i].empty())
+			m_Input[i][m_States[i].top()->Name()].ReceiveInput(Key);
 }
 
 void Cyan::AddObject(size_t * Out)

@@ -26,7 +26,7 @@ void Logo::Exit()
 void Logo::Render(float fInterpolation)
 {
 	if (Fade < 0.f)
-		m_Framework->ToScene(new Menu);
+		m_Framework->Play<Menu>();
 	Engine.Render(fInterpolation);
 }
 

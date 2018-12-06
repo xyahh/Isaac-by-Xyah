@@ -49,19 +49,6 @@ private:
 	u_int Direction;
 };
 
-class ToSceneCommand : public Command
-{
-public:
-	ToSceneCommand(Scene* scene) :
-		m_Scene(scene) {}
-	virtual ~ToSceneCommand() {}
-
-	virtual void execute(size_t Index);
-
-private:
-	Scene*		m_Scene;
-};
-
 class StateCommand : public Command
 {
 public:

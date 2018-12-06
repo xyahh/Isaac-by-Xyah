@@ -20,7 +20,6 @@ enum Direction
 class Cyan
 {
 	friend Framework;
-
 	using Action = STD function<void()>;
 
 public:

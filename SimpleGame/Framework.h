@@ -13,28 +13,28 @@ class Framework
 public:	
 
 	Framework() {}
-	~Framework();
+	~Framework() {}
 
-	BOOL Initialize(const STD string& strWindowsTitle, int width, int height, int argc, char* argv[]);
-	void Fullscreen();
+	bool Initialize(const STD string& Title, int Width, int Height);
 	void Close();
 
 	void GetWindowSizei(int* WinWidth, int * WinHeight) const;
 	void GetWindowSizef(float * WinWidth, float * WinHeight) const;
 
-	void KeyboardInput(int Value, bool Pressed);
+	int Run();
 
-	void Loop();
-	void Run();
-
+	LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 	BOOL WINAPI CloseConsole(DWORD dwCtrlType);
 
-	void ToScene(Scene*& pScene) = delete;
-	void ToScene(Scene*&& pScene);
+	template<class T>
+	void Play()
+	{
+		if(m_ShiftScene == NULL)
+			m_ShiftScene = new T;
+	}
 	
 private:
 
-	void BindFunctions();
 	void ResetClock();
 	void ChangeScenes();
 	

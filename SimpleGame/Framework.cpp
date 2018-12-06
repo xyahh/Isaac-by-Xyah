@@ -5,154 +5,165 @@
 
 #include "Scene.h"
 #include "CyanEngine.h"
+#include "DevConsole.h"
+#include "resource.h"
 
 Framework Fw;
-
-
-
-
-Framework::~Framework()
+bool Framework::Initialize(const STD string & Title, int Width, int Height)
 {
-	Close();
+#ifdef CYAN_DEBUG_CONSOLE
+	DevConsole::Create();
+#endif
+
+	m_WindowTitle = Title;
+	m_WindowWidth = Width;
+	m_WindowHeight = Height;
+
+	STD wstring WinTitle{ Title.begin(), Title.end() };
+	RECT WindowRect
+	{
+		0, 0,
+		Width, Height
+	};
+
+	WNDCLASS    wc;
+	DWORD       dwExStyle;
+	DWORD       dwStyle;
+
+	LPCTSTR lpszClass = TEXT("OpenGL");
+	m_hInstance = GetModuleHandle(NULL);
+	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+	wc.lpfnWndProc = (WNDPROC)[](HWND h, UINT u, WPARAM w, LPARAM l)->LRESULT 
+	{ 
+		return Fw.WndProc(h, u, w, l); 
+	};
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = m_hInstance;
+	wc.hIcon = LoadIcon(m_hInstance, MAKEINTRESOURCE(IDI_ICON1));
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = NULL;
+	wc.lpszMenuName = NULL;
+	wc.lpszClassName = lpszClass;
+	RegisterClass(&wc);
+
+	dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+	dwStyle = WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
+	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);
+
+	RECT ScreenSize;
+	GetWindowRect(GetDesktopWindow(), &ScreenSize);
+
+	POINT Center
+	{
+		(ScreenSize.right - WindowRect.right) / 2 ,
+		(ScreenSize.bottom - WindowRect.bottom) / 2
+	};
+
+	// Create The Window
+	m_HWND = CreateWindowEx
+	(
+		dwExStyle,
+		lpszClass,
+		WinTitle.c_str(),
+		dwStyle | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+		Center.x, Center.y,
+		Width, Height,
+		NULL,
+		NULL,
+		m_hInstance,
+		NULL
+	);
+
+	PIXELFORMATDESCRIPTOR pfd;
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 32;
+	pfd.cDepthBits = 32;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+
+	m_HDC = GetDC(m_HWND);
+
+	GLuint PixelFormat = ChoosePixelFormat(m_HDC, &pfd);
+	SetPixelFormat(m_HDC, PixelFormat, &pfd);
+	m_HRC = wglCreateContext(m_HDC);
+	wglMakeCurrent(m_HDC, m_HRC);
+
+	ShowWindow(m_HWND, SW_SHOW);  
+	SetForegroundWindow(m_HWND);  
+	SetFocus(m_HWND);
+	glewInit();
+
+	UpdateWindow(m_HWND);
+
+	
+	return TRUE;
 }
 
-BOOL Framework::Initialize(const STD string & strWindowsTitle, int width, int height, int argc, char* argv[])
+LRESULT CALLBACK Framework::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LPARAM  lParam)
 {
-	m_WindowTitle = strWindowsTitle;
-	m_WindowWidth = width;
-	m_WindowHeight = height;
+	PAINTSTRUCT ps;
+	HDC hdc;
 
-	//// Initialize GL stuff
-	//glutInit(&argc, argv);
-	//glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	//glutInitWindowPosition(
-	//	(glutGet(GLUT_SCREEN_WIDTH) - m_WindowWidth) / 2,
-	//	(glutGet(GLUT_SCREEN_HEIGHT) - m_WindowHeight) / 2
-	//);
-	//glutInitWindowSize(m_WindowWidth, m_WindowHeight);
-	//glutCreateWindow(m_WindowTitle.c_str());
-	//
-	////Disable Maximize and Resizing
-	//HWND hWnd = FindWindowA(NULL, m_WindowTitle.c_str());
-	//DWORD dwStyle = GetWindowLong(hWnd, GWL_STYLE);
-	//dwStyle &= ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
-	//SetWindowLong(hWnd, GWL_STYLE, dwStyle);
+	switch (uMsg)
+	{
+	case WM_SYSCOMMAND:
+	{
+		switch (wParam)
+		{
+		case SC_SCREENSAVE:
+		case SC_MONITORPOWER:
+			return 0;
+		}
+		break;
+	}
+	case WM_CLOSE:
+	{
+		PostQuitMessage(0);
+		return 0;
+	}
 
+	case WM_KEYDOWN:
+	{
+		if(m_CurrentScene)
+			m_CurrentScene->HandleInput(wParam, true);
+		return 0;
+	}
 
+	case WM_KEYUP:
+	{
+		if (m_CurrentScene)
+			m_CurrentScene->HandleInput(wParam, false);
+		//keys[wParam] = FALSE;         
+		return 0;
+	}
 
-	return 1;
+	case WM_SIZE:
+	{
 
-}
+		return 0;
+	}
+	}
 
-void Framework::Fullscreen()
-{
-	m_WindowWidth = glutGet(GLUT_SCREEN_WIDTH);
-	m_WindowHeight = glutGet(GLUT_SCREEN_HEIGHT);
-	glutFullScreen();
+	// Pass All Unhandled Messages To DefWindowProc
+	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
 void Framework::Close()
 {
-	if (m_HRC)                                // Do We Have A Rendering Context?
-	{
-		if (!wglMakeCurrent(NULL, NULL))  
-			MessageBox
-			(
-				NULL, 
-				L"Release Of DC And RC Failed.", 
-				L"SHUTDOWN ERROR", 
-				MB_OK | MB_ICONINFORMATION
-			);
-		if (!wglDeleteContext(m_HRC))  
-			MessageBox
-			(
-				NULL, 
-				L"Release Rendering Context Failed.", 
-				L"SHUTDOWN ERROR", 
-				MB_OK | MB_ICONINFORMATION
-			);
-		m_HRC = NULL;                           // Set RC To NULL
-	}
-	if (m_HDC && !ReleaseDC(m_HWND, m_HDC))                    // Are We Able To Release The DC
-	{
-		MessageBox
-		(
-			NULL, 
-			L"Release Device Context Failed.", 
-			L"SHUTDOWN ERROR", 
-			MB_OK | MB_ICONINFORMATION
-		);
-		m_HDC = NULL;                           // Set DC To NULL
-	}
-	if (m_HWND && !DestroyWindow(m_HWND))                   // Are We Able To Destroy The Window?
-	{
-		MessageBox
-		(
-			NULL, 
-			L"Could Not Release hWnd.", 
-			L"SHUTDOWN ERROR", 
-			MB_OK | MB_ICONINFORMATION
-		);
-		m_HWND = NULL;                          // Set hWnd To NULL
-	}
-	if (!UnregisterClass(L"OpenGL", m_hInstance))               // Are We Able To Unregister Class
-	{
-		MessageBox
-		(
-			NULL, 
-			L"Could Not Unregister Class.", 
-			L"SHUTDOWN ERROR", 
-			MB_OK | MB_ICONINFORMATION
-		);
-		m_hInstance = NULL;                         // Set hInstance To NULL
-	}
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(m_HRC);
+	m_HRC = NULL;
+	ReleaseDC(m_HWND, m_HDC);
+	DestroyWindow(m_HWND);
+	m_HDC = NULL;
+	m_HWND = NULL;
+	UnregisterClass(L"OpenGL", m_hInstance);
+	m_hInstance = NULL;
 	Engine.Destroy();
-}
-
-void Framework::BindFunctions()
-{
-	//SetConsoleCtrlHandler([](DWORD dw)->BOOL
-	//{
-	//	return Fw.CloseConsole(dw);
-	//}, TRUE);
-	//glutDisplayFunc([]()
-	//{
-	//	Fw.Loop();
-	//});
-	//glutIdleFunc([]()
-	//{
-	//	Fw.Loop();
-	//});
-	//glutCloseFunc([]()
-	//{
-	//	Fw.Close();
-	//});
-	//atexit([]()
-	//{
-	//	Fw.Close();
-	//});
-
-	//glutKeyboardFunc([](unsigned char Key, int, int) 
-	//{
-	//	printf("PRESS\n");
-	//	Fw.KeyboardInput(Key, true);
-	//});
-
-	//glutKeyboardUpFunc([](unsigned char Key, int, int)
-	//{
-	//	printf("RELEASE\n");
-	//	Fw.KeyboardInput(Key, false);
-	//});
-
-	//glutSpecialFunc([](int Key, int, int)
-	//{
-	//	Fw.KeyboardInput(Key, true);
-	//});
-	//
-	//glutSpecialUpFunc([](int Key, int, int)
-	//{
-	//	Fw.KeyboardInput(Key, false);
-	//});
 }
 
 void Framework::ResetClock()
@@ -175,21 +186,10 @@ void Framework::GetWindowSizef(float * WinWidth, float * WinHeight) const
 	*WinHeight = static_cast<float>(m_WindowHeight);
 }
 
-void Framework::KeyboardInput(int Value, bool Pressed)
-{
-	if (!m_CurrentScene) return;
-	m_CurrentScene->HandleInput(Value, Pressed);
-}
-
 BOOL WINAPI Framework::CloseConsole(DWORD dwCtrlType)
 {
 	Close();
 	return TRUE;
-}
-
-void Framework::ToScene(Scene*&& pScene)
-{
-	m_ShiftScene = pScene;
 }
 
 void Framework::ChangeScenes()
@@ -204,14 +204,16 @@ void Framework::ChangeScenes()
 	m_CurrentScene->Init();
 }
 
-void Framework::Run()
+int Framework::Run()
 {
 	Scene::m_Framework = this;
 	Engine.Initialize();
-	//BindFunctions();
 	ChangeScenes();
-	//glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
-	//GLUT_KEY_UP;
+
+	atexit([]()
+	{
+		Fw.Close();
+	});
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_ALPHA_TEST);
@@ -221,28 +223,50 @@ void Framework::Run()
 	glDepthRange(NEAREST, FARTHEST);
 
 	ResetClock();
-	//glutMainLoop();
-}
-
-void Framework::Loop()
-{
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	glClearDepth(FARTHEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	m_CurrentTime = Time::now();
-	m_TimeFrame = TimeDuration(m_CurrentTime - m_PreviousTime).count();
-	m_PreviousTime = m_CurrentTime;
-	m_TimeAccumulator += m_TimeFrame;
-
-	while (m_TimeAccumulator >= UPDATE_TIME)
+	MSG Message;
+	while (TRUE) 
 	{
-		m_CurrentScene->Update(); 
-		m_TimeAccumulator -= UPDATE_TIME;
+		if (PeekMessage(&Message, NULL, 0, 0, PM_REMOVE)) 
+		{
+			if (Message.message == WM_QUIT) break;
+			TranslateMessage(&Message);
+			DispatchMessage(&Message);
+		}
+		else
+		{
+			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+			glClearDepth(FARTHEST);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			m_CurrentTime = Time::now();
+			m_TimeFrame = TimeDuration(m_CurrentTime - m_PreviousTime).count();
+			m_PreviousTime = m_CurrentTime;
+			m_TimeAccumulator += m_TimeFrame;
+
+			while (m_TimeAccumulator >= UPDATE_TIME)
+			{
+				m_CurrentScene->Update();
+				m_TimeAccumulator -= UPDATE_TIME;
+			}
+			
+			m_CurrentScene->Render(m_TimeAccumulator * UPDATE_TIME);
+
+			if (m_ShiftScene != NULL)
+				ChangeScenes();
+
+			HPEN hPen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+			HPEN oldPen = (HPEN)SelectObject(m_HDC, hPen);
+			Ellipse(m_HDC, 100, 100, 200, 200);
+			SelectObject(m_HDC, oldPen);
+			DeleteObject(hPen);
+		
+			SwapBuffers(m_HDC);
+
+			
+		}
+
 	}
-
-	m_CurrentScene->Render(m_TimeAccumulator * UPDATE_FREQUENCY);
-
-	if(m_ShiftScene != NULL)
-		ChangeScenes();
-}	
+	
+	Close();
+	return (Message.wParam);
+}

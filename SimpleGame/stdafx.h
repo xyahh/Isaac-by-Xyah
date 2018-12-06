@@ -20,6 +20,8 @@
 #include "Indices.h"
 
 #define	STD		std::
+
+#define CYAN_DEBUG_CONSOLE
 //#define CYAN_DEBUG_STATES
 #define CYAN_DEBUG_COLLISION
 

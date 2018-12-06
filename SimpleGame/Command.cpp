@@ -10,11 +10,6 @@ void ForceCommand::execute(size_t ObjectIndex)
 	Engine.GetPhysics(ObjectIndex).ApplyForce(DX3 Load(Force));
 }
 
-void ToSceneCommand::execute(size_t ObjectIndex)
-{
-	Fw.ToScene(&*m_Scene);
-}
-
 void FaceCommand::execute(size_t ObjectIndex)
 {
 	Engine.GetSprite(ObjectIndex, SpriteIndex).SetDirection(Direction);
