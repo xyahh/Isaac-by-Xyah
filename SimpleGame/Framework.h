@@ -15,7 +15,7 @@ public:
 	Framework() {}
 	~Framework() {}
 
-	bool Initialize(const STD string& Title, int Width, int Height);
+	bool Initialize(const STD string& Title, int Width, int Height, bool EnableDevConsole=false);
 	void Close();
 
 	void GetWindowSizei(int* WinWidth, int * WinHeight) const;

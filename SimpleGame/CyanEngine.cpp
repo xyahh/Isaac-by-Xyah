@@ -97,12 +97,6 @@ void Cyan::Render(float fInterpolation)
 		m_Graphics[i].Render(m_Renderer, m_Physics[i], m_Sprites[i], fInterpolation);
 }
 
-void Cyan::HandleInput(int KeyValue, bool Pressed)
-{
-	//if (!m_States[0].empty())
-	//m_Input[0][m_States[0].top()->Name()].ReceiveInput({KeyValue, Pressed, 0});			
-}
-
 void Cyan::AddObject(size_t * Out)
 {
 	m_Descriptors.emplace_back();

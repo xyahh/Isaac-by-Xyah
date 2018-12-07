@@ -6,27 +6,34 @@
 
 void Menu::Init()
 {
-	//Engine.ReserveObjects(0, 0, 1, 1);
-	//
-	//Engine.AddSound("Menu", "./Resources/Sounds/menu.mp3", true);
-	//
-	//Engine.GetSound("Menu").Play();
-	//
-	//Engine.AddVisual("Title");
-	//Graphics& VisualGraphics = Engine.GetGraphics("Title");
-	//Engine.AddTexture("Title", "./Resources/title.png");
-	//VisualGraphics.AddSprite("Title");
-	//Sprite& Title = VisualGraphics.GetSprite("Title");
-	//
-	//Title.SetSize({ 20.f, 20.f });
-	//Title.SetTexID("Title");
-	//
-	//Engine.AddCommand("Next", new ShiftSceneCommand(*m_Framework, new Gameplay));
-	//
-	//Engine.AddStateType("GlobalState", new GlobalState);
-	//Engine.GetStateType("GlobalState")->GetInput("").AddKeyboardInput(VK_RETURN, "Next");
-	//
-	//Engine.AddNonActorState("GlobalState");
+	size_t MENU_SOUND;
+	Engine.AddSound(&MENU_SOUND, "./Resources/Sounds/menu.mp3", true);
+	Engine.GetSound(MENU_SOUND).Play();
+	
+	size_t TITLE_TEX;
+	Engine.AddTexture(&TITLE_TEX, "./Resources/title.png");
+
+	size_t TITLE;
+	Engine.AddObject(&TITLE);
+
+	size_t TITLE_SPRITE;
+	Engine.AddSprite(&TITLE_SPRITE, TITLE);
+	Sprite& TitleSprite = Engine.GetSprite(TITLE, TITLE_SPRITE);
+	TitleSprite.SetTexture(TITLE_TEX);
+	TitleSprite.SetSize({ 20.f, 20.f });
+
+	size_t START_GAME;
+	Engine.AddCommand<SceneCommand<Gameplay>>(&START_GAME);
+
+	size_t NULL_STATE;
+	Engine.AddStatePrototype<NullState>(&NULL_STATE);
+
+	Engine.AddObjectState(TITLE, NULL_STATE);
+	Input& TitleInput = Engine.GetStateInput(TITLE, NULL_STATE);
+	
+	TitleInput.AddKeyMapping(VK_RETURN, START_GAME);
+
+	Engine.ChangeState(TITLE, NULL_STATE);
 }
 
 void Menu::Exit()

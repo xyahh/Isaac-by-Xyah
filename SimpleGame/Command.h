@@ -1,4 +1,5 @@
 #pragma once
+#include "Framework.h"
 
 enum ST_CMD
 {
@@ -42,7 +43,7 @@ public:
 	virtual ~FaceCommand() {}
 
 	virtual void execute(size_t Index);
-	virtual void release(size_t Index);
+	virtual void release(size_t Index) {}
 
 private:
 	size_t SpriteIndex;
@@ -55,7 +56,7 @@ public:
 	StateCommand(size_t StateID, DWORD Config = ST_CMD::ON_PRESS | ST_CMD::CHANGE_STATE) :
 		StateIndex(StateID),
 		Config(Config) {}
-	~StateCommand() {}
+	virtual ~StateCommand() {}
 
 	virtual void execute(size_t Index);
 	virtual void release(size_t Index);
@@ -64,3 +65,17 @@ private:
 	DWORD  Config;
 	size_t StateIndex;
 };
+
+template<class T>
+class SceneCommand : public Command
+{
+public:
+	SceneCommand() {}
+	virtual ~SceneCommand() {}
+
+	virtual void execute(size_t Index)
+	{
+		Fw.Play<T>();
+	}
+};
+
