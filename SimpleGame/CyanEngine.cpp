@@ -59,25 +59,17 @@ void Cyan::ChangeState(size_t ObjectIndex, size_t StateIndex)
 
 void Cyan::Update()
 {
-
+	/* State & Input Update */
 	for (size_t i = 0; i < m_Input.size(); ++i)
 	{
 		if (m_States[i].empty()) continue;
+		m_Input[i][m_States[i].top()->Name()].ReceiveLocalInput();
 		m_Input[i][m_States[i].top()->Name()].ProcessInput(i);
 		m_States[i].top()->Update(i);
 		FlushActionQueue();
-		
+
 	}
-	/* State & Input Update */
-	for (size_t i = 0; i < m_States.size(); ++i)
-	{
-		if (m_States[i].empty()) continue;
-		//m_States[i].top()->pInput->ReceiveForeignInput(KeyInfo{VK_SPACE, true, 0});
-		
-		
-		
-	}
-	
+
 	/* Sprite Update */
 	for (size_t i = 0; i < m_Sprites.size(); ++i)
 	{
@@ -107,14 +99,8 @@ void Cyan::Render(float fInterpolation)
 
 void Cyan::HandleInput(int KeyValue, bool Pressed)
 {
-	if (Input::TotalKeys.find(KeyValue) == Input::TotalKeys.end()) return;
-
-	printf("AddKey\n");
-
-	KeyInfo Key{ KeyValue, Pressed, 0 };
-	for (size_t i = 0; i < m_States.size(); ++i)
-		if(!m_States[i].empty())
-			m_Input[i][m_States[i].top()->Name()].ReceiveInput(Key);
+	//if (!m_States[0].empty())
+	//m_Input[0][m_States[0].top()->Name()].ReceiveInput({KeyValue, Pressed, 0});			
 }
 
 void Cyan::AddObject(size_t * Out)

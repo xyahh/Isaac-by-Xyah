@@ -145,7 +145,6 @@ void Physics::Update()
 	/* --- Friction ----------------------------------------------------------------------------*/
 	float FrictionAccel = m_Friction * m_Gravity;
 	float FrictionSpeed = FrictionAccel * UPDATE_TIME;
-	//printf("%f\n", m_Friction);
 
 	DX XMVECTOR FrictionVelocity = DX Scale(DX3 Normalize(Velocity), FrictionSpeed);
 	DX XMVECTOR PreviousVelocity = Velocity;

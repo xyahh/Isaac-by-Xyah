@@ -99,6 +99,9 @@ bool Framework::Initialize(const STD string & Title, int Width, int Height)
 
 	UpdateWindow(m_HWND);
 
+	//Move Later for Resizing
+	GetClientRect(m_HWND, &m_ClientRect);
+	//Resize();
 	
 	return TRUE;
 }
@@ -107,7 +110,6 @@ LRESULT CALLBACK Framework::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LP
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
-
 	switch (uMsg)
 	{
 	case WM_SYSCOMMAND:
@@ -222,6 +224,9 @@ int Framework::Run()
 	glDepthMask(GL_TRUE);
 	glDepthRange(NEAREST, FARTHEST);
 
+	static float  FPSTime = 0.f;
+	static int Frames = 0;
+
 	ResetClock();
 	MSG Message;
 	while (TRUE) 
@@ -234,14 +239,21 @@ int Framework::Run()
 		}
 		else
 		{
-			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-			glClearDepth(FARTHEST);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 			m_CurrentTime = Time::now();
 			m_TimeFrame = TimeDuration(m_CurrentTime - m_PreviousTime).count();
 			m_PreviousTime = m_CurrentTime;
 			m_TimeAccumulator += m_TimeFrame;
+
+			/*FPSTime += m_TimeFrame;
+			++Frames;
+			if (FPSTime >= 1.f)
+			{
+				FPSTime = 0;
+				STD wstring title{ m_WindowTitle.begin(), m_WindowTitle.end() };
+				title += STD to_wstring(Frames);
+				SetWindowText(m_HWND, title.c_str());
+				Frames = 0;
+			}*/
 
 			while (m_TimeAccumulator >= UPDATE_TIME)
 			{
@@ -249,20 +261,16 @@ int Framework::Run()
 				m_TimeAccumulator -= UPDATE_TIME;
 			}
 			
+			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+			glClearDepth(FARTHEST);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			m_CurrentScene->Render(m_TimeAccumulator * UPDATE_TIME);
+
+			SwapBuffers(m_HDC);
 
 			if (m_ShiftScene != NULL)
 				ChangeScenes();
-
-			HPEN hPen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
-			HPEN oldPen = (HPEN)SelectObject(m_HDC, hPen);
-			Ellipse(m_HDC, 100, 100, 200, 200);
-			SelectObject(m_HDC, oldPen);
-			DeleteObject(hPen);
-		
-			SwapBuffers(m_HDC);
-
-			
 		}
 
 	}

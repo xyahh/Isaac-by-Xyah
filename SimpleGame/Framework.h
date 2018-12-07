@@ -39,9 +39,11 @@ private:
 	void ChangeScenes();
 	
 private:
-	HGLRC		m_HRC{ NULL };
-	HDC			m_HDC{ NULL };
-	HWND		m_HWND{ NULL };
+	HGLRC		m_HRC			{ NULL };
+	HDC			m_HDC			{ NULL };
+	HWND		m_HWND			{ NULL };
+	RECT		m_ClientRect	{};
+
 	HINSTANCE	m_hInstance;
 
 	STD string  m_WindowTitle	{ "Default Title" };

@@ -1,20 +1,17 @@
 --------------------------------------------
 New Features
 --------------------------------------------
-+) Code Cleanup - Engine Remade
-+) Added new Visual for Collision Box drawing (4 boxes now)
-+) StructureCollision Added.
-Structure Collisions put Friction onto the Object
-(e.g. Floors). If an Object is not colliding with
-a Structure, then the Friction is Zero.
-+) Friction now defaults to zero every cycle
++) WINAPI Support. Now I can fix the 
+current bug that has been 'bugging' me :)
++) Text Support (through WINAPI)
 --------------------------------------------
 Features Pending (In order of Priority)
 --------------------------------------------
++) INPUT LastKey wins! 
 
 +) Event Dispatcher
 +) Button UI Interface Class
-+) Text Support
+
 +) Engine to have a Vibration Time Setter for Controllers
 +) Engine to have an Optional Periodical try to reconnect Controller.
 +) Support for Multiple Controllers
