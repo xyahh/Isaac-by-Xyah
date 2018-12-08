@@ -7,6 +7,7 @@
 #define KEY_PRESSED(key) (GetAsyncKeyState(key) & 0x8000)
 
 
+
 struct KeyInfo
 {
 	int		Value;
@@ -19,6 +20,12 @@ struct KeyState
 	bool Pressed;
 	bool Released;
 };
+
+class Controller
+{
+
+};
+
 
 class Input
 {
@@ -33,15 +40,14 @@ public:
 
 private:
 
-	void ReceiveLocalInput();
+	void ClearKeys();
 	void ReceiveForeignInput(const KeyInfo& Key); //Network Support
 	void ProcessInput(size_t ObjectIndex);
 
 private:
-	STD map<int, KeyState>		m_LocalInput;
 	STD multimap<int, size_t>	m_Controls;
-	STD set<int>	m_Input;
-	STD stack<int>	m_PushedKeys;
-	STD stack<int>	m_ReleasedKeys;
+	STD map<int, KeyState>		m_LocalInput;
+	STD vector<int>				m_PushedKeys;
+	STD vector<int>				m_ReleasedKeys;
 
 };

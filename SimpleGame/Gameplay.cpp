@@ -53,48 +53,48 @@ void Gameplay::Init()
 
 	size_t PLAYER2;
 
-	//Actor
-	{
+	////Actor
+	//{
 
-		Engine.AddObject(&PLAYER2);
+	//	Engine.AddObject(&PLAYER2);
 
-		auto& ActorDescriptor = Engine.GetDescriptor(PLAYER2);
-		auto& ActorPhysics = Engine.GetPhysics(PLAYER2);
-		auto& ActorGraphics = Engine.GetGraphics(PLAYER2);
+	//	auto& ActorDescriptor = Engine.GetDescriptor(PLAYER2);
+	//	auto& ActorPhysics = Engine.GetPhysics(PLAYER2);
+	//	auto& ActorGraphics = Engine.GetGraphics(PLAYER2);
 
-		ActorDescriptor.SetType(ObjectType::Actor);
-		ActorDescriptor.SetValue(100.f); // 100 HP
+	//	ActorDescriptor.SetType(ObjectType::Actor);
+	//	ActorDescriptor.SetValue(100.f); // 100 HP
 
-		ActorPhysics.SetCollision(&Collision::Actor);
-		ActorPhysics.Box().SetDimensions({ 0.5f, 0.25f, 1.5f });
+	//	ActorPhysics.SetCollision(&Collision::Actor);
+	//	ActorPhysics.Box().SetDimensions({ 0.5f, 0.25f, 1.5f });
 
-		size_t BODY;
-		size_t HEAD;
+	//	size_t BODY;
+	//	size_t HEAD;
 
-		Engine.AddSprite(&BODY, PLAYER2);
-		Engine.AddSprite(&HEAD, PLAYER2);
+	//	Engine.AddSprite(&BODY, PLAYER2);
+	//	Engine.AddSprite(&HEAD, PLAYER2);
 
-		auto& Body = Engine.GetSprite(PLAYER2, BODY);
-		auto& Head = Engine.GetSprite(PLAYER2, HEAD);
+	//	auto& Body = Engine.GetSprite(PLAYER2, BODY);
+	//	auto& Head = Engine.GetSprite(PLAYER2, HEAD);
 
-		ActorGraphics.SetColor(1.f, 1.f, 1.f, 1.f);
-		ActorPhysics.SetMass(70.f);
+	//	ActorGraphics.SetColor(1.f, 1.f, 1.f, 1.f);
+	//	ActorPhysics.SetMass(70.f);
 
-		float HeadSize = 1.25f;
-		float BodySize = 0.75f;
+	//	float HeadSize = 1.25f;
+	//	float BodySize = 0.75f;
 
-		Body.SetTexture(TEX::BASIC_BODY);
-		Body.SetSize({ BodySize, BodySize });
-		Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
-		Body.SetTotal({ 10, 4 });
-		Body.SetDirection(Direction::Down);
+	//	Body.SetTexture(TEX::BASIC_BODY);
+	//	Body.SetSize({ BodySize, BodySize });
+	//	Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
+	//	Body.SetTotal({ 10, 4 });
+	//	Body.SetDirection(Direction::Down);
 
-		Head.SetTexture(TEX::ISAAC_HEAD);
-		Head.SetSize({ HeadSize, HeadSize });
-		Head.SetTotal({ 2, 4 });
-		Head.SetDirection(Direction::Down);
-		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
-	}
+	//	Head.SetTexture(TEX::ISAAC_HEAD);
+	//	Head.SetSize({ HeadSize, HeadSize });
+	//	Head.SetTotal({ 2, 4 });
+	//	Head.SetDirection(Direction::Down);
+	//	Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
+	//}
 
 
 	//Actor States

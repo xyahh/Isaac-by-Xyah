@@ -49,6 +49,9 @@ void Cyan::ChangeState(size_t ObjectIndex, size_t StateIndex)
 		if (!m_States[ObjectIndex].empty())
 		{
 			m_States[ObjectIndex].top()->Exit(ObjectIndex);
+			printf("Change Keys\n");
+			m_Input[ObjectIndex][m_States[ObjectIndex].top()->Name()].ClearKeys();
+
 			delete m_States[ObjectIndex].top();
 			m_States[ObjectIndex].pop();
 		}
@@ -63,7 +66,6 @@ void Cyan::Update()
 	for (size_t i = 0; i < m_Input.size(); ++i)
 	{
 		if (m_States[i].empty()) continue;
-		m_Input[i][m_States[i].top()->Name()].ReceiveLocalInput();
 		m_Input[i][m_States[i].top()->Name()].ProcessInput(i);
 		m_States[i].top()->Update(i);
 		FlushActionQueue();
