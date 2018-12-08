@@ -4,19 +4,45 @@
 
 Cyan Engine;
 
-bool Cyan::Initialize()
+bool Cyan::Init
+(
+	const STD string& Title,
+	int Width, int Height,
+	bool EnableDevConsole
+)
 {
+	m_Window.Initialize(Title, Width, Height, EnableDevConsole);
 	Sound::Initialize();
 	return m_Renderer.Initialize();
 }
 
-void Cyan::Destroy()
+void Cyan::MainLoop()
 {
-	ReleaseData();
-	Sound::Destroy();
+	m_Timer.Reset();
+	while (TRUE)
+	{
+		if (m_Window.ProcMessage()) 
+			break;
+
+		m_Timer.Tick();
+		while (m_Timer.FlushAccumulatedTime())
+		{
+			Update();
+		}
+
+		m_Renderer.Prepare(); 
+		Render(m_Timer.Interpolation());
+		m_Window.SwapBuffers();
+	}
+	Destroy();
 }
 
-
+void Cyan::Destroy()
+{
+	ReleaseComponentData();
+	m_Window.Close();
+	Sound::Destroy();
+}
 
 void Cyan::PushState(size_t ObjectIndex, size_t StateIndex)
 {
@@ -31,10 +57,10 @@ void Cyan::PushState(size_t ObjectIndex, size_t StateIndex)
 
 void Cyan::PopState(size_t ObjectIndex)
 {
-	if (m_States[ObjectIndex].size() < 2) return;
-
 	QueueAction([this, ObjectIndex]()
 	{
+		// Can't Pop The Last Remaining State
+		if (m_States[ObjectIndex].size() <= 1) return; 
 		m_States[ObjectIndex].top()->Exit(ObjectIndex);
 		delete m_States[ObjectIndex].top();
 		m_States[ObjectIndex].pop();
@@ -49,9 +75,6 @@ void Cyan::ChangeState(size_t ObjectIndex, size_t StateIndex)
 		if (!m_States[ObjectIndex].empty())
 		{
 			m_States[ObjectIndex].top()->Exit(ObjectIndex);
-			printf("Change Keys\n");
-			m_Input[ObjectIndex][m_States[ObjectIndex].top()->Name()].ClearKeys();
-
 			delete m_States[ObjectIndex].top();
 			m_States[ObjectIndex].pop();
 		}
@@ -66,7 +89,7 @@ void Cyan::Update()
 	for (size_t i = 0; i < m_Input.size(); ++i)
 	{
 		if (m_States[i].empty()) continue;
-		m_Input[i][m_States[i].top()->Name()].ProcessInput(i);
+		//m_Input[i][m_States[i].top()->Name()].ProcessInput(i);
 		m_States[i].top()->Update(i);
 		FlushActionQueue();
 
@@ -118,7 +141,7 @@ void Cyan::AddSprite(size_t * Out, size_t ObjectIndex)
 
 void Cyan::AddObjectState(size_t ObjectIndex, size_t StatePrototypeIndex)
 {
-	m_Input[ObjectIndex][StatePrototypeIndex];
+	//m_Input[ObjectIndex][StatePrototypeIndex];
 }
 
 void Cyan::AddTexture(size_t * Out, const STD string & ImagePath)
@@ -132,6 +155,11 @@ void Cyan::AddSound(size_t * Out, const STD string & ImagePath, bool isBGM)
 {
 	m_Sounds.emplace_back(ImagePath, isBGM);
 	*Out = Last(m_Sounds);
+}
+
+Window & Cyan::GetFramework()
+{
+	return m_Window;
 }
 
 Descriptor & Cyan::GetDescriptor(size_t Index)
@@ -156,7 +184,8 @@ State *& Cyan::GetCurrentState(size_t Index)
 
 Input & Cyan::GetStateInput(size_t ObjectIndex, size_t StateIndex)
 {
-	return m_Input[ObjectIndex][StateIndex];
+	//return m_Input[ObjectIndex][StateIndex];
+	return m_Input[0];
 }
 
 Sprite& Cyan::GetSprite(size_t Index, size_t SpriteNumber)
@@ -179,7 +208,25 @@ Sound & Cyan::GetSound(size_t Index)
 	return m_Sounds[Index];
 }
 
-void Cyan::ReleaseData()
+void Cyan::DeleteComponents()
+{
+	/* Release Data */
+	ReleaseComponentData();
+
+	/* Clear Data */
+	m_Sprites.clear();
+	m_Sounds.clear();
+	m_States.clear();
+	m_StatePrototypes.clear();
+	m_Physics.clear();
+	m_Graphics.clear();
+	m_Descriptors.clear();
+	m_Commands.clear();
+	m_Textures.clear();
+	m_Input.clear();
+}
+
+void Cyan::ReleaseComponentData()
 {
 	for (auto& Sound : m_Sounds)
 	{
@@ -212,20 +259,4 @@ void Cyan::ReleaseData()
 	{
 		m_Renderer.DeleteTexture(Texture);
 	}
-}
-
-void Cyan::DeleteComponents()
-{
-	ReleaseData();
-
-	m_Sprites.clear();
-	m_Sounds.clear();
-	m_States.clear();
-	m_StatePrototypes.clear();
-	m_Physics.clear();
-	m_Graphics.clear();
-	m_Descriptors.clear();
-	m_Commands.clear();
-	m_Textures.clear();
-	m_Input.clear();
 }

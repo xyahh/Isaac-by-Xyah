@@ -1,15 +1,14 @@
 #include "stdafx.h"
 #include "Framework.h"
-
-#include <iostream>
-
-#include "Scene.h"
 #include "CyanEngine.h"
 #include "DevConsole.h"
 #include "resource.h"
+#include "Scene.h"
 
-Framework Fw;
-bool Framework::Initialize(const STD string & Title, int Width, int Height, bool EnableDevConsole)
+#include "Dependencies/GL/glew.h"
+#include "Dependencies/GL/freeglut.h"
+
+bool Window::Initialize(const STD string & Title, int Width, int Height, bool EnableDevConsole)
 {
 	if(EnableDevConsole)
 		DevConsole::Create();
@@ -33,9 +32,7 @@ bool Framework::Initialize(const STD string & Title, int Width, int Height, bool
 	m_hInstance = GetModuleHandle(NULL);
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	wc.lpfnWndProc = (WNDPROC)[](HWND h, UINT u, WPARAM w, LPARAM l)->LRESULT 
-	{ 
-		return Fw.WndProc(h, u, w, l); 
-	};
+	{ return Engine.GetFramework().WndProc(h, u, w, l); };
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = m_hInstance;
@@ -96,16 +93,18 @@ bool Framework::Initialize(const STD string & Title, int Width, int Height, bool
 	SetFocus(m_HWND);
 	glewInit();
 
-	UpdateWindow(m_HWND);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0);
+	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
+	glDepthRange(NEAREST, FARTHEST);
 
-	//Move Later for Resizing
-	GetClientRect(m_HWND, &m_ClientRect);
-	//Resize();
-	
+	UpdateWindow(m_HWND);
 	return TRUE;
 }
 
-LRESULT CALLBACK Framework::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LPARAM  lParam)
+LRESULT CALLBACK Window::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LPARAM  lParam) const
 {
 	switch (uMsg)
 	{
@@ -121,143 +120,59 @@ LRESULT CALLBACK Framework::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LP
 	}
 	case WM_CLOSE:
 	{
+		Engine.Destroy();
 		PostQuitMessage(0);
 		return 0;
 	}
 
 	case WM_SIZE:
 	{
-
+		GetClientRect(m_HWND, (LPRECT)&m_ClientRect);
 		return 0;
 	}
 	}
-
-	// Pass All Unhandled Messages To DefWindowProc
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-void Framework::Close()
+void Window::Close()
 {
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(m_HRC);
-	m_HRC = NULL;
 	ReleaseDC(m_HWND, m_HDC);
 	DestroyWindow(m_HWND);
+	UnregisterClass(L"OpenGL", m_hInstance);
+
+	m_HRC = NULL;
 	m_HDC = NULL;
 	m_HWND = NULL;
-	UnregisterClass(L"OpenGL", m_hInstance);
 	m_hInstance = NULL;
-	Engine.Destroy();
 }
 
-void Framework::ResetClock()
-{
-	m_CurrentTime = Time::now();
-	m_PreviousTime = Time::now();
-	m_TimeAccumulator = 0.f;
-	m_TimeFrame = 0.f;
-}
-
-void Framework::GetWindowSizei(int * WinWidth, int * WinHeight) const
+void Window::GetWindowSizei(int * WinWidth, int * WinHeight) const
 {
 	*WinWidth = m_WindowWidth;
 	*WinHeight = m_WindowHeight;
 }
 
-void Framework::GetWindowSizef(float * WinWidth, float * WinHeight) const
+void Window::GetWindowSizef(float * WinWidth, float * WinHeight) const
 {
 	*WinWidth = static_cast<float>(m_WindowWidth);
 	*WinHeight = static_cast<float>(m_WindowHeight);
 }
 
-BOOL WINAPI Framework::CloseConsole(DWORD dwCtrlType)
+int Window::ProcMessage()
 {
-	Close();
-	return TRUE;
+	if (PeekMessage(&m_MSG, NULL, 0, 0, PM_REMOVE))
+	{
+		if (m_MSG.message == WM_QUIT)
+			return TRUE;
+		TranslateMessage(&m_MSG);
+		DispatchMessage(&m_MSG);
+	}
+	return FALSE;
 }
 
-void Framework::ChangeScenes()
+void Window::SwapBuffers()
 {
-	if (m_CurrentScene)
-	{
-		m_CurrentScene->Exit();
-		delete m_CurrentScene;
-	}
-	m_CurrentScene = m_ShiftScene;
-	m_ShiftScene = NULL;
-	m_CurrentScene->Init();
-}
-
-int Framework::Run()
-{
-	Scene::m_Framework = this;
-	Engine.Initialize();
-	ChangeScenes();
-
-	atexit([]()
-	{
-		Fw.Close();
-	});
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0);
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(GL_TRUE);
-	glDepthRange(NEAREST, FARTHEST);
-
-	static float  FPSTime = 0.f;
-	static int Frames = 0;
-
-	ResetClock();
-	MSG Message;
-	while (TRUE) 
-	{
-		if (PeekMessage(&Message, NULL, 0, 0, PM_REMOVE)) 
-		{
-			if (Message.message == WM_QUIT) break;
-			TranslateMessage(&Message);
-			DispatchMessage(&Message);
-		}
-		else
-		{
-			m_CurrentTime = Time::now();
-			m_TimeFrame = TimeDuration(m_CurrentTime - m_PreviousTime).count();
-			m_PreviousTime = m_CurrentTime;
-			m_TimeAccumulator += m_TimeFrame;
-
-			/*FPSTime += m_TimeFrame;
-			++Frames;
-			if (FPSTime >= 1.f)
-			{
-				FPSTime = 0;
-				STD wstring title{ m_WindowTitle.begin(), m_WindowTitle.end() };
-				title += STD to_wstring(Frames);
-				SetWindowText(m_HWND, title.c_str());
-				Frames = 0;
-			}*/
-
-			while (m_TimeAccumulator >= UPDATE_TIME)
-			{
-				m_CurrentScene->Update();
-				m_TimeAccumulator -= UPDATE_TIME;
-			}
-			
-			float Color = 0.25f;
-			glClearColor(Color, Color, Color, 1.0f);
-			glClearDepth(FARTHEST);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			m_CurrentScene->Render(m_TimeAccumulator * UPDATE_TIME);
-
-			SwapBuffers(m_HDC);
-
-			if (m_ShiftScene != NULL)
-				ChangeScenes();
-		}
-
-	}
-	
-	Close();
-	return (int)(Message.wParam);
+	::SwapBuffers(m_HDC);
 }

@@ -31,7 +31,7 @@ void Menu::Init()
 	Engine.AddObjectState(TITLE, NULL_STATE);
 	Input& TitleInput = Engine.GetStateInput(TITLE, NULL_STATE);
 	
-	TitleInput.AddKeyMapping(VK_RETURN, START_GAME);
+	//TitleInput.AddKeyMapping(VK_RETURN, START_GAME);
 
 	Engine.ChangeState(TITLE, NULL_STATE);
 }

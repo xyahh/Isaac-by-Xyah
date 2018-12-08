@@ -6,7 +6,7 @@
 #include <fstream>
 #include "Dependencies/GL/glew.h"
 #include "World.h"
-#include "Framework.h"
+#include "CyanEngine.h"
 
 
 /* CImage to Unsigned Char Vector */
@@ -35,7 +35,7 @@ DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 {
 	float Scale = World::GetScale();
 	float WinX, WinY;
-	Fw.GetWindowSizef(&WinX, &WinY);
+	Engine.GetFramework().GetWindowSizef(&WinX, &WinY);
 	return DX Multiply
 	(
 		Position,
@@ -51,7 +51,7 @@ DX XMVECTOR XM_CALLCONV Renderer::GetGLSize(DX FXMVECTOR Size) const
 {
 	float Scale = World::GetScale();
 	float WinX, WinY;
-	Fw.GetWindowSizef(&WinX, &WinY);
+	Engine.GetFramework().GetWindowSizef(&WinX, &WinY);
 	return DX Multiply
 	(
 		Size,
@@ -261,6 +261,13 @@ u_int Renderer::CompileShaders(const STD string& filenameVS, const STD string&  
 	STD cout << filenameVS << ", " << filenameFS << " Shader compiling is done.\n";
 
 	return ShaderProgram;
+}
+
+void Renderer::Prepare()
+{
+	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+	glClearDepth(FARTHEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 #ifdef CYAN_DEBUG_COLLISION

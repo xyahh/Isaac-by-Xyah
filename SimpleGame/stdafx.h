@@ -40,7 +40,7 @@ inline size_t Last(const STD vector<T>& v)
 }
 
 /* Core */
-class Framework;
+class Window;
 class Scene;
 class Cyan;
 

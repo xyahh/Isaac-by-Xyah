@@ -1,44 +1,39 @@
 #pragma once
-#include <chrono>
-#include "Dependencies/GL/glew.h"
-#include "Dependencies/GL/freeglut.h"
 
-class Framework
+class Window
 {
-	/* Chrono Time */
-	using TimeDuration = STD chrono::duration<float>;
-	using Time = STD chrono::high_resolution_clock;
-	using TimePoint = Time::time_point;
+	friend Cyan;
 
-public:	
+public:
+	
+	void GetWindowSizei(int* WinWidth, int * WinHeight) const;
+	void GetWindowSizef(float * WinWidth, float * WinHeight) const;
+	LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM) const;
 
-	Framework() {}
-	~Framework() {}
+	template<class T>
+	void PlayScene()
+	{
+		if (m_Scene)
+		{
+			m_Scene->Exit();
+			delete m_Scene;
+		}
+		m_Scene = new T;
+		m_Scene->Init();
+	}
+
+private:
+
+	Window() {}
+	~Window() {}
 
 	bool Initialize(const STD string& Title, int Width, int Height, bool EnableDevConsole=false);
 	void Close();
-
-	void GetWindowSizei(int* WinWidth, int * WinHeight) const;
-	void GetWindowSizef(float * WinWidth, float * WinHeight) const;
-
-	int Run();
-
-	LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-	BOOL WINAPI CloseConsole(DWORD dwCtrlType);
-
-	template<class T>
-	void Play()
-	{
-		if(m_ShiftScene == NULL)
-			m_ShiftScene = new T;
-	}
+	int ProcMessage();
+	void SwapBuffers();
 	
-private:
-
-	void ResetClock();
-	void ChangeScenes();
+	MSG			m_MSG;
 	
-private:
 	HGLRC		m_HRC			{ NULL };
 	HDC			m_HDC			{ NULL };
 	HWND		m_HWND			{ NULL };
@@ -50,17 +45,8 @@ private:
 	int			m_WindowWidth	{ 500 };
 	int			m_WindowHeight	{ 500 };
 
-	Scene*		m_CurrentScene	{ NULL };
-	Scene*		m_ShiftScene	{ NULL };
+	Scene*		m_Scene	{ NULL };
 
-// Framework Timer
 
-	TimePoint	m_CurrentTime;
-	TimePoint	m_PreviousTime;
-	float		m_TimeFrame;
-	float		m_TimeAccumulator;
-	
 };
-
-extern Framework Fw;
 

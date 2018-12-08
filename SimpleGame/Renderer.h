@@ -16,6 +16,8 @@ public:
 	Renderer() {}
 	~Renderer() {}
 
+	void Prepare();
+
 #ifdef CYAN_DEBUG_COLLISION
 	void XM_CALLCONV DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size) const;
 #endif

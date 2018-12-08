@@ -1,17 +1,16 @@
 #include "stdafx.h"
 #include "DevConsole.h"
-#include <io.h>
 #include <fcntl.h>
+#include <io.h>
+
+/*
+Code Source: https://stackoverflow.com/a/43870739
+*/
 
 #pragma warning(push)
 #pragma warning(disable:4311)
 long HTL(HANDLE ht) { return reinterpret_cast<long>(ht); }
 #pragma warning(pop)
-
-
-/*
-Code Source: https://stackoverflow.com/a/43870739
-*/
 
 void DevConsole::Create()
 {

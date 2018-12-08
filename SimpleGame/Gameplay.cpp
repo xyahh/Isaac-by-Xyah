@@ -55,7 +55,7 @@ void Gameplay::Init()
 		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
 	}
 
-	size_t PLAYER2;
+	//size_t PLAYER2;
 
 	////Actor
 	//{
@@ -112,7 +112,7 @@ void Gameplay::Init()
 		Engine.AddStatePrototype<ShootState>(&ST::SHOOT, 5.f, 100.f);
 	}
 
-	size_t TEST;
+	//size_t TEST;
 	//Commands
 	{
 		//Engine.AddCommand<SceneCommand<Menu>>(&TEST);
@@ -153,51 +153,51 @@ void Gameplay::Init()
 
 		//Engine.AddObjectState(PLAYER2, ST::IDLE);
 
-		Input& IdleInput = Engine.GetStateInput(OBJ::PLAYER, ST::IDLE);
-		IdleInput.AddKeyMapping('W', CMD::START_MOVE);
-		IdleInput.AddKeyMapping('A', CMD::START_MOVE);
-		IdleInput.AddKeyMapping('S', CMD::START_MOVE);
-		IdleInput.AddKeyMapping('D', CMD::START_MOVE);
-		IdleInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_JUMP);
-		IdleInput.AddKeyMapping(VK_RIGHT, CMD::START_SHOOT);
-		IdleInput.AddKeyMapping(VK_LEFT, CMD::START_SHOOT);
-		IdleInput.AddKeyMapping(VK_UP, CMD::START_SHOOT);
-		IdleInput.AddKeyMapping(VK_DOWN, CMD::START_SHOOT);
-
-		Input&  MoveInput = Engine.GetStateInput(OBJ::PLAYER, ST::MOVE);
-		MoveInput.AddKeyMapping('W', CMD::MOVE_UP);
-		MoveInput.AddKeyMapping('A', CMD::MOVE_LEFT);
-		MoveInput.AddKeyMapping('S', CMD::MOVE_DOWN);
-		MoveInput.AddKeyMapping('D', CMD::MOVE_RIGHT);
-		MoveInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_JUMP);
-		MoveInput.AddKeyMapping(VK_RIGHT, CMD::START_SHOOT);
-		MoveInput.AddKeyMapping(VK_LEFT, CMD::START_SHOOT);
-		MoveInput.AddKeyMapping(VK_UP, CMD::START_SHOOT);
-		MoveInput.AddKeyMapping(VK_DOWN, CMD::START_SHOOT);
-
-		Input&  ChargeJump = Engine.GetStateInput(OBJ::PLAYER, ST::CHARGE_JUMP);
-		ChargeJump.AddKeyMapping('W', CMD::SLOW_MOVE_UP);
-		ChargeJump.AddKeyMapping('A', CMD::SLOW_MOVE_LEFT);
-		ChargeJump.AddKeyMapping('S', CMD::SLOW_MOVE_DOWN);
-		ChargeJump.AddKeyMapping('D', CMD::SLOW_MOVE_RIGHT);
-		ChargeJump.AddKeyMapping(VK_SPACE, CMD::START_IN_AIR);
-
-		Input&  InAirInput = Engine.GetStateInput(OBJ::PLAYER, ST::IN_AIR);
-		InAirInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_SLAM);
-
-		Input& ShootInput = Engine.GetStateInput(OBJ::PLAYER, ST::SHOOT);
-		ShootInput.AddKeyMapping('W', CMD::MOVE_UP);
-		ShootInput.AddKeyMapping('A', CMD::MOVE_LEFT);
-		ShootInput.AddKeyMapping('S', CMD::MOVE_DOWN);
-		ShootInput.AddKeyMapping('D', CMD::MOVE_RIGHT);
-		ShootInput.AddKeyMapping(VK_RIGHT,CMD::FACE_RIGHT);
-		ShootInput.AddKeyMapping(VK_LEFT,	CMD::FACE_LEFT);
-		ShootInput.AddKeyMapping(VK_UP,	CMD::FACE_UP);
-		ShootInput.AddKeyMapping(VK_DOWN,	CMD::FACE_DOWN);
-		ShootInput.AddKeyMapping(VK_RIGHT,CMD::END_SHOOT);
-		ShootInput.AddKeyMapping(VK_LEFT,	CMD::END_SHOOT);
-		ShootInput.AddKeyMapping(VK_UP,	CMD::END_SHOOT);
-		ShootInput.AddKeyMapping(VK_DOWN,	CMD::END_SHOOT);
+		//Input& IdleInput = Engine.GetStateInput(OBJ::PLAYER, ST::IDLE);
+		//IdleInput.AddKeyMapping('W', CMD::START_MOVE);
+		//IdleInput.AddKeyMapping('A', CMD::START_MOVE);
+		//IdleInput.AddKeyMapping('S', CMD::START_MOVE);
+		//IdleInput.AddKeyMapping('D', CMD::START_MOVE);
+		//IdleInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_JUMP);
+		//IdleInput.AddKeyMapping(VK_RIGHT, CMD::START_SHOOT);
+		//IdleInput.AddKeyMapping(VK_LEFT, CMD::START_SHOOT);
+		//IdleInput.AddKeyMapping(VK_UP, CMD::START_SHOOT);
+		//IdleInput.AddKeyMapping(VK_DOWN, CMD::START_SHOOT);
+		//
+		//Input&  MoveInput = Engine.GetStateInput(OBJ::PLAYER, ST::MOVE);
+		//MoveInput.AddKeyMapping('W', CMD::MOVE_UP);
+		//MoveInput.AddKeyMapping('A', CMD::MOVE_LEFT);
+		//MoveInput.AddKeyMapping('S', CMD::MOVE_DOWN);
+		//MoveInput.AddKeyMapping('D', CMD::MOVE_RIGHT);
+		//MoveInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_JUMP);
+		//MoveInput.AddKeyMapping(VK_RIGHT, CMD::START_SHOOT);
+		//MoveInput.AddKeyMapping(VK_LEFT, CMD::START_SHOOT);
+		//MoveInput.AddKeyMapping(VK_UP, CMD::START_SHOOT);
+		//MoveInput.AddKeyMapping(VK_DOWN, CMD::START_SHOOT);
+		//
+		//Input&  ChargeJump = Engine.GetStateInput(OBJ::PLAYER, ST::CHARGE_JUMP);
+		//ChargeJump.AddKeyMapping('W', CMD::SLOW_MOVE_UP);
+		//ChargeJump.AddKeyMapping('A', CMD::SLOW_MOVE_LEFT);
+		//ChargeJump.AddKeyMapping('S', CMD::SLOW_MOVE_DOWN);
+		//ChargeJump.AddKeyMapping('D', CMD::SLOW_MOVE_RIGHT);
+		//ChargeJump.AddKeyMapping(VK_SPACE, CMD::START_IN_AIR);
+		//
+		//Input&  InAirInput = Engine.GetStateInput(OBJ::PLAYER, ST::IN_AIR);
+		//InAirInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_SLAM);
+		//
+		//Input& ShootInput = Engine.GetStateInput(OBJ::PLAYER, ST::SHOOT);
+		//ShootInput.AddKeyMapping('W', CMD::MOVE_UP);
+		//ShootInput.AddKeyMapping('A', CMD::MOVE_LEFT);
+		//ShootInput.AddKeyMapping('S', CMD::MOVE_DOWN);
+		//ShootInput.AddKeyMapping('D', CMD::MOVE_RIGHT);
+		//ShootInput.AddKeyMapping(VK_RIGHT,CMD::FACE_RIGHT);
+		//ShootInput.AddKeyMapping(VK_LEFT,	CMD::FACE_LEFT);
+		//ShootInput.AddKeyMapping(VK_UP,	CMD::FACE_UP);
+		//ShootInput.AddKeyMapping(VK_DOWN,	CMD::FACE_DOWN);
+		//ShootInput.AddKeyMapping(VK_RIGHT,CMD::END_SHOOT);
+		//ShootInput.AddKeyMapping(VK_LEFT,	CMD::END_SHOOT);
+		//ShootInput.AddKeyMapping(VK_UP,	CMD::END_SHOOT);
+		//ShootInput.AddKeyMapping(VK_DOWN,	CMD::END_SHOOT);
 		
 		
 

@@ -1,13 +1,13 @@
 #pragma once
-#include "Framework.h"
+#include "CyanEngine.h"
 
 enum ST_CMD
 {
-	ON_PRESS = 0x01,
-	ON_RELEASE = 0x02,
-	PUSH_STATE = 0x04,
-	CHANGE_STATE = 0x08,
-	POP_STATE = 0x10
+	ON_PRESS		= 0x01,
+	ON_RELEASE		= 0x02,
+	PUSH_STATE		= 0x04,
+	CHANGE_STATE	= 0x08,
+	POP_STATE		= 0x10,
 };
 
 class Command
@@ -72,10 +72,6 @@ class SceneCommand : public Command
 public:
 	SceneCommand() {}
 	virtual ~SceneCommand() {}
-
-	virtual void execute(size_t Index)
-	{
-		Fw.Play<T>();
-	}
+	virtual void execute(size_t Index) { Engine.GetFramework().PlayScene<T>(); }
 };
 

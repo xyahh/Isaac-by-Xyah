@@ -1,4 +1,5 @@
 #pragma once
+#include "Framework.h"
 #include "Descriptor.h"
 #include "Renderer.h"
 #include "Graphics.h"
@@ -6,7 +7,9 @@
 #include "Command.h"
 #include "State.h"
 #include "Sound.h"
+#include "Timer.h"
 #include "Sprite.h"
+#include "Controller.h"
 
 /* Reversed order from Image TopDown. It is read from Bottom to Top */
 enum Direction
@@ -19,17 +22,21 @@ enum Direction
 
 class Cyan
 {
-	friend Input;
-	friend Framework;
 	using Action = STD function<void()>;
-
+	
 public:
 	Cyan() {}
 	~Cyan() {}
  
 	/*---------Game Loop--------------------------------*/
+	bool Init(const STD string& Title, int Width, int Height, bool Dev = false);
+
+	void MainLoop();
+
 	void Update();
 	void Render(float fInterpolation);
+
+	void Destroy();
 	/*--------------------------------------------------*/
 
 	/*---------Components Functions---------------------*/
@@ -51,7 +58,7 @@ public:
 
 	void AddTexture(size_t * Out, const STD string& ImagePath);
 	void AddSound(size_t * Out, const STD string& ImagePath, bool isBGM);
-	
+
 	void PushState(size_t ObjectIndex, size_t StateIndex);
 	void PopState(size_t ObjectIndex);
 	void ChangeState(size_t ObjectIndex, size_t StateIndex);
@@ -64,14 +71,15 @@ public:
 
 	void FlushActionQueue()
 	{
-		for (auto& Act : m_Actions) 
-			Act();
+		for (auto& Action : m_Actions) 
+			Action();
 		m_Actions.clear();
 	}
 
 	/*---------Components Getters-----------------------*/
+	Window& GetFramework();
+
 	Descriptor& GetDescriptor(size_t Index);
-	
 	Graphics& GetGraphics(size_t Index);
 	Physics& GetPhysics(size_t Index);
 	State*& GetCurrentState(size_t Index);
@@ -89,6 +97,8 @@ public:
 
 private:
 
+	void ReleaseComponentData();
+
 	template<class T, class V, class... Args>
 	void Add(STD vector<V>& v, size_t* Out, Args&&... Ax)
 	{
@@ -96,21 +106,20 @@ private:
 		*Out = Last(v);
 	}
 
-
-	bool Initialize();
-	void Destroy();
-	void ReleaseData();
-
 private:
-	Renderer						m_Renderer;
+	/* Core */
+	Timer		m_Timer;
+	Window		m_Window;
+	Renderer	m_Renderer;
 
 	/* Object Components */
-	STD vector<Descriptor>				m_Descriptors;
-	STD vector<Graphics>				m_Graphics;
-	STD vector<Physics>					m_Physics;
-	STD vector<STD vector<Sprite>>		m_Sprites;
-	STD vector<STD stack<State*>>		m_States;
-	STD vector<STD map<size_t, Input>>	m_Input;
+	STD vector<Descriptor>					m_Descriptors;
+	STD vector<Graphics>					m_Graphics;
+	STD vector<Physics>						m_Physics;
+	STD vector<STD vector<Sprite>>			m_Sprites;
+	STD vector<STD stack<State*>>			m_States;
+	STD vector<STD map<size_t, Controller>> m_StateControllers;
+	STD vector<Input>						m_Input;
 
 
 	/* Integral Components */
@@ -119,6 +128,7 @@ private:
 	STD vector<u_int>		m_Textures;
 	STD vector<Sound>		m_Sounds;
 	STD vector<Action>		m_Actions;
+
 };
 
 extern Cyan Engine;
