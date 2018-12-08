@@ -9,11 +9,10 @@
 #include "resource.h"
 
 Framework Fw;
-bool Framework::Initialize(const STD string & Title, int Width, int Height)
+bool Framework::Initialize(const STD string & Title, int Width, int Height, bool EnableDevConsole)
 {
-#ifdef CYAN_DEBUG_CONSOLE
-	DevConsole::Create();
-#endif
+	if(EnableDevConsole)
+		DevConsole::Create();
 
 	m_WindowTitle = Title;
 	m_WindowWidth = Width;
@@ -108,8 +107,6 @@ bool Framework::Initialize(const STD string & Title, int Width, int Height)
 
 LRESULT CALLBACK Framework::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LPARAM  lParam)
 {
-	PAINTSTRUCT ps;
-	HDC hdc;
 	switch (uMsg)
 	{
 	case WM_SYSCOMMAND:
@@ -125,21 +122,6 @@ LRESULT CALLBACK Framework::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LP
 	case WM_CLOSE:
 	{
 		PostQuitMessage(0);
-		return 0;
-	}
-
-	case WM_KEYDOWN:
-	{
-		if(m_CurrentScene)
-			m_CurrentScene->HandleInput(wParam, true);
-		return 0;
-	}
-
-	case WM_KEYUP:
-	{
-		if (m_CurrentScene)
-			m_CurrentScene->HandleInput(wParam, false);
-		//keys[wParam] = FALSE;         
 		return 0;
 	}
 
@@ -261,7 +243,8 @@ int Framework::Run()
 				m_TimeAccumulator -= UPDATE_TIME;
 			}
 			
-			glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+			float Color = 0.25f;
+			glClearColor(Color, Color, Color, 1.0f);
 			glClearDepth(FARTHEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -276,5 +259,5 @@ int Framework::Run()
 	}
 	
 	Close();
-	return (Message.wParam);
+	return (int)(Message.wParam);
 }

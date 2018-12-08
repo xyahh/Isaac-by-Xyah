@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Command.h"
 #include "CyanEngine.h"
-#include "Framework.h"
 #include "Scene.h"
 
 
@@ -13,10 +12,6 @@ void ForceCommand::execute(size_t ObjectIndex)
 void FaceCommand::execute(size_t ObjectIndex)
 {
 	Engine.GetSprite(ObjectIndex, SpriteIndex).SetDirection(Direction);
-}
-
-void FaceCommand::release(size_t ObjectIndex)
-{
 }
 
 void StateCommand::execute(size_t ObjectIndex)

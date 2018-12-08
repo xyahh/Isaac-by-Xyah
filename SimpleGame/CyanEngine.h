@@ -30,7 +30,6 @@ public:
 	/*---------Game Loop--------------------------------*/
 	void Update();
 	void Render(float fInterpolation);
-	void HandleInput(int KeyValue, bool Pressed);
 	/*--------------------------------------------------*/
 
 	/*---------Components Functions---------------------*/

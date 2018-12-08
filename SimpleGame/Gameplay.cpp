@@ -2,6 +2,7 @@
 #include "Gameplay.h"
 #include "Framework.h"
 #include "Renderer.h"
+//#include "Menu.h"
 
 void Gameplay::Init()
 {
@@ -9,6 +10,9 @@ void Gameplay::Init()
 	Engine.AddTexture(&TEX::ISAAC_HEAD, "./Resources/Characters/cain_head.png");
 	Engine.AddTexture(&TEX::EXPLOSION, "./Resources/explosion.png");
 
+	size_t SOUND_TEST;
+	Engine.AddSound(&SOUND_TEST, "./Resources/Sounds/Main.mp3", true);
+	Engine.GetSound(SOUND_TEST).Play();
 
 	//Actor
 	{
@@ -108,8 +112,10 @@ void Gameplay::Init()
 		Engine.AddStatePrototype<ShootState>(&ST::SHOOT, 5.f, 100.f);
 	}
 
+	size_t TEST;
 	//Commands
 	{
+		//Engine.AddCommand<SceneCommand<Menu>>(&TEST);
 
 		float Move = 1'500.f;
 		Engine.AddCommand<ForceCommand>(&CMD::MOVE_UP, 0.f, Move, 0.f);
@@ -135,8 +141,6 @@ void Gameplay::Init()
 		Engine.AddCommand<FaceCommand>(&CMD::FACE_LEFT, OBJ::SPRITE::HEAD, Direction::Left);
 		Engine.AddCommand<FaceCommand>(&CMD::FACE_RIGHT, OBJ::SPRITE::HEAD, Direction::Right);
 	}
-
-
 
 	//Actor Input
 	{
@@ -220,11 +224,6 @@ void Gameplay::Init()
 void Gameplay::Exit()
 {
 	Engine.DeleteComponents();
-}
-
-void Gameplay::HandleInput(int Value, bool Pressed)
-{
-	Engine.HandleInput(Value, Pressed);
 }
 
 void Gameplay::Render(float fInterpolation) 
