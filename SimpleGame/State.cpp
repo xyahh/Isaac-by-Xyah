@@ -20,7 +20,10 @@ void NullState::Exit(size_t ObjectIndex)
 
 void IdleState::Enter(size_t ObjectIndex)
 {
+	Sprite& HeadSprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD);
+	HeadSprite.SetDirection(Direction::Down);
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
+	BodySprite.SetDirection(Direction::Down);
 	BodySprite.SetFrameRate(0.f);
 	BodySprite.ResetSprite();
 }
@@ -57,11 +60,7 @@ void MoveState::Update(size_t ObjectIndex)
 	if (!Zero(DX GetZ(Velocity)))
 		Engine.ChangeState(ObjectIndex, ST::IN_AIR);
 	else if (Zero(DX2 Magnitude(Velocity)) && Zero(DX2 Magnitude(Force)))
-		Engine.ChangeState(ObjectIndex, ST::IDLE);
-	//u_int Dir = GetVector2Direction(APhysics.GetForce());
-	//Engine.GetSprites(ObjectIndex)[0].SetDirection(Dir);
-	//Engine.GetSprites(ObjectIndex)[1].SetDirection(Dir);
-		
+		Engine.ChangeState(ObjectIndex, ST::IDLE);		
 }
 
 void MoveState::Exit(size_t ObjectIndex)
@@ -192,19 +191,10 @@ void SlamState::Exit(size_t ObjectIndex)
 	EffectSprite.SetTotal({ 9, 9 });
 	EffectSprite.AddEvent(SpriteEvent::LoopEnd, [Effect]() 
 	{
-		printf("Sprite ended!\n");
-		//Delete Object when Available!
+		Engine.DeleteObject(Effect);
 	});
 	Physics& EffectPhysics = Engine.GetPhysics(Effect);
-	EffectPhysics.SetPosition(
-		DX Multiply(
-		Engine.GetPhysics(ObjectIndex).GetPosition(),
-		{1.f, 1.f, 1.f}
-		)
-	);
-
-
-
+	EffectPhysics.SetPosition(Engine.GetPhysics(ObjectIndex).GetPosition());
 	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f, 1.f, 1.f);
 }
 
@@ -212,24 +202,13 @@ void SlamState::Exit(size_t ObjectIndex)
 
 void ShootState::Enter(size_t ObjectIndex)
 {
-	//Growth = 0.5f;
-	//Engine.GetGraphics(ActorID).GetSprite("Head").FrameLinearNext();
-	//
-	//BulletID = Engine.AddObject("Bullet");
-	//Graphics& BulletGraphics = Engine.GetGraphics(BulletID);
-	//BulletGraphics.AddSprite("Bullet");
-	//Sprite& BulletSprite = BulletGraphics.GetSprite("Bullet");
-	//BulletSprite.SetTexture(TexID);
-	//BulletSprite.SetSize({ Growth, Growth });
-	//
-	//Physics& BulletPhysics = Engine.GetPhysics(BulletID);
-	//BulletPhysics.SetPosition(Engine.GetPhysics(ActorID).GetPosition());
-	//BulletPhysics.SetMass(0.5f);
-	//BulletPhysics.SetFriction(0.2f);
+	Time = 0.f;
+	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).NextFrame();
 }
 
 void ShootState::Update(size_t ObjectIndex)
 {
+	Sprite& HeadSprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD);
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
 	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
 	if (!Zero(DX2 Magnitude(Velocity)))
@@ -239,34 +218,37 @@ void ShootState::Update(size_t ObjectIndex)
 		BodySprite.SetFrameRate(0.f);
 		BodySprite.ResetSprite();
 	}
-	//State::Update(ActorID);
-	//Physics& ActorPhysics = Engine.GetPhysics(ActorID);
-	//Physics& BulletPhysics = Engine.GetPhysics(BulletID);
-	//Graphics& ActorGraphics = Engine.GetGraphics(ActorID);
-	//Graphics& BulletGraphics = Engine.GetGraphics(BulletID);
-	//
-	//Growth += UPDATE_TIME * GrowingRate;
-	//Clamp(0.5f, &Growth, 2.f);
-	//
-	//ActorGraphics.GetSprite("Body").SetDirection(GetVector2Direction(ActorPhysics.GetForce()));
-	//if (Zero(DX2 Magnitude(ActorPhysics.GetVelocity())))
-	//	ActorGraphics.GetSprite("Body").ResetSprite();
-	//else 
-	//	ActorGraphics.GetSprite("Body").FrameLinearUpdate();
-	//
-	//BulletGraphics.GetSprite("Bullet").SetSize({ Growth, Growth });	
-	//BulletPhysics.SetPosition(ActorPhysics.GetPosition());
-	//BulletPhysics.GetBox().SetDimensions({ Growth, Growth*0.25f, Growth });
+
+	Time += UPDATE_TIME * ShootingRate;
+	if (Time >= 1.f)
+	{
+		Time = 0.f;
+		HeadSprite.NextFrame();
+		size_t Tear, TearSprite;
+		Engine.AddObject(&Tear);
+		Engine.AddSprite(&TearSprite, Tear);
+		Sprite& TSprite = Engine.GetSprite(Tear, TearSprite);
+		TSprite.SetTexture(TexID);
+		TSprite.SetSize({ 0.5f, 0.5f });
+		TSprite.SetOffset({ 0.f, 0.25f });
+
+		Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
+		Physics& TPhysics = Engine.GetPhysics(Tear);
+		TPhysics.SetPosition(ObjPhysics.GetPosition());
+		TPhysics.SetMass(0.5f);
+		TPhysics.SetFriction(0.2f);
+		TPhysics.Box().SetDimensions({ 0.5f, 0.125f, 0.5f });
+
+		u_int Dir = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).GetDirection();
+		TPhysics.SetCollision(&Collision::Projectile);
+		TPhysics.SetVelocity(ObjPhysics.GetVelocity());
+		TPhysics.ApplyForce(DX Scale(GetDirectionVector(Dir), ShootingForce));
+	}
 }
 
 void ShootState::Exit(size_t ObjectIndex)
 {
-	//Physics& BulletPhysics = Engine.GetPhysics(BulletID);
-	//DX XMVECTOR For = DX Scale(GetDirectionVector2(GetActorFacingDirection(ActorID)), Force);
-	//BulletPhysics.ApplyForce(For);
-	//BulletPhysics.SetCollision(&Collision::Bullet);
-	//BulletPhysics.SetVelocity(Engine.GetPhysics(ActorID).GetVelocity());
-	//Engine.GetGraphics(ActorID).GetSprite("Head").ResetSprite();
+	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).ResetSprite();
 }
 
 

@@ -4,12 +4,10 @@ New Features
 +) INPUT LastKey wins
 +) Decoupled Input & Controller
 +) EventDispatcher (inheritance for now..)
-
++) Delete Object now available. 
 --------------------------------------------
 Features Pending (In order of Priority)
 --------------------------------------------
-+) Change Shooting to ShootUp, ShootDown, etc...
-(because we are now pushing it...?)
 +) Button UI Interface Class
 +) Engine to have a Vibration Time Setter for Controllers
 +) Engine to have an Optional Periodical try to reconnect Controller.

@@ -157,6 +157,7 @@
     <ClInclude Include="Controller.h" />
     <ClInclude Include="Descriptor.h" />
     <ClInclude Include="DevConsole.h" />
+    <ClInclude Include="Direction.h" />
     <ClInclude Include="Subject.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="CyanEngine.h" />

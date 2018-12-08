@@ -40,49 +40,51 @@ void Cyan::Destroy()
 
 void Cyan::PushState(size_t ObjectIndex, size_t StateIndex)
 { 
-	if (m_States[ObjectIndex].first) return;
-	m_States[ObjectIndex].first = true;
-	QueueAction([this, ObjectIndex, StateIndex]() 
+	size_t Index = m_ObjectLocator[ObjectIndex];
+	if (m_States[Index].first) return;
+	m_States[Index].first = true;
+	QueueAction([this, Index, StateIndex]()
 	{
-		if (!m_States[ObjectIndex].second.empty())
-			m_States[ObjectIndex].second.top()->Exit(ObjectIndex);
-		m_States[ObjectIndex].second.emplace(m_StatePrototypes[StateIndex]->Make());
-		m_States[ObjectIndex].second.top()->Enter(ObjectIndex);
-		m_States[ObjectIndex].first = false;
+		if (!m_States[Index].second.empty())
+			m_States[Index].second.top()->Exit(Index);
+		m_States[Index].second.emplace(m_StatePrototypes[StateIndex]->Make());
+		m_States[Index].second.top()->Enter(Index);
+		m_States[Index].first = false;
 	});
 }
 
 void Cyan::PopState(size_t ObjectIndex)
 {
-	if (m_States[ObjectIndex].first) return;
-	m_States[ObjectIndex].first = true;
-	QueueAction([this, ObjectIndex]()
+	size_t Index = m_ObjectLocator[ObjectIndex];
+	if (m_States[Index].first) return;
+	m_States[Index].first = true;
+	QueueAction([this, Index]()
 	{
-		if (m_States[ObjectIndex].second.size() <= 1) return;
-		m_States[ObjectIndex].second.top()->Exit(ObjectIndex);
-		delete m_States[ObjectIndex].second.top();
-		m_States[ObjectIndex].second.pop();
-		m_States[ObjectIndex].second.top()->Enter(ObjectIndex);
-		m_States[ObjectIndex].first = false;
+		if (m_States[Index].second.size() <= 1) return;
+		m_States[Index].second.top()->Exit(Index);
+		delete m_States[Index].second.top();
+		m_States[Index].second.pop();
+		m_States[Index].second.top()->Enter(Index);
+		m_States[Index].first = false;
 	});
 }
 
 void Cyan::ChangeState(size_t ObjectIndex, size_t StateIndex)
 {
-
-	if (m_States[ObjectIndex].first) return;
-	m_States[ObjectIndex].first = true;
-	QueueAction([this, ObjectIndex, StateIndex]()
+	size_t Index = m_ObjectLocator[ObjectIndex];
+	if (m_States[Index].first) return;
+	m_States[Index].first = true;
+	QueueAction([this, Index, StateIndex]()
 	{
-		if (!m_States[ObjectIndex].second.empty())
+		if (!m_States[Index].second.empty())
 		{
-			m_States[ObjectIndex].second.top()->Exit(ObjectIndex);
-			delete m_States[ObjectIndex].second.top();
-			m_States[ObjectIndex].second.pop();
+			m_States[Index].second.top()->Exit(Index);
+			delete m_States[Index].second.top();
+			m_States[Index].second.pop();
 		}
-		m_States[ObjectIndex].second.emplace(m_StatePrototypes[StateIndex]->Make());
-		m_States[ObjectIndex].second.top()->Enter(ObjectIndex);
-		m_States[ObjectIndex].first = false;
+		m_States[Index].second.emplace(m_StatePrototypes[StateIndex]->Make());
+		m_States[Index].second.top()->Enter(Index);
+		m_States[Index].first = false;
 	});
 }
 
@@ -136,18 +138,43 @@ void Cyan::AddObject(size_t * Out)
 	m_Sprites.emplace_back();
 	m_States.emplace_back();
 	m_Input.emplace_back();
-	*Out = Last(m_Descriptors);
+
+	static size_t ID = 0;
+	m_ObjectLocator[ID] = Last(m_Descriptors);
+	*Out = ID;
+	++ID;
 }
 
 void Cyan::AddSprite(size_t * Out, size_t ObjectIndex)
 {
-	m_Sprites[ObjectIndex].emplace_back();
-	*Out = Last(m_Sprites[ObjectIndex]);
+	size_t Index = m_ObjectLocator[ObjectIndex];
+	m_Sprites[Index].emplace_back();
+	*Out = Last(m_Sprites[Index]);
 }
 
 void Cyan::AddController(size_t ObjectIndex, size_t StateIndex)
 {
-	m_Controllers[ObjectIndex][StateIndex];
+	m_Controllers[m_ObjectLocator[ObjectIndex]][StateIndex];
+}
+
+void Cyan::DeleteObject(size_t ObjectIndex)
+{
+	QueueAction([this, ObjectIndex]()
+	{
+		auto Found = m_ObjectLocator.find(ObjectIndex);
+
+		EraseByIndex(m_Descriptors, Found->second);
+		EraseByIndex(m_Graphics, Found->second);
+		EraseByIndex(m_Physics, Found->second);
+		EraseByIndex(m_Input, Found->second);
+		EraseByIndex(m_Sprites, Found->second);
+		EraseByIndex(m_States, Found->second);
+		EraseByIndex(m_Controllers, Found->second);
+
+		for (auto& i = Found; i != m_ObjectLocator.end(); ++i)
+			--i->second; //Decrease by one all the Indexes added after
+		m_ObjectLocator.erase(ObjectIndex);
+	});
 }
 
 void Cyan::UpdateInput()
@@ -185,34 +212,34 @@ Window & Cyan::GetFramework()
 	return m_Window;
 }
 
-Descriptor & Cyan::GetDescriptor(size_t Index)
+Descriptor & Cyan::GetDescriptor(size_t ObjectIndex)
 {
-	return m_Descriptors[Index];
+	return m_Descriptors[m_ObjectLocator[ObjectIndex]];
 }
 
-Graphics& Cyan::GetGraphics(size_t Index)
+Graphics& Cyan::GetGraphics(size_t ObjectIndex)
 {
-	return m_Graphics[Index];
+	return m_Graphics[m_ObjectLocator[ObjectIndex]];
 }
 
-Physics & Cyan::GetPhysics(size_t Index)
+Physics & Cyan::GetPhysics(size_t ObjectIndex)
 {
-	return m_Physics[Index];
+	return m_Physics[m_ObjectLocator[ObjectIndex]];
 }
 
-State *& Cyan::GetCurrentState(size_t Index)
+State *& Cyan::GetCurrentState(size_t ObjectIndex)
 {
-	return m_States[Index].second.top();
+	return m_States[m_ObjectLocator[ObjectIndex]].second.top();
 }
 
 Controller & Cyan::GetController(size_t ObjectIndex, size_t StateIndex)
 {
-	return m_Controllers[ObjectIndex][StateIndex];
+	return m_Controllers[m_ObjectLocator[ObjectIndex]][StateIndex];
 }
 
-Sprite& Cyan::GetSprite(size_t Index, size_t SpriteNumber)
+Sprite& Cyan::GetSprite(size_t ObjectIndex, size_t SpriteNumber)
 {
-	return m_Sprites[Index][SpriteNumber];
+	return m_Sprites[m_ObjectLocator[ObjectIndex]][SpriteNumber];
 }
 
 Command *& Cyan::GetCommand(size_t Index)

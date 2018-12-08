@@ -23,8 +23,7 @@ void Input::ProcessInput()
 		}
 		else if (i.second)
 		{
-			m_Pushed.erase(STD remove(m_Pushed.begin(), m_Pushed.end(), i.first),  
-				m_Pushed.end());
+			EraseByValue(m_Pushed, i.first);
 			m_Released.emplace_back(i.first);
 			i.second = false;
 		}

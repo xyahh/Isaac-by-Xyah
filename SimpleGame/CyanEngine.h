@@ -12,14 +12,7 @@
 #include "Input.h"
 #include "Sprite.h"
 #include "Controller.h"
-
-enum Direction
-{
-	Up,
-	Down,
-	Left,
-	Right,
-};
+#include "Direction.h"
 
 class Cyan
 {
@@ -53,6 +46,8 @@ public:
 	void AddObject(size_t * Out);
 	void AddSprite(size_t * Out, size_t ObjectIndex);
 	void AddController(size_t ObjectIndex, size_t StateIndex); 
+
+	void DeleteObject(size_t ObjectIndex);
 
 	void UpdateInput();
 
@@ -135,6 +130,8 @@ private:
 	World		m_World; //Scale
 
 	/* Object Components */
+	STD map<size_t, size_t>		m_ObjectLocator;
+
 	STD vector<Descriptor>		m_Descriptors;
 	STD vector<Graphics>		m_Graphics;
 	STD vector<Physics>			m_Physics;

@@ -4,6 +4,7 @@ namespace TEX
 	extern size_t BASIC_BODY;
 	extern size_t ISAAC_HEAD;
 	extern size_t EXPLOSION;
+	extern size_t TEAR;
 }
 
 

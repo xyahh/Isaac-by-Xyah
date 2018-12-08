@@ -6,6 +6,7 @@ namespace TEX
 	size_t BASIC_BODY;
 	size_t ISAAC_HEAD;
 	size_t EXPLOSION;
+	size_t TEAR;
 }
 
 

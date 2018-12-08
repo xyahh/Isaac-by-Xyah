@@ -68,7 +68,7 @@ bool Sprite::LinearUpdate()
 {
 	CurrentFrame += UPDATE_TIME *  FrameRate;
 	Current.x = (u_int)(CurrentFrame) % Total.x;
-	return CurrentFrame > Total.x;
+	return CurrentFrame >= Total.x;
 }
 
 bool Sprite::GridUpdate()
@@ -77,16 +77,13 @@ bool Sprite::GridUpdate()
 	Current.x = (u_int)(CurrentFrame) % Total.x;
 	u_int Vframes = (u_int)(CurrentFrame) / Total.x;
 	Current.y = Vframes % Total.y;
-
-	bool Result = Vframes >= Total.y;
-
-	if (Result)
+	if (Vframes >= Total.y)
 	{
 		Dispatch(SpriteEvent::LoopEnd);
 		CurrentFrame = 0;
+		return true;
 	}
-
-	return Result;
+	return false;
 }
 
 size_t Sprite::GetTexture() const

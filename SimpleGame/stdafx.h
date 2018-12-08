@@ -39,6 +39,26 @@ inline size_t Last(const STD vector<T>& v)
 	return v.size() - 1;
 }
 
+template<class T>
+inline void EraseByValue(STD vector<T>& v, const T& value)
+{
+	size_t Count = 0;
+	v.erase(STD remove(v.begin(), v.end(), value), v.end());
+}
+
+
+template<class T>
+inline void EraseByIndex(STD vector<T>& v, size_t Index)
+{
+	size_t Count = 0;
+	v.erase(STD remove_if(v.begin(), v.end(), [&](const T& value)
+	{
+		return Count++ == Index;
+	}), v.end());
+}
+
+
+
 /* Core */
 class Window;
 class Scene;

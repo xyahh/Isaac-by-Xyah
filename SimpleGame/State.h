@@ -21,12 +21,6 @@ protected:
 	{
 		return pState;
 	}
-
-	/* 
-		Prototypes hold the Data for Storage when 
-		next State is created of the same Type. 
-		(Note: Non-prototype State pointers are deleted after change / pop!)
-	*/
 };
 
 class NullState : public State
@@ -238,7 +232,7 @@ class ShootState : public State
 {
 public:
 
-	ShootState(float ShootingRate, float ShootingForce) :
+	ShootState(u_int TexID, float ShootingRate, float ShootingForce) :
 		TexID(TexID), ShootingRate(ShootingRate), ShootingForce(ShootingForce)
 	{
 #ifdef CYAN_DEBUG_STATES
@@ -260,11 +254,10 @@ private:
 
 	virtual size_t Name() const { return ST::SHOOT; }
 
-	virtual State* Make() { return Assemble(new ShootState(ShootingRate, ShootingForce)); }
+	virtual State* Make() { return Assemble(new ShootState(TexID, ShootingRate, ShootingForce)); }
 	
 	float Time;
 	float ShootingRate;
 	float ShootingForce;
-	size_t BulletID;
-	size_t TexID;
+	u_int TexID;
 };
