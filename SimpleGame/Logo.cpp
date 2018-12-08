@@ -1,11 +1,10 @@
 #include "stdafx.h"
-#include "Framework.h"
 #include "Logo.h"
 #include "Menu.h"
 
 size_t LOGO;
 
-void Logo::Init()
+void Logo::Enter()
 {
 	size_t LOGO_TEX;
 	Engine.AddObject(&LOGO);
@@ -16,27 +15,9 @@ void Logo::Init()
 	Sprite& LogoSprite = Engine.GetSprite(LOGO, LOGO_SPRITE);
 	LogoSprite.SetTexture(LOGO_TEX);	
 	LogoSprite.SetSize({ 9.f, 3.f });
-	FadeMax = 1.5f;
-	Fade = 0.f;
 }
 
 void Logo::Exit()
 {
 	Engine.DeleteComponents();
 }
-
-void Logo::Render(float fInterpolation)
-{
-	if (Fade < 0.f)
-		Engine.GetFramework().PlayScene<Menu>();
-	Engine.Render(fInterpolation);
-}
-
-void Logo::Update()
-{
-	Engine.GetGraphics(LOGO).SetColor(1.f, 1.f, 1.f, Fade);
-	Fade += UPDATE_TIME / FadeMax;
-	if (Fade > fabs(FadeMax))
-		FadeMax *= -1.f;		
-}
-

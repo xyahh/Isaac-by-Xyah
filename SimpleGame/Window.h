@@ -13,13 +13,18 @@ public:
 	template<class T>
 	void PlayScene()
 	{
-		if (m_Scene)
+		Engine.QueueAction([&]()
 		{
-			m_Scene->Exit();
-			delete m_Scene;
-		}
-		m_Scene = new T;
-		m_Scene->Init();
+			if (m_Scene)
+			{
+				m_Scene->Exit();
+				delete m_Scene;
+			}
+			m_Scene = new T;
+			m_Scene->Enter();
+		
+			Engine.UpdateInput();
+		});
 	}
 
 private:
@@ -32,6 +37,7 @@ private:
 	int ProcMessage();
 	void SwapBuffers();
 	
+
 	MSG			m_MSG;
 	
 	HGLRC		m_HRC			{ NULL };
@@ -46,7 +52,5 @@ private:
 	int			m_WindowHeight	{ 500 };
 
 	Scene*		m_Scene	{ NULL };
-
-
 };
 

@@ -157,7 +157,8 @@
     <ClInclude Include="Controller.h" />
     <ClInclude Include="Descriptor.h" />
     <ClInclude Include="DevConsole.h" />
-    <ClInclude Include="Framework.h" />
+    <ClInclude Include="Subject.h" />
+    <ClInclude Include="Window.h" />
     <ClInclude Include="CyanEngine.h" />
     <ClInclude Include="Gamepad.h" />
     <ClInclude Include="Graphics.h" />
@@ -185,7 +186,8 @@
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="Descriptor.cpp" />
     <ClCompile Include="DevConsole.cpp" />
-    <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="Subject.cpp" />
+    <ClCompile Include="Window.cpp" />
     <ClCompile Include="CyanEngine.cpp" />
     <ClCompile Include="Gamepad.cpp" />
     <ClCompile Include="Graphics.cpp" />

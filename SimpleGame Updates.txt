@@ -1,17 +1,16 @@
 --------------------------------------------
 New Features
 --------------------------------------------
-+) WINAPI Support. Now I can fix the 
-current bug that has been 'bugging' me :)
-+) Text Support (through WINAPI)
++) INPUT LastKey wins
++) Decoupled Input & Controller
++) EventDispatcher (inheritance for now..)
+
 --------------------------------------------
 Features Pending (In order of Priority)
 --------------------------------------------
-+) INPUT LastKey wins! 
-
-+) Event Dispatcher
++) Change Shooting to ShootUp, ShootDown, etc...
+(because we are now pushing it...?)
 +) Button UI Interface Class
-
 +) Engine to have a Vibration Time Setter for Controllers
 +) Engine to have an Optional Periodical try to reconnect Controller.
 +) Support for Multiple Controllers

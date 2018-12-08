@@ -1,8 +1,5 @@
 #include "stdafx.h"
 #include "Command.h"
-#include "CyanEngine.h"
-#include "Scene.h"
-
 
 void ForceCommand::execute(size_t ObjectIndex)
 {

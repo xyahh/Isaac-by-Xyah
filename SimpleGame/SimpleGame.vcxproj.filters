@@ -42,9 +42,6 @@
     <ClInclude Include="State.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Framework.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -96,6 +93,12 @@
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Subject.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SimpleGame.cpp">
@@ -126,9 +129,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="CyanEngine.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Framework.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
@@ -168,6 +168,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Subject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

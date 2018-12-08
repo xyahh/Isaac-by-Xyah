@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Renderer.h"
 
-
 #include <atlimage.h>
 #include <fstream>
+
 #include "Dependencies/GL/glew.h"
-#include "World.h"
 #include "CyanEngine.h"
+#include "World.h"
 
 
 /* CImage to Unsigned Char Vector */
@@ -33,7 +33,7 @@ STD vector<unsigned char> GetImageBits(const CImage & Image)
 
 DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 {
-	float Scale = World::GetScale();
+	float Scale = Engine.GetWorld().GetScale();
 	float WinX, WinY;
 	Engine.GetFramework().GetWindowSizef(&WinX, &WinY);
 	return DX Multiply
@@ -49,7 +49,7 @@ DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 
 DX XMVECTOR XM_CALLCONV Renderer::GetGLSize(DX FXMVECTOR Size) const
 {
-	float Scale = World::GetScale();
+	float Scale = Engine.GetWorld().GetScale();
 	float WinX, WinY;
 	Engine.GetFramework().GetWindowSizef(&WinX, &WinY);
 	return DX Multiply
@@ -346,7 +346,7 @@ void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
 	glUniform2f(u_Size, DX GetX(GLSize), DX GetY(GLSize));
 	glUniform4f(u_Color, DX GetX(Color), DX GetY(Color), DX GetZ(Color), DX GetW(Color));
 	glUniform1f(u_CurrSeqX, DX GetX(CurrentSprite));
-	glUniform1f(u_CurrSeqY, DX GetY(CurrentSprite));
+	glUniform1f(u_CurrSeqY, DX GetY(TotalSprite) - DX GetY(CurrentSprite) - 1);
 	glUniform1f(u_TotalSeqX, DX GetX(TotalSprite));
 	glUniform1f(u_TotalSeqY, DX GetY(TotalSprite));
 

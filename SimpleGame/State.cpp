@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "State.h"
 #include "CyanEngine.h"
+
 /*Null State */
 
 void NullState::Enter(size_t ObjectIndex)
@@ -28,7 +29,7 @@ void IdleState::Update(size_t ObjectIndex)
 {
 	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetForce();
 	if (!Zero(DX GetZ(Velocity)))
-		Engine.ChangeState(ObjectIndex, ST::IN_AIR);
+		Engine.ChangeState(ObjectIndex, ST::IN_AIR);		
 	else if (!Zero(DX2 Magnitude(Velocity)))
 		Engine.ChangeState(ObjectIndex, ST::MOVE);
 }
@@ -90,8 +91,6 @@ void ChargeJumpState::Update(size_t ObjectIndex)
 		BodySprite.SetFrameRate(0.f);
 		BodySprite.ResetSprite();
 	}
-		
-
 	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f);
 	Clamp(0.f, &RageAmount, 1.f);
 }
@@ -111,7 +110,6 @@ void InAirState::Enter(size_t ObjectIndex)
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
 	GroundFriction = ObjPhysics.GetFriction();
 	ObjPhysics.SetFriction(AirResistance);
-
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
 	BodySprite.SetFrameRate(0.f);
 	BodySprite.ResetSprite();
@@ -119,10 +117,10 @@ void InAirState::Enter(size_t ObjectIndex)
 
 void InAirState::Update(size_t ObjectIndex)
 {
-	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
-	if (Zero(DX GetZ(Velocity)))
+	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
+	if (Zero(DX GetZ(ObjPhysics.GetPosition())) && Zero(DX GetZ(ObjPhysics.GetForce())))
 	{
-		if (Zero(DX2 Magnitude(Velocity)))
+		if (Zero(DX2 Magnitude(ObjPhysics.GetVelocity())))
 			Engine.ChangeState(ObjectIndex, ST::IDLE);
 		else
 			Engine.ChangeState(ObjectIndex, ST::MOVE);
@@ -175,26 +173,38 @@ void SlamState::Enter(size_t ObjectIndex)
 void SlamState::Update(size_t ObjectIndex)
 {
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
-	if (Zero(DX GetZ(ObjPhysics.GetVelocity()) && Zero(DX GetZ(ObjPhysics.GetForce()))))
+	if (Zero(DX GetZ(ObjPhysics.GetPosition())))
 		Engine.ChangeState(ObjectIndex, ST::IDLE);
 }
 
 void SlamState::Exit(size_t ObjectIndex)
 {
-	//size_t Effect = Engine.AddObject();
-	//
-	//size_t EffSpIdx = Engine.AddSprite(Effect);
-	//Sprite& EffectSprite = Engine.GetSprite(Effect, EffSpIdx);
-	//EffectSprite.SetSpriteType(SPRITETYPE::GRID);
-	//EffectSprite.SetTexture(TEX::EXPLOSION);
-	//EffectSprite.SetSize({ 5.f, 5.f });
-	//EffectSprite.SetFrameRate(60);
-	//EffectSprite.SetTotal({ 9, 9 });
-	//
-	//Engine.GetPhysics(Effect).SetPosition(
-	//	DX Add(Engine.GetPhysics(ObjectIndex).GetPosition(), 
-	//		{ 0.f, 0.1f, -0.1f })
-	//);
+	size_t Effect;
+	Engine.AddObject(&Effect);
+	size_t EffSpIdx;
+	Engine.AddSprite(&EffSpIdx, Effect);
+	Sprite& EffectSprite = Engine.GetSprite(Effect, EffSpIdx);
+	EffectSprite.SetSpriteType(SpriteType::Grid);
+	EffectSprite.SetTexture(TEX::EXPLOSION);
+	EffectSprite.SetSize({ 5.f, 5.f });
+	EffectSprite.SetFrameRate(60);
+	EffectSprite.SetDirection(5);
+	EffectSprite.SetTotal({ 9, 9 });
+	EffectSprite.AddEvent(SpriteEvent::LoopEnd, [Effect]() 
+	{
+		printf("Sprite ended!\n");
+		//Delete Object when Available!
+	});
+	Physics& EffectPhysics = Engine.GetPhysics(Effect);
+	EffectPhysics.SetPosition(
+		DX Multiply(
+		Engine.GetPhysics(ObjectIndex).GetPosition(),
+		{1.f, 1.f, 1.f}
+		)
+	);
+
+
+
 	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f, 1.f, 1.f);
 }
 
@@ -220,6 +230,15 @@ void ShootState::Enter(size_t ObjectIndex)
 
 void ShootState::Update(size_t ObjectIndex)
 {
+	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
+	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	if (!Zero(DX2 Magnitude(Velocity)))
+		BodySprite.SetFrameRate(30.f);
+	else
+	{
+		BodySprite.SetFrameRate(0.f);
+		BodySprite.ResetSprite();
+	}
 	//State::Update(ActorID);
 	//Physics& ActorPhysics = Engine.GetPhysics(ActorID);
 	//Physics& BulletPhysics = Engine.GetPhysics(BulletID);
@@ -249,4 +268,5 @@ void ShootState::Exit(size_t ObjectIndex)
 	//BulletPhysics.SetVelocity(Engine.GetPhysics(ActorID).GetVelocity());
 	//Engine.GetGraphics(ActorID).GetSprite("Head").ResetSprite();
 }
+
 

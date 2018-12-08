@@ -1,5 +1,4 @@
 #pragma once
-#include "Input.h"
 
 class State
 {
@@ -18,8 +17,6 @@ public:
 	virtual size_t Name() const = 0;
 
 protected:
-
-
 	State* Assemble(State* pState)
 	{
 		return pState;

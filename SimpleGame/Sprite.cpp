@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Sprite.h"
 
-
 void Sprite::SetTexture(size_t TexIdx)
 {
  	TexIndex = TexIdx;
@@ -47,8 +46,10 @@ bool Sprite::Update()
 {
 	switch (Type)
 	{
-	case SpriteType::Linear:return LinearUpdate();
-	case SpriteType::Grid: return GridUpdate();
+	case SpriteType::Linear: 
+		return LinearUpdate();
+	case SpriteType::Grid: 
+		return GridUpdate();
 	}
 	return false;
 }
@@ -66,17 +67,26 @@ float Sprite::GetFrameRate() const
 bool Sprite::LinearUpdate()
 {
 	CurrentFrame += UPDATE_TIME *  FrameRate;
-	Current.x = (int)(CurrentFrame) % Total.x;
+	Current.x = (u_int)(CurrentFrame) % Total.x;
 	return CurrentFrame > Total.x;
 }
 
 bool Sprite::GridUpdate()
 {
 	CurrentFrame += UPDATE_TIME * FrameRate;
-	Current.x = (int)(CurrentFrame) % Total.x;
-	u_int Vframes = (int)(CurrentFrame) / Total.x;
+	Current.x = (u_int)(CurrentFrame) % Total.x;
+	u_int Vframes = (u_int)(CurrentFrame) / Total.x;
 	Current.y = Vframes % Total.y;
-	return Vframes >= Total.y;
+
+	bool Result = Vframes >= Total.y;
+
+	if (Result)
+	{
+		Dispatch(SpriteEvent::LoopEnd);
+		CurrentFrame = 0;
+	}
+
+	return Result;
 }
 
 size_t Sprite::GetTexture() const

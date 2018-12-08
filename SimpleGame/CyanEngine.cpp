@@ -1,17 +1,11 @@
 #include "stdafx.h"
 #include "CyanEngine.h"
-#include "World.h"
 
 Cyan Engine;
 
-bool Cyan::Init
-(
-	const STD string& Title,
-	int Width, int Height,
-	bool EnableDevConsole
-)
+bool Cyan::Init(const STD string& Title, int X, int Y,bool Dev)
 {
-	m_Window.Initialize(Title, Width, Height, EnableDevConsole);
+	m_Window.Initialize(Title, X, Y, Dev);
 	Sound::Initialize();
 	return m_Renderer.Initialize();
 }
@@ -22,7 +16,7 @@ void Cyan::MainLoop()
 	while (TRUE)
 	{
 		if (m_Window.ProcMessage()) 
-			break;
+			break; //Break Loop if QUIT Message was called
 
 		m_Timer.Tick();
 		while (m_Timer.FlushAccumulatedTime())
@@ -45,61 +39,72 @@ void Cyan::Destroy()
 }
 
 void Cyan::PushState(size_t ObjectIndex, size_t StateIndex)
-{
-	QueueAction([this, ObjectIndex, StateIndex]()
+{ 
+	if (m_States[ObjectIndex].first) return;
+	m_States[ObjectIndex].first = true;
+	QueueAction([this, ObjectIndex, StateIndex]() 
 	{
-		if (!m_States[ObjectIndex].empty())
-			m_States[ObjectIndex].top()->Exit(ObjectIndex);
-		m_States[ObjectIndex].emplace(m_StatePrototypes[StateIndex]->Make());
-		m_States[ObjectIndex].top()->Enter(ObjectIndex);
+		if (!m_States[ObjectIndex].second.empty())
+			m_States[ObjectIndex].second.top()->Exit(ObjectIndex);
+		m_States[ObjectIndex].second.emplace(m_StatePrototypes[StateIndex]->Make());
+		m_States[ObjectIndex].second.top()->Enter(ObjectIndex);
+		m_States[ObjectIndex].first = false;
 	});
 }
 
 void Cyan::PopState(size_t ObjectIndex)
 {
+	if (m_States[ObjectIndex].first) return;
+	m_States[ObjectIndex].first = true;
 	QueueAction([this, ObjectIndex]()
 	{
-		// Can't Pop The Last Remaining State
-		if (m_States[ObjectIndex].size() <= 1) return; 
-		m_States[ObjectIndex].top()->Exit(ObjectIndex);
-		delete m_States[ObjectIndex].top();
-		m_States[ObjectIndex].pop();
-		m_States[ObjectIndex].top()->Enter(ObjectIndex);
+		if (m_States[ObjectIndex].second.size() <= 1) return;
+		m_States[ObjectIndex].second.top()->Exit(ObjectIndex);
+		delete m_States[ObjectIndex].second.top();
+		m_States[ObjectIndex].second.pop();
+		m_States[ObjectIndex].second.top()->Enter(ObjectIndex);
+		m_States[ObjectIndex].first = false;
 	});
 }
 
 void Cyan::ChangeState(size_t ObjectIndex, size_t StateIndex)
 {
+
+	if (m_States[ObjectIndex].first) return;
+	m_States[ObjectIndex].first = true;
 	QueueAction([this, ObjectIndex, StateIndex]()
 	{
-		if (!m_States[ObjectIndex].empty())
+		if (!m_States[ObjectIndex].second.empty())
 		{
-			m_States[ObjectIndex].top()->Exit(ObjectIndex);
-			delete m_States[ObjectIndex].top();
-			m_States[ObjectIndex].pop();
+			m_States[ObjectIndex].second.top()->Exit(ObjectIndex);
+			delete m_States[ObjectIndex].second.top();
+			m_States[ObjectIndex].second.pop();
 		}
-		m_States[ObjectIndex].emplace(m_StatePrototypes[StateIndex]->Make());
-		m_States[ObjectIndex].top()->Enter(ObjectIndex);	
+		m_States[ObjectIndex].second.emplace(m_StatePrototypes[StateIndex]->Make());
+		m_States[ObjectIndex].second.top()->Enter(ObjectIndex);
+		m_States[ObjectIndex].first = false;
 	});
 }
 
 void Cyan::Update()
 {
-	/* State & Input Update */
-	for (size_t i = 0; i < m_Input.size(); ++i)
-	{
-		if (m_States[i].empty()) continue;
-		//m_Input[i][m_States[i].top()->Name()].ProcessInput(i);
-		m_States[i].top()->Update(i);
-		FlushActionQueue();
-
-	}
-
 	/* Sprite Update */
 	for (size_t i = 0; i < m_Sprites.size(); ++i)
 	{
 		for (auto& Sprite : m_Sprites[i])
 			Sprite.Update();
+	}
+
+	/* State & Input Update */
+	for (size_t i = 0; i < m_Input.size(); ++i)
+	{
+		if (m_States[i].second.empty())
+			continue;
+		m_Input[i].ProcessInput();
+		m_Controllers[i][m_States[i].second.top()->Name()].HandleControls(i,
+			m_Input[i].m_Pushed, m_Input[i].m_Released);
+		m_Input[i].m_Released.clear(); // Call only once;
+		m_States[i].second.top()->Update(i);
 	}
 
 	/* Collision Check */
@@ -125,6 +130,7 @@ void Cyan::Render(float fInterpolation)
 void Cyan::AddObject(size_t * Out)
 {
 	m_Descriptors.emplace_back();
+	m_Controllers.emplace_back();
 	m_Graphics.emplace_back();
 	m_Physics.emplace_back();
 	m_Sprites.emplace_back();
@@ -139,9 +145,21 @@ void Cyan::AddSprite(size_t * Out, size_t ObjectIndex)
 	*Out = Last(m_Sprites[ObjectIndex]);
 }
 
-void Cyan::AddObjectState(size_t ObjectIndex, size_t StatePrototypeIndex)
+void Cyan::AddController(size_t ObjectIndex, size_t StateIndex)
 {
-	//m_Input[ObjectIndex][StatePrototypeIndex];
+	m_Controllers[ObjectIndex][StateIndex];
+}
+
+void Cyan::UpdateInput()
+{
+	for (int i = 0; i < m_Input.size(); ++i)
+	{
+		for (auto& Controller : m_Controllers[i])
+		{
+			for(auto& Control : Controller.second.m_Controls)
+				m_Input[i].DefineInput(Control.first);
+		}
+	}
 }
 
 void Cyan::AddTexture(size_t * Out, const STD string & ImagePath)
@@ -155,6 +173,11 @@ void Cyan::AddSound(size_t * Out, const STD string & ImagePath, bool isBGM)
 {
 	m_Sounds.emplace_back(ImagePath, isBGM);
 	*Out = Last(m_Sounds);
+}
+
+World & Cyan::GetWorld()
+{
+	return m_World;
 }
 
 Window & Cyan::GetFramework()
@@ -179,13 +202,12 @@ Physics & Cyan::GetPhysics(size_t Index)
 
 State *& Cyan::GetCurrentState(size_t Index)
 {
-	return m_States[Index].top();
+	return m_States[Index].second.top();
 }
 
-Input & Cyan::GetStateInput(size_t ObjectIndex, size_t StateIndex)
+Controller & Cyan::GetController(size_t ObjectIndex, size_t StateIndex)
 {
-	//return m_Input[ObjectIndex][StateIndex];
-	return m_Input[0];
+	return m_Controllers[ObjectIndex][StateIndex];
 }
 
 Sprite& Cyan::GetSprite(size_t Index, size_t SpriteNumber)
@@ -214,16 +236,19 @@ void Cyan::DeleteComponents()
 	ReleaseComponentData();
 
 	/* Clear Data */
-	m_Sprites.clear();
-	m_Sounds.clear();
-	m_States.clear();
-	m_StatePrototypes.clear();
-	m_Physics.clear();
-	m_Graphics.clear();
 	m_Descriptors.clear();
+	m_Graphics.clear();
+	m_Physics.clear();
+	m_Input.clear();
+
+	m_Sprites.clear();
+	m_States.clear();
+	m_Controllers.clear();
+
+	m_StatePrototypes.clear();
 	m_Commands.clear();
 	m_Textures.clear();
-	m_Input.clear();
+	m_Sounds.clear();
 }
 
 void Cyan::ReleaseComponentData()
@@ -235,11 +260,11 @@ void Cyan::ReleaseComponentData()
 
 	for (auto& ObjStateStack : m_States)
 	{
-		while (!ObjStateStack.empty())
+		while (!ObjStateStack.second.empty())
 		{
-			State* pState = ObjStateStack.top();
+			State* pState = ObjStateStack.second.top();
 			delete pState;
-			ObjStateStack.pop();
+			ObjStateStack.second.pop();
 		}
 	}
 

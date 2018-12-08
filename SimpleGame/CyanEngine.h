@@ -1,5 +1,6 @@
 #pragma once
-#include "Framework.h"
+#include "World.h"
+#include "Window.h"
 #include "Descriptor.h"
 #include "Renderer.h"
 #include "Graphics.h"
@@ -8,16 +9,16 @@
 #include "State.h"
 #include "Sound.h"
 #include "Timer.h"
+#include "Input.h"
 #include "Sprite.h"
 #include "Controller.h"
 
-/* Reversed order from Image TopDown. It is read from Bottom to Top */
 enum Direction
 {
-	Right,
-	Left,
-	Down,
 	Up,
+	Down,
+	Left,
+	Right,
 };
 
 class Cyan
@@ -28,8 +29,17 @@ public:
 	Cyan() {}
 	~Cyan() {}
  
+	/*---------Action Queue-----------------------------*/
+
+	template<typename Func>
+	void QueueAction(Func&& Fx)
+	{
+		m_Actions.emplace(Fx);
+	}
+
 	/*---------Game Loop--------------------------------*/
-	bool Init(const STD string& Title, int Width, int Height, bool Dev = false);
+
+	bool Init(const STD string& Title, int X, int Y, bool Dev = false);
 
 	void MainLoop();
 
@@ -37,12 +47,14 @@ public:
 	void Render(float fInterpolation);
 
 	void Destroy();
-	/*--------------------------------------------------*/
 
 	/*---------Components Functions---------------------*/
+
 	void AddObject(size_t * Out);
 	void AddSprite(size_t * Out, size_t ObjectIndex);
-	void AddObjectState(size_t ObjectIndex, size_t StatePrototypeIndex); //Map of Object's Input
+	void AddController(size_t ObjectIndex, size_t StateIndex); 
+
+	void UpdateInput();
 
 	template<class T, class... Args>
 	void AddStatePrototype(size_t* Out, Args&&... Ax)
@@ -63,27 +75,15 @@ public:
 	void PopState(size_t ObjectIndex);
 	void ChangeState(size_t ObjectIndex, size_t StateIndex);
 
-	template<typename Func>
-	void QueueAction(Func&& Fx)
-	{
-		m_Actions.emplace_back(Fx);
-	}
-
-	void FlushActionQueue()
-	{
-		for (auto& Action : m_Actions) 
-			Action();
-		m_Actions.clear();
-	}
-
 	/*---------Components Getters-----------------------*/
+	World& GetWorld();
 	Window& GetFramework();
 
 	Descriptor& GetDescriptor(size_t Index);
 	Graphics& GetGraphics(size_t Index);
 	Physics& GetPhysics(size_t Index);
 	State*& GetCurrentState(size_t Index);
-	Input& GetStateInput(size_t ObjectIndex, size_t StateIndex);
+	Controller& GetController(size_t ObjectIndex, size_t StateIndex);
 
 	Sprite& GetSprite(size_t Index, size_t SpriteNumber);
 
@@ -91,9 +91,9 @@ public:
 	u_int GetTexture(size_t Index);
 	Sound& GetSound(size_t Index);
 
-	/*--------------------------------------------------*/
+	/*---------Components Deletion----------------------*/
+
 	void DeleteComponents();
-	/*--------------------------------------------------*/
 
 private:
 
@@ -106,28 +106,49 @@ private:
 		*Out = Last(v);
 	}
 
+	void FlushActionQueue()
+	{
+		while (!m_Actions.empty())
+		{
+			m_Actions.front()();
+			m_Actions.pop();
+		}
+	}
+
+
 private:
+
+	using ObjController = STD map <size_t, Controller>;
+	using ObjSprite = STD vector<Sprite>;
+	using ObjState = STD pair<bool, STD stack<State*>>;
+	/*
+		The Bool in State Pair helps decide whether a
+		Change in state of an Object is Queued in the
+		Action Queue. This stops having two or more 
+		state changes of the same objects.
+	*/	
+
 	/* Core */
 	Timer		m_Timer;
 	Window		m_Window;
 	Renderer	m_Renderer;
+	World		m_World; //Scale
 
 	/* Object Components */
-	STD vector<Descriptor>					m_Descriptors;
-	STD vector<Graphics>					m_Graphics;
-	STD vector<Physics>						m_Physics;
-	STD vector<STD vector<Sprite>>			m_Sprites;
-	STD vector<STD stack<State*>>			m_States;
-	STD vector<STD map<size_t, Controller>> m_StateControllers;
-	STD vector<Input>						m_Input;
-
+	STD vector<Descriptor>		m_Descriptors;
+	STD vector<Graphics>		m_Graphics;
+	STD vector<Physics>			m_Physics;
+	STD vector<Input>			m_Input;
+	STD vector<ObjSprite>		m_Sprites;
+	STD vector<ObjState>		m_States;
+	STD vector<ObjController>	m_Controllers;
 
 	/* Integral Components */
 	STD vector<State*>		m_StatePrototypes;
 	STD vector<Command*>	m_Commands;
 	STD vector<u_int>		m_Textures;
 	STD vector<Sound>		m_Sounds;
-	STD vector<Action>		m_Actions;
+	STD queue<Action>		m_Actions;
 
 };
 

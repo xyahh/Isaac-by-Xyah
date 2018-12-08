@@ -8,10 +8,8 @@ public:
 	World() {}
 	~World() {}
 
-	static void SetScale(float meter, unsigned int pixels);
-	static float GetScale();
+	void  SetScale(float meter, unsigned int pixels);
+	float GetScale();
 
 private:
-	//Camera
-
 };

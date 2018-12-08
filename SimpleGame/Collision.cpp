@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Collision.h"
-#include "Physics.h"
 #include "CyanEngine.h"
 
 void XM_CALLCONV Collision::BBox::SetDimensions(DX FXMVECTOR v)

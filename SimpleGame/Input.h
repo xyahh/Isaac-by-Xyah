@@ -13,25 +13,19 @@ struct KeyInfo
 	int		ClientNum;
 };
 
-struct KeyState
-{
-	bool Pressed;
-	bool Released;
-};
-
-
-
 class Input
 {
 	friend Cyan;
 
 private:
 
-	void DefineUsefulInput(int Value);
-	void ProcessInput(size_t ObjectIndex);
+	void DefineInput(int Value);
+	void ProcessInput();
 
 private:
-	STD map<int, KeyState>	m_FilteredInput;
-	STD vector<int> m_PushedKeys;
-	STD vector<int> m_ReleasedKeys;
+
+	/* map <KeyValue, Pressed> */
+	STD map<int, bool>	m_Input;
+	STD vector<int>		m_Pushed;
+	STD vector<int>		m_Released;
 };

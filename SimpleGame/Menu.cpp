@@ -1,10 +1,9 @@
 #include "stdafx.h"
 #include "Menu.h"
 #include "Gameplay.h"
-#include "Framework.h"
 
 
-void Menu::Init()
+void Menu::Enter()
 {
 	size_t MENU_SOUND;
 	Engine.AddSound(&MENU_SOUND, "./Resources/Sounds/menu.mp3", true);
@@ -28,10 +27,9 @@ void Menu::Init()
 	size_t NULL_STATE;
 	Engine.AddStatePrototype<NullState>(&NULL_STATE);
 
-	Engine.AddObjectState(TITLE, NULL_STATE);
-	Input& TitleInput = Engine.GetStateInput(TITLE, NULL_STATE);
-	
-	//TitleInput.AddKeyMapping(VK_RETURN, START_GAME);
+	Engine.AddController(TITLE, NULL_STATE);
+	Controller& TitleInput = Engine.GetController(TITLE, NULL_STATE);
+	TitleInput.MapControl(VK_RETURN, START_GAME);
 
 	Engine.ChangeState(TITLE, NULL_STATE);
 }
@@ -39,14 +37,4 @@ void Menu::Init()
 void Menu::Exit()
 {
 	Engine.DeleteComponents();
-}
-
-void Menu::Render(float fInterpolation) 
-{ 
-	Engine.Render(fInterpolation);
-}
-
-void Menu::Update() 
-{ 
-	Engine.Update(); 
 }

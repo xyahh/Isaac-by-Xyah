@@ -1,38 +1,32 @@
 #include "stdafx.h"
 #include "Input.h"
-#include "Gamepad.h"
 #include "CyanEngine.h"
 
-void Input::DefineUsefulInput(int Value)
+void Input::DefineInput(int Value)
 {
-	m_FilteredInput.emplace(Value, KeyState{ false, true });
+
+	m_Input.emplace(Value, false);
 }
 
-void Input::ProcessInput(size_t ObjectIndex)
+void Input::ProcessInput()
 {
-	//for (auto& i : m_FilteredInput)
-	//{
-	//	if (KEY_PRESSED(i.first))
-	//	{
-	//		if (!i.second.Pressed)
-	//		{
-	//			printf("PRESSED [%d] IN STATE [%d]\n", i.first, Engine.m_States[ObjectIndex].top()->Name());
-	//			m_PushedKeys.emplace_back(i.first);
-	//			i.second.Pressed = true;
-	//			i.second.Released = false;
-	//		}
-	//
-	//	}
-	//	else if (!i.second.Released && i.second.Pressed)
-	//	{
-	//		printf("RELEASED [%d] IN STATE [%d]\n", i.first, Engine.m_States[ObjectIndex].top()->Name());
-	//		m_PushedKeys.erase(STD remove(m_PushedKeys.begin(), m_PushedKeys.end(), i.first), m_PushedKeys.end());
-	//		m_ReleasedKeys.emplace_back(i.first);
-	//		i.second.Released = true;
-	//		i.second.Pressed = false;
-	//	}
-	//
-	//}
-	//
-	//m_ReleasedKeys.clear();
+	for (auto& i : m_Input)
+	{
+		if (KEY_PRESSED(i.first))
+		{
+			if (!i.second)
+			{
+				m_Pushed.emplace_back(i.first);
+				i.second = true;
+			}
+	
+		}
+		else if (i.second)
+		{
+			m_Pushed.erase(STD remove(m_Pushed.begin(), m_Pushed.end(), i.first),  
+				m_Pushed.end());
+			m_Released.emplace_back(i.first);
+			i.second = false;
+		}
+	}
 }

@@ -10,9 +10,13 @@ enum ObjectType
 
 class Descriptor
 {
+	friend Cyan;
 public:
 
-	Descriptor() : Type(ObjectType::None), TypeValue(0.f) {}
+	Descriptor() : 
+		Type(ObjectType::None), 
+		TypeValue(0.f) 
+	{}
 	
 	void SetType(ObjectType Type);
 	ObjectType GetType() const;
@@ -33,5 +37,4 @@ private:
 
 	ObjectType Type;
 	float TypeValue;
-
 };

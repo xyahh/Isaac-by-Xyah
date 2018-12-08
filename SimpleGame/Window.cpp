@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include "Framework.h"
+#include "Window.h"
+
 #include "CyanEngine.h"
 #include "DevConsole.h"
 #include "resource.h"

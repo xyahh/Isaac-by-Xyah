@@ -1,10 +1,7 @@
 #include "stdafx.h"
 #include "Gameplay.h"
-#include "Framework.h"
-#include "Renderer.h"
-//#include "Menu.h"
 
-void Gameplay::Init()
+void Gameplay::Enter()
 {
 	Engine.AddTexture(&TEX::BASIC_BODY, "./Resources/Characters/basic_body.png");
 	Engine.AddTexture(&TEX::ISAAC_HEAD, "./Resources/Characters/cain_head.png");
@@ -55,50 +52,50 @@ void Gameplay::Init()
 		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
 	}
 
-	//size_t PLAYER2;
+	size_t PLAYER2;
 
-	////Actor
-	//{
+	//Actor
+	{
 
-	//	Engine.AddObject(&PLAYER2);
+		Engine.AddObject(&PLAYER2);
 
-	//	auto& ActorDescriptor = Engine.GetDescriptor(PLAYER2);
-	//	auto& ActorPhysics = Engine.GetPhysics(PLAYER2);
-	//	auto& ActorGraphics = Engine.GetGraphics(PLAYER2);
+		auto& ActorDescriptor = Engine.GetDescriptor(PLAYER2);
+		auto& ActorPhysics = Engine.GetPhysics(PLAYER2);
+		auto& ActorGraphics = Engine.GetGraphics(PLAYER2);
 
-	//	ActorDescriptor.SetType(ObjectType::Actor);
-	//	ActorDescriptor.SetValue(100.f); // 100 HP
+		ActorDescriptor.SetType(ObjectType::Actor);
+		ActorDescriptor.SetValue(100.f); // 100 HP
 
-	//	ActorPhysics.SetCollision(&Collision::Actor);
-	//	ActorPhysics.Box().SetDimensions({ 0.5f, 0.25f, 1.5f });
+		ActorPhysics.SetCollision(&Collision::Actor);
+		ActorPhysics.Box().SetDimensions({ 0.5f, 0.25f, 1.5f });
 
-	//	size_t BODY;
-	//	size_t HEAD;
+		size_t BODY;
+		size_t HEAD;
 
-	//	Engine.AddSprite(&BODY, PLAYER2);
-	//	Engine.AddSprite(&HEAD, PLAYER2);
+		Engine.AddSprite(&BODY, PLAYER2);
+		Engine.AddSprite(&HEAD, PLAYER2);
 
-	//	auto& Body = Engine.GetSprite(PLAYER2, BODY);
-	//	auto& Head = Engine.GetSprite(PLAYER2, HEAD);
+		auto& Body = Engine.GetSprite(PLAYER2, BODY);
+		auto& Head = Engine.GetSprite(PLAYER2, HEAD);
 
-	//	ActorGraphics.SetColor(1.f, 1.f, 1.f, 1.f);
-	//	ActorPhysics.SetMass(70.f);
+		ActorGraphics.SetColor(1.f, 1.f, 1.f, 1.f);
+		ActorPhysics.SetMass(70.f);
 
-	//	float HeadSize = 1.25f;
-	//	float BodySize = 0.75f;
+		float HeadSize = 1.25f;
+		float BodySize = 0.75f;
 
-	//	Body.SetTexture(TEX::BASIC_BODY);
-	//	Body.SetSize({ BodySize, BodySize });
-	//	Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
-	//	Body.SetTotal({ 10, 4 });
-	//	Body.SetDirection(Direction::Down);
+		Body.SetTexture(TEX::BASIC_BODY);
+		Body.SetSize({ BodySize, BodySize });
+		Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
+		Body.SetTotal({ 10, 4 });
+		Body.SetDirection(Direction::Down);
 
-	//	Head.SetTexture(TEX::ISAAC_HEAD);
-	//	Head.SetSize({ HeadSize, HeadSize });
-	//	Head.SetTotal({ 2, 4 });
-	//	Head.SetDirection(Direction::Down);
-	//	Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
-	//}
+		Head.SetTexture(TEX::ISAAC_HEAD);
+		Head.SetSize({ HeadSize, HeadSize });
+		Head.SetTotal({ 2, 4 });
+		Head.SetDirection(Direction::Down);
+		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
+	}
 
 
 	//Actor States
@@ -106,17 +103,14 @@ void Gameplay::Init()
 		Engine.AddStatePrototype<IdleState>(&ST::IDLE);
 		Engine.AddStatePrototype<MoveState>(&ST::MOVE);
 		Engine.AddStatePrototype<InAirState>(&ST::IN_AIR, 0.0f);
-		Engine.AddStatePrototype<ChargeJumpState>(&ST::CHARGE_JUMP, 1.f, 20'000.f);
+		Engine.AddStatePrototype<ChargeJumpState>(&ST::CHARGE_JUMP, 1.f, 40'000.f);
 		Engine.AddStatePrototype<ChargeSlamState>(&ST::CHARGE_SLAM, 1.f);
 		Engine.AddStatePrototype<SlamState>(&ST::SLAM, 200'000.f);
 		Engine.AddStatePrototype<ShootState>(&ST::SHOOT, 5.f, 100.f);
 	}
 
-	//size_t TEST;
 	//Commands
 	{
-		//Engine.AddCommand<SceneCommand<Menu>>(&TEST);
-
 		float Move = 1'500.f;
 		Engine.AddCommand<ForceCommand>(&CMD::MOVE_UP, 0.f, Move, 0.f);
 		Engine.AddCommand<ForceCommand>(&CMD::MOVE_DOWN, 0.f, -Move, 0.f);
@@ -145,59 +139,61 @@ void Gameplay::Init()
 	//Actor Input
 	{
 		/* Adding the Inputs to Player */
-		Engine.AddObjectState(OBJ::PLAYER, ST::IDLE);
-		Engine.AddObjectState(OBJ::PLAYER, ST::MOVE);
-		Engine.AddObjectState(OBJ::PLAYER, ST::CHARGE_JUMP);
-		Engine.AddObjectState(OBJ::PLAYER, ST::IN_AIR);
-		Engine.AddObjectState(OBJ::PLAYER, ST::SHOOT);
+		Engine.AddController(OBJ::PLAYER, ST::IDLE);
+		Engine.AddController(OBJ::PLAYER, ST::MOVE);
+		Engine.AddController(OBJ::PLAYER, ST::CHARGE_JUMP);
+		Engine.AddController(OBJ::PLAYER, ST::IN_AIR);
+		Engine.AddController(OBJ::PLAYER, ST::SHOOT);
 
-		//Engine.AddObjectState(PLAYER2, ST::IDLE);
+		Engine.AddController(PLAYER2, ST::IDLE);
 
-		//Input& IdleInput = Engine.GetStateInput(OBJ::PLAYER, ST::IDLE);
-		//IdleInput.AddKeyMapping('W', CMD::START_MOVE);
-		//IdleInput.AddKeyMapping('A', CMD::START_MOVE);
-		//IdleInput.AddKeyMapping('S', CMD::START_MOVE);
-		//IdleInput.AddKeyMapping('D', CMD::START_MOVE);
-		//IdleInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_JUMP);
-		//IdleInput.AddKeyMapping(VK_RIGHT, CMD::START_SHOOT);
-		//IdleInput.AddKeyMapping(VK_LEFT, CMD::START_SHOOT);
-		//IdleInput.AddKeyMapping(VK_UP, CMD::START_SHOOT);
-		//IdleInput.AddKeyMapping(VK_DOWN, CMD::START_SHOOT);
-		//
-		//Input&  MoveInput = Engine.GetStateInput(OBJ::PLAYER, ST::MOVE);
-		//MoveInput.AddKeyMapping('W', CMD::MOVE_UP);
-		//MoveInput.AddKeyMapping('A', CMD::MOVE_LEFT);
-		//MoveInput.AddKeyMapping('S', CMD::MOVE_DOWN);
-		//MoveInput.AddKeyMapping('D', CMD::MOVE_RIGHT);
-		//MoveInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_JUMP);
-		//MoveInput.AddKeyMapping(VK_RIGHT, CMD::START_SHOOT);
-		//MoveInput.AddKeyMapping(VK_LEFT, CMD::START_SHOOT);
-		//MoveInput.AddKeyMapping(VK_UP, CMD::START_SHOOT);
-		//MoveInput.AddKeyMapping(VK_DOWN, CMD::START_SHOOT);
-		//
-		//Input&  ChargeJump = Engine.GetStateInput(OBJ::PLAYER, ST::CHARGE_JUMP);
-		//ChargeJump.AddKeyMapping('W', CMD::SLOW_MOVE_UP);
-		//ChargeJump.AddKeyMapping('A', CMD::SLOW_MOVE_LEFT);
-		//ChargeJump.AddKeyMapping('S', CMD::SLOW_MOVE_DOWN);
-		//ChargeJump.AddKeyMapping('D', CMD::SLOW_MOVE_RIGHT);
-		//ChargeJump.AddKeyMapping(VK_SPACE, CMD::START_IN_AIR);
-		//
-		//Input&  InAirInput = Engine.GetStateInput(OBJ::PLAYER, ST::IN_AIR);
-		//InAirInput.AddKeyMapping(VK_SPACE, CMD::START_CHARGE_SLAM);
-		//
-		//Input& ShootInput = Engine.GetStateInput(OBJ::PLAYER, ST::SHOOT);
-		//ShootInput.AddKeyMapping('W', CMD::MOVE_UP);
-		//ShootInput.AddKeyMapping('A', CMD::MOVE_LEFT);
-		//ShootInput.AddKeyMapping('S', CMD::MOVE_DOWN);
-		//ShootInput.AddKeyMapping('D', CMD::MOVE_RIGHT);
-		//ShootInput.AddKeyMapping(VK_RIGHT,CMD::FACE_RIGHT);
-		//ShootInput.AddKeyMapping(VK_LEFT,	CMD::FACE_LEFT);
-		//ShootInput.AddKeyMapping(VK_UP,	CMD::FACE_UP);
-		//ShootInput.AddKeyMapping(VK_DOWN,	CMD::FACE_DOWN);
-		//ShootInput.AddKeyMapping(VK_RIGHT,CMD::END_SHOOT);
-		//ShootInput.AddKeyMapping(VK_LEFT,	CMD::END_SHOOT);
-		//ShootInput.AddKeyMapping(VK_UP,	CMD::END_SHOOT);
-		//ShootInput.AddKeyMapping(VK_DOWN,	CMD::END_SHOOT);
+		Controller& IdleInput = Engine.GetController(OBJ::PLAYER, ST::IDLE);
+		IdleInput.MapControl('W', CMD::MOVE_UP);
+		IdleInput.MapControl('A', CMD::MOVE_LEFT);
+		IdleInput.MapControl('S', CMD::MOVE_DOWN);
+		IdleInput.MapControl('D', CMD::MOVE_RIGHT);
+		IdleInput.MapControl(VK_SPACE, CMD::START_CHARGE_JUMP);
+		IdleInput.MapControl(VK_RIGHT, CMD::START_SHOOT);
+		IdleInput.MapControl(VK_LEFT, CMD::START_SHOOT);
+		IdleInput.MapControl(VK_UP, CMD::START_SHOOT);
+		IdleInput.MapControl(VK_DOWN, CMD::START_SHOOT);
+		
+		Controller&  MoveInput = Engine.GetController(OBJ::PLAYER, ST::MOVE);
+		MoveInput.MapControl('W', CMD::MOVE_UP);
+		MoveInput.MapControl('A', CMD::MOVE_LEFT);
+		MoveInput.MapControl('S', CMD::MOVE_DOWN);
+		MoveInput.MapControl('D', CMD::MOVE_RIGHT);
+		MoveInput.MapControl(VK_SPACE, CMD::START_CHARGE_JUMP);
+		MoveInput.MapControl(VK_RIGHT, CMD::START_SHOOT);
+		MoveInput.MapControl(VK_LEFT, CMD::START_SHOOT);
+		MoveInput.MapControl(VK_UP, CMD::START_SHOOT);
+		MoveInput.MapControl(VK_DOWN, CMD::START_SHOOT);
+		
+		Controller&  ChargeJump = Engine.GetController (OBJ::PLAYER, ST::CHARGE_JUMP);
+		ChargeJump.MapControl('W', CMD::SLOW_MOVE_UP);
+		ChargeJump.MapControl('A', CMD::SLOW_MOVE_LEFT);
+		ChargeJump.MapControl('S', CMD::SLOW_MOVE_DOWN);
+		ChargeJump.MapControl('D', CMD::SLOW_MOVE_RIGHT);
+		ChargeJump.MapControl(VK_SPACE, CMD::START_IN_AIR);
+		
+		Controller&  InAirInput = Engine.GetController(OBJ::PLAYER, ST::IN_AIR);
+		InAirInput.MapControl(VK_SPACE, CMD::START_CHARGE_SLAM);
+		
+		Controller& ShootInput = Engine.GetController(OBJ::PLAYER, ST::SHOOT);
+		ShootInput.MapControl('W', CMD::MOVE_UP);
+		ShootInput.MapControl('A', CMD::MOVE_LEFT);
+		ShootInput.MapControl('S', CMD::MOVE_DOWN);
+		ShootInput.MapControl('D', CMD::MOVE_RIGHT);
+
+		ShootInput.MapControl(VK_RIGHT, CMD::FACE_RIGHT);
+		ShootInput.MapControl(VK_LEFT,	CMD::FACE_LEFT);
+		ShootInput.MapControl(VK_UP,	CMD::FACE_UP);
+		ShootInput.MapControl(VK_DOWN,	CMD::FACE_DOWN);
+
+		ShootInput.MapControl(VK_RIGHT, CMD::END_SHOOT);
+		ShootInput.MapControl(VK_LEFT,	CMD::END_SHOOT);
+		ShootInput.MapControl(VK_UP,	CMD::END_SHOOT);
+		ShootInput.MapControl(VK_DOWN,	CMD::END_SHOOT);
 		
 		
 
@@ -224,14 +220,4 @@ void Gameplay::Init()
 void Gameplay::Exit()
 {
 	Engine.DeleteComponents();
-}
-
-void Gameplay::Render(float fInterpolation) 
-{ 
-	Engine.Render(fInterpolation);
-}
-
-void Gameplay::Update() 
-{ 
-	Engine.Update();
 }

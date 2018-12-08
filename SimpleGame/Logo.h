@@ -7,14 +7,7 @@ public:
 	Logo() { }
 	virtual ~Logo() { }
 
-	virtual void Init();
+	virtual void Enter();
 	virtual void Exit();
-	virtual void Render(float fInterpolation);
-	virtual void Update();
-
-private:
-	float Fade;
-	float Timer;
-	float FadeMax;
 };
 

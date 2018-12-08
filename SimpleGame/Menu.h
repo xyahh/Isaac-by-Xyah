@@ -7,10 +7,8 @@ public:
 	Menu() { }
 	virtual ~Menu() {  }
 	
-	virtual void Init();
+	virtual void Enter();
 	virtual void Exit();
-	virtual void Render(float fInterpolation);
-	virtual void Update();
 	
 private:
 };

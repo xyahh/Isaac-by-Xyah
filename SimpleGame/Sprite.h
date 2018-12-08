@@ -1,12 +1,18 @@
 #pragma once
+#include "Subject.h"
 
 enum SpriteType
 {
 	Linear,
-	Grid
+	Grid,
 };
 
-class Sprite
+enum SpriteEvent
+{
+	LoopEnd,
+};
+
+class Sprite : public EventDispatcher
 {
 	friend Cyan;
 

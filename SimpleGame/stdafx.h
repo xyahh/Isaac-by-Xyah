@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <queue>
 #include <set>
 #include <map>
 
@@ -22,15 +23,14 @@
 #define	STD		std::
 
 #define CYAN_DEBUG_CONSOLE
-//#define CYAN_DEBUG_STATES
+#define CYAN_DEBUG_STATES
 #define CYAN_DEBUG_COLLISION
 
 /* For the Depth Test */
 #define FARTHEST 1.f
 #define NEAREST -1.f
 
-
-constexpr float UPDATE_FREQUENCY	{ 60.f };
+constexpr float UPDATE_FREQUENCY	{ 120.f };
 constexpr float UPDATE_TIME			{ 1.f / UPDATE_FREQUENCY };
 
 template<class T>
@@ -43,17 +43,21 @@ inline size_t Last(const STD vector<T>& v)
 class Window;
 class Scene;
 class Cyan;
-
-class State;
-class Command;
-class Gamepad;
-class Renderer;
+class Timer;
 
 /* Components */
 class Graphics;
 class Physics;
 class Input;
 class Sprite;
+
+class State;
+class Command;
+class Gamepad;
+class Renderer;
+
+class EventDispatcher;
+class Observer;
 
 namespace FMOD
 {

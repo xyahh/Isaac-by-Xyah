@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "World.h"
-#include "Physics.h"
 
 float World::Scale{ 1.f } ;
 
