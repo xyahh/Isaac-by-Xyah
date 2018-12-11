@@ -242,7 +242,7 @@ void ShootState::Update(size_t ObjectIndex)
 
 		Descriptor& TearDesc = Engine.GetDescriptor(Tear);
 		TearDesc.Type = (ObjectType::Projectile);
-		TearDesc.Value = (10.f);
+		TearDesc.Value = (5.f);
 		TearDesc.Team = (Engine.GetDescriptor(ObjectIndex).Team);
 
 		Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);

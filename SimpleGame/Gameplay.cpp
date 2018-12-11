@@ -66,7 +66,7 @@ void Gameplay::Enter()
 		ActorDescriptor.Type = ObjectType::Actor;
 		ActorDescriptor.Value = 100.f; // 100 HP
 		ActorDescriptor.Team = PLAYER2;
-		ActorDescriptor.AddEvent(DescriptorEvent::ActorDied, [PLAYER2]()
+		ActorDescriptor.AddEvent(DescriptorEvent::ValueZeroNegative, [PLAYER2]()
 		{
 			STD cout << "Player2 Died!\n";
 			Engine.DeleteObject(PLAYER2);

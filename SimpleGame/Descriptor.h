@@ -11,7 +11,7 @@ enum ObjectType
 
 enum DescriptorEvent
 {
-	ActorDied,
+	ValueZeroNegative,
 };
 
 

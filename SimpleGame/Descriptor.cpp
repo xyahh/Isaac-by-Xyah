@@ -7,7 +7,7 @@ void Descriptor::Update(size_t ObjIndex)
 	{
 	case ObjectType::DamagedActor:
 		if (Value <= 0)
-			Dispatch(DescriptorEvent::ActorDied);
+			Dispatch(DescriptorEvent::ValueZeroNegative);
 		break;
 	}
 
