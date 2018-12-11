@@ -18,6 +18,7 @@ namespace ST
 	extern size_t SLAM;
 
 	extern size_t SHOOT;
+	extern size_t DAMAGED;
 }
 
 namespace CMD

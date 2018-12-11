@@ -4,25 +4,28 @@ enum ObjectType
 {
 	None,
 	Actor,
+	DamagedActor,
 	Projectile,
 	Structure
 };
 
-class Descriptor
+enum DescriptorEvent
+{
+	ActorDied,
+};
+
+
+class Descriptor : public EventDispatcher
 {
 	friend Cyan;
 public:
 
 	Descriptor() : 
 		Type(ObjectType::None), 
-		TypeValue(0.f) 
+		Value(0.f)
 	{}
-	
-	void SetType(ObjectType Type);
-	ObjectType GetType() const;
 
-	void SetValue(float Value);
-	float GetValue() const;
+	void Update(size_t ObjIndex);
 
 	/*
 	|---------------|-----------------|
@@ -33,8 +36,8 @@ public:
 	| Structure		|	Friction	  |
 	|---------------|-----------------|
 	*/
-private:
 
 	ObjectType Type;
-	float TypeValue;
+	float Value;
+	size_t Team;
 };

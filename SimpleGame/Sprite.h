@@ -1,5 +1,4 @@
 #pragma once
-#include "Subject.h"
 
 enum SpriteType
 {

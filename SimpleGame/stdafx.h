@@ -17,14 +17,14 @@
 #include <set>
 #include <map>
 
-#include "Math.h"
-#include "Indices.h"
-
 #define	STD		std::
 
-#define CYAN_DEBUG_CONSOLE
-#define CYAN_DEBUG_STATES
-#define CYAN_DEBUG_COLLISION
+#include "Math.h"
+#include "Indices.h"
+#include "EventDispatcher.h"
+
+//#define CYAN_DEBUG_STATES
+//#define CYAN_DEBUG_COLLISION
 
 /* For the Depth Test */
 #define FARTHEST 1.f

@@ -23,6 +23,10 @@ public:
 			m_Scene = new T;
 			m_Scene->Enter();
 		
+			/* 
+			Add all the Keys that were mapped
+			in the Scene Initialization
+			*/
 			Engine.UpdateInput();
 		});
 	}

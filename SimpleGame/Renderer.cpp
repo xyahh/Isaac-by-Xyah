@@ -268,6 +268,7 @@ void Renderer::Prepare()
 	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	glClearDepth(FARTHEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 }
 
 #ifdef CYAN_DEBUG_COLLISION

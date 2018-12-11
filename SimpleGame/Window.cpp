@@ -45,7 +45,8 @@ bool Window::Initialize(const STD string & Title, int Width, int Height, bool En
 	RegisterClass(&wc);
 
 	dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-	dwStyle = WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
+	//dwStyle = WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
+	dwStyle = WS_OVERLAPPEDWINDOW;
 	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);
 
 	RECT ScreenSize;
@@ -109,25 +110,17 @@ LRESULT CALLBACK Window::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LPARA
 {
 	switch (uMsg)
 	{
-	case WM_SYSCOMMAND:
-	{
-		switch (wParam)
-		{
-		case SC_SCREENSAVE:
-		case SC_MONITORPOWER:
-			return 0;
-		}
-		break;
-	}
 	case WM_CLOSE:
 	{
 		Engine.Destroy();
 		PostQuitMessage(0);
 		return 0;
 	}
-
 	case WM_SIZE:
 	{
+		int x = LOWORD(lParam);
+		int y = HIWORD(lParam);
+		glViewport((x-y)/2, 0, y, y);
 		GetClientRect(m_HWND, (LPRECT)&m_ClientRect);
 		return 0;
 	}

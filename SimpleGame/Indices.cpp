@@ -19,6 +19,7 @@ namespace ST
 	size_t CHARGE_SLAM;
 	size_t SLAM;
 	size_t SHOOT;
+	size_t DAMAGED;
 }
 
 namespace CMD

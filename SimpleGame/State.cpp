@@ -90,14 +90,14 @@ void ChargeJumpState::Update(size_t ObjectIndex)
 		BodySprite.SetFrameRate(0.f);
 		BodySprite.ResetSprite();
 	}
-	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f);
+	Engine.GetGraphics(ObjectIndex).SetColor({ 1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f });
 	Clamp(0.f, &RageAmount, 1.f);
 }
 
 void ChargeJumpState::Exit(size_t ObjectIndex)
 {
 	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).ResetSprite();
-	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f, 1.f, 1.f);
+	Engine.GetGraphics(ObjectIndex).SetColor({ 1.f, 1.f, 1.f, 1.f });
 	float Amount = Force * (1.f + RageAmount);
 	Engine.GetPhysics(ObjectIndex).ApplyForce({ 0.f, 0.f,  Amount});
 }
@@ -149,7 +149,7 @@ void ChargeSlamState::Enter(size_t ObjectIndex)
 void ChargeSlamState::Update(size_t ObjectIndex)
 {
 	RageAmount += UPDATE_TIME * RageRate;
-	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f);
+	Engine.GetGraphics(ObjectIndex).SetColor({ 1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f });
 	if (RageAmount >= 1.f)
 		Engine.ChangeState(ObjectIndex, ST::SLAM);
 }
@@ -180,6 +180,12 @@ void SlamState::Exit(size_t ObjectIndex)
 {
 	size_t Effect;
 	Engine.AddObject(&Effect);
+
+	Descriptor& EffectDesc = Engine.GetDescriptor(Effect);
+	EffectDesc.Type = (ObjectType::Projectile);
+	EffectDesc.Value = (50.f);
+	EffectDesc.Team = (Engine.GetDescriptor(ObjectIndex).Team);
+
 	size_t EffSpIdx;
 	Engine.AddSprite(&EffSpIdx, Effect);
 	Sprite& EffectSprite = Engine.GetSprite(Effect, EffSpIdx);
@@ -194,8 +200,10 @@ void SlamState::Exit(size_t ObjectIndex)
 		Engine.DeleteObject(Effect);
 	});
 	Physics& EffectPhysics = Engine.GetPhysics(Effect);
+	EffectPhysics.Box().SetDimensions({ 3.f, 3.f, 0.5f });
+	EffectPhysics.SetCollision(&Collision::Explosion);
 	EffectPhysics.SetPosition(Engine.GetPhysics(ObjectIndex).GetPosition());
-	Engine.GetGraphics(ObjectIndex).SetColor(1.f, 1.f, 1.f, 1.f);
+	Engine.GetGraphics(ObjectIndex).SetColor({ 1.f, 1.f, 1.f, 1.f });
 }
 
 /* Shooting State*/
@@ -232,6 +240,11 @@ void ShootState::Update(size_t ObjectIndex)
 		TSprite.SetSize({ 0.5f, 0.5f });
 		TSprite.SetOffset({ 0.f, 0.25f });
 
+		Descriptor& TearDesc = Engine.GetDescriptor(Tear);
+		TearDesc.Type = (ObjectType::Projectile);
+		TearDesc.Value = (10.f);
+		TearDesc.Team = (Engine.GetDescriptor(ObjectIndex).Team);
+
 		Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
 		Physics& TPhysics = Engine.GetPhysics(Tear);
 		TPhysics.SetPosition(ObjPhysics.GetPosition());
@@ -251,4 +264,51 @@ void ShootState::Exit(size_t ObjectIndex)
 	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).ResetSprite();
 }
 
+/* Damaged State*/
 
+void DamagedState::Enter(size_t ObjectIndex)
+{
+	Descriptor& Desc = Engine.GetDescriptor(ObjectIndex);
+	Type = Desc.Type;
+	Desc.Type = ObjectType::DamagedActor;
+
+	DurationTimer = 0.f;
+	BlinkingTimer = 0.f;
+	Color = DX4 Store(Engine.GetGraphics(ObjectIndex).GetColor());
+	Alpha = 0;
+}
+
+void DamagedState::Update(size_t ObjectIndex)
+{
+	DurationTimer += UPDATE_TIME;
+	BlinkingTimer += UPDATE_TIME * BlinkingRate;
+
+	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
+	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	if (!Zero(DX2 Magnitude(Velocity)))
+		BodySprite.SetFrameRate(10.f);
+	else
+	{
+		BodySprite.SetFrameRate(0.f);
+		BodySprite.ResetSprite();
+	}
+
+	if (BlinkingTimer >= 1.f)
+	{
+		Engine.GetGraphics(ObjectIndex).SetAlpha(Alpha);
+		Alpha = (Alpha + 1) % 2;
+		BlinkingTimer = 0.f;
+	}
+
+	if (DurationTimer >= Duration)
+	{
+		Engine.ChangeState(ObjectIndex, ST::IDLE);
+		DurationTimer = 0.f;
+	}
+}
+
+void DamagedState::Exit(size_t ObjectIndex)
+{
+	Engine.GetGraphics(ObjectIndex).SetColor(DX4 Load(Color));
+	Engine.GetDescriptor(ObjectIndex).Type = static_cast<ObjectType>(Type);
+}

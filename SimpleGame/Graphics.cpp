@@ -10,9 +10,20 @@ void DrawBoundingBoxes(const Renderer& RenderDevice,  DX FXMVECTOR Position, DX 
 }	 
 #endif
 
-void Graphics::SetColor(float r, float g, float b, float a)
+
+void Graphics::SetColor(DX XMVECTOR Color)
 {
-	m_Color = DX XMFLOAT4(r, g, b, a);
+	m_Color = DX4 Store(Color);
+}
+
+void Graphics::SetAlpha(float Value)
+{
+	m_Color.w = Value;
+}
+
+DX XMVECTOR XM_CALLCONV Graphics::GetColor() const
+{
+	return DX4 Load(m_Color);
 }
 
 void Graphics::Render (

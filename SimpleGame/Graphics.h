@@ -10,7 +10,9 @@ public:
 	{}
 	~Graphics() {}
 
-	void SetColor(float r, float g, float b, float a);
+	void SetColor(DX XMVECTOR Color);
+	void SetAlpha(float Value);
+	DX XMVECTOR XM_CALLCONV GetColor() const;
 
 private:
 

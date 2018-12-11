@@ -2,7 +2,7 @@
 
 class World
 {
-	static float Scale;
+	float Scale { 1.f };
 
 public:
 	World() {}

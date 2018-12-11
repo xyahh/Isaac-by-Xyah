@@ -69,12 +69,31 @@ public:
 };
 
 
+class ExplosionCollision : public BasicCollision
+{
+public:
+	ExplosionCollision() {}
+	virtual ~ExplosionCollision() {}
+
+	virtual void XM_CALLCONV OnCollision
+	(
+		size_t MyID,
+		Physics* MyBody,
+		size_t CollidingID,
+		Physics* CollidingBody,
+		DX FXMVECTOR CollisionNormal
+	);
+
+private:
+};
+
 NS_COLLISION_START
 
 static BasicCollision		Basic;
 static ActorCollision		Actor;
 static ProjectileCollision	Projectile;
 static StructureCollision	Structure;
+static ExplosionCollision	Explosion;
 
 class BBox
 	{

@@ -22,6 +22,22 @@ public:
 	Cyan() {}
 	~Cyan() {}
  
+	size_t GetID(size_t Index)
+	{
+		for (auto& obj : m_ObjectLocator)
+			if (Index == obj.second)
+				return obj.first;
+		assert("Hello" && false);
+	}
+	
+	size_t GetIndex(size_t ID)
+	{
+		auto& obj = m_ObjectLocator.find(ID);
+		if (obj != m_ObjectLocator.end())
+			return obj->second;
+		assert("Hello" && false);
+	}
+
 	/*---------Action Queue-----------------------------*/
 
 	template<typename Func>

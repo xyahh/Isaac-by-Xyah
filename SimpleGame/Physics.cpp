@@ -29,9 +29,9 @@ void Physics::HandleCollision(size_t MyID, Physics* OtherPhysics, size_t OtherID
 	if (Collision::HandleCollision(Min, Max, OtherMin, OtherMax))
 	{
 		DX XMVECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
-		
 		if (m_Collision)
-			m_Collision->OnCollision(MyID, this, OtherID, OtherPhysics, Normal);
+			m_Collision->OnCollision(MyID, this, OtherID, 
+				OtherPhysics, Normal);
 		if (OtherPhysics->m_Collision)
 			OtherPhysics->GetCollision()->OnCollision(OtherID, OtherPhysics, MyID, this, Normal);
 	}

@@ -1,22 +1,14 @@
 #include "stdafx.h"
 #include "Descriptor.h"
 
-void Descriptor::SetType(ObjectType Type_)
+void Descriptor::Update(size_t ObjIndex)
 {
-	Type = Type_;
-}
+	switch (Type)
+	{
+	case ObjectType::DamagedActor:
+		if (Value <= 0)
+			Dispatch(DescriptorEvent::ActorDied);
+		break;
+	}
 
-ObjectType Descriptor::GetType() const
-{
-	return Type;
-}
-
-void Descriptor::SetValue(float Value)
-{
-	TypeValue = Value;
-}
-
-float Descriptor::GetValue() const
-{
-	return TypeValue;
 }

@@ -9,7 +9,7 @@ void Gameplay::Enter()
 	Engine.AddTexture(&TEX::TEAR, "./Resources/tear.png");
 	size_t SOUND_TEST;
 	Engine.AddSound(&SOUND_TEST, "./Resources/Sounds/Main.mp3", true);
-	Engine.GetSound(SOUND_TEST).Play();
+	//Engine.GetSound(SOUND_TEST).Play();
 
 	//Actor
 	{
@@ -19,12 +19,15 @@ void Gameplay::Enter()
 		auto& ActorPhysics = Engine.GetPhysics(OBJ::PLAYER);
 		auto& ActorGraphics = Engine.GetGraphics(OBJ::PLAYER);
 
-		ActorDescriptor.SetType(ObjectType::Actor);
-		ActorDescriptor.SetValue(100.f); // 100 HP
-		
+		ActorDescriptor.Type = ObjectType::Actor;
+		ActorDescriptor.Value = 100.f; // 100 HP
+		ActorDescriptor.Team = OBJ::PLAYER;
+
 		ActorPhysics.SetCollision(&Collision::Actor);
 		ActorPhysics.Box().SetDimensions({0.5f, 0.25f, 1.5f});
 		ActorPhysics.SetPosition({ 4.f, 4.f, 0.f });
+
+		
 
 		Engine.AddSprite(&OBJ::SPRITE::BODY, OBJ::PLAYER);
 		Engine.AddSprite(&OBJ::SPRITE::HEAD, OBJ::PLAYER);
@@ -32,7 +35,6 @@ void Gameplay::Enter()
 		auto& Body = Engine.GetSprite(OBJ::PLAYER, OBJ::SPRITE::BODY);
 		auto& Head = Engine.GetSprite(OBJ::PLAYER, OBJ::SPRITE::HEAD);
 
-		ActorGraphics.SetColor(1.f, 1.f, 1.f, 1.f);
 		ActorPhysics.SetMass(70.f);
 		
 		float HeadSize = 1.25f;
@@ -61,11 +63,18 @@ void Gameplay::Enter()
 		auto& ActorPhysics = Engine.GetPhysics(PLAYER2);
 		auto& ActorGraphics = Engine.GetGraphics(PLAYER2);
 
-		ActorDescriptor.SetType(ObjectType::Actor);
-		ActorDescriptor.SetValue(100.f); // 100 HP
+		ActorDescriptor.Type = ObjectType::Actor;
+		ActorDescriptor.Value = 100.f; // 100 HP
+		ActorDescriptor.Team = PLAYER2;
+		ActorDescriptor.AddEvent(DescriptorEvent::ActorDied, [PLAYER2]()
+		{
+			STD cout << "Player2 Died!\n";
+			Engine.DeleteObject(PLAYER2);
+		});
 
 		ActorPhysics.SetCollision(&Collision::Actor);
 		ActorPhysics.Box().SetDimensions({ 0.5f, 0.25f, 1.5f });
+		ActorPhysics.SetFriction(1.f);
 
 		size_t BODY;
 		size_t HEAD;
@@ -76,7 +85,6 @@ void Gameplay::Enter()
 		auto& Body = Engine.GetSprite(PLAYER2, BODY);
 		auto& Head = Engine.GetSprite(PLAYER2, HEAD);
 
-		ActorGraphics.SetColor(1.f, 1.f, 1.f, 1.f);
 		ActorPhysics.SetMass(70.f);
 
 		float HeadSize = 1.25f;
@@ -95,7 +103,6 @@ void Gameplay::Enter()
 		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
 	}
 
-
 	//Actor States
 	{
 		Engine.AddStatePrototype<IdleState>(&ST::IDLE);
@@ -105,6 +112,7 @@ void Gameplay::Enter()
 		Engine.AddStatePrototype<ChargeSlamState>(&ST::CHARGE_SLAM, 1.f);
 		Engine.AddStatePrototype<SlamState>(&ST::SLAM, 200'000.f);
 		Engine.AddStatePrototype<ShootState>(&ST::SHOOT, TEX::TEAR, 5.f, 2'000.f);
+		Engine.AddStatePrototype<DamagedState>(&ST::DAMAGED, 2.f, 10.f);
 	}
 
 	//Commands
@@ -212,23 +220,55 @@ void Gameplay::Enter()
 		
 
 		Engine.ChangeState(OBJ::PLAYER, ST::IDLE);
+		Engine.ChangeState(PLAYER2, ST::IDLE);
 	}
 
+	//Boundaries
+	{
 
-	//Input& IdleInput = Engine.GetStateInput(PLAYER2, ST::IDLE);
-	//IdleInput.AddKeyMapping('I', CMD::START_MOVE);
-	//IdleInput.AddKeyMapping('J', CMD::START_MOVE);
-	//IdleInput.AddKeyMapping('K', CMD::START_MOVE);
-	//IdleInput.AddKeyMapping('L', CMD::START_MOVE);
-	//
-	//
-	//Input&  MoveInput = Engine.GetStateInput(PLAYER2, ST::MOVE);
-	//MoveInput.AddKeyMapping('I', CMD::MOVE_UP);
-	//MoveInput.AddKeyMapping('J', CMD::MOVE_LEFT);
-	//MoveInput.AddKeyMapping('K', CMD::MOVE_DOWN);
-	//MoveInput.AddKeyMapping('L', CMD::MOVE_RIGHT);
-	//
-	//Engine.ChangeState(PLAYER2, ST::IDLE);
+		float Min = 12.f;
+		float Max = 30.f;
+		{
+			size_t Boundary;
+			Engine.AddObject(&Boundary);
+			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
+			Physics& BPhysics = Engine.GetPhysics(Boundary);
+			BPhysics.Box().SetDimensions({ Min, Max + Min, 10.f });
+			BPhysics.SetPosition({ 16.f, 0.f, 0.f });
+			BPhysics.SetCollision(&Collision::Structure);
+		}
+
+		{
+			size_t Boundary;
+			Engine.AddObject(&Boundary);
+			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
+			Physics& BPhysics = Engine.GetPhysics(Boundary);
+			BPhysics.Box().SetDimensions({ Min, Max + Min, 10.f });
+			BPhysics.SetPosition({ -16.f, 0.f, 0.f });
+			BPhysics.SetCollision(&Collision::Structure);
+		}
+
+		{
+			size_t Boundary;
+			Engine.AddObject(&Boundary);
+			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
+			Physics& BPhysics = Engine.GetPhysics(Boundary);
+			BPhysics.Box().SetDimensions({ Max, Min, 10.f });
+			BPhysics.SetPosition({ 0.f, 16.f, 0.f });
+			BPhysics.SetCollision(&Collision::Structure);
+		}
+
+		{
+			size_t Boundary;
+			Engine.AddObject(&Boundary);
+			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
+			Physics& BPhysics = Engine.GetPhysics(Boundary);
+			BPhysics.Box().SetDimensions({ Max, Min, 10.f });
+			BPhysics.SetPosition({ 0.f, -16.f, 0.f });
+			BPhysics.SetCollision(&Collision::Structure);
+		}
+
+	}
 }
 
 void Gameplay::Exit()
