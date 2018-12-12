@@ -6,13 +6,6 @@
 #define GAMEPAD		0x02
 #define KEY_PRESSED(key) (GetAsyncKeyState(key) & 0x8000)
 
-struct KeyInfo
-{
-	int		Value;
-	bool	Pressed;
-	int		ClientNum;
-};
-
 class Input
 {
 	friend Cyan;

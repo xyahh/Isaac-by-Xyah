@@ -247,7 +247,8 @@ void ShootState::Update(size_t ObjectIndex)
 
 		Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
 		Physics& TPhysics = Engine.GetPhysics(Tear);
-		TPhysics.SetPosition(ObjPhysics.GetPosition());
+		TPhysics.SetPosition(DX Add(ObjPhysics.GetPosition(),
+			{ 0.f, 0.f, 0.75f }));
 		TPhysics.SetMass(0.5f);
 		TPhysics.SetFriction(0.2f);
 		TPhysics.Box().SetDimensions({ 0.5f, 0.125f, 0.5f });

@@ -116,8 +116,8 @@ u_int Renderer::GenerateTexture(const STD string& filePath) const
 	if (BitsPerPixel == 4)
 		Format = GL_BGRA_EXT;
 
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, BitsPerPixel, Image.GetWidth(), Image.GetHeight(), 0, Format, GL_UNSIGNED_BYTE, GetImageBits(Image).data());
 	return TexID;

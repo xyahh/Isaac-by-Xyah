@@ -1,57 +1,58 @@
 #include "stdafx.h"
 #include "Gameplay.h"
 
+void Gameplay::AddActor(size_t * ID, size_t Team, DX XMVECTOR Position, size_t HeadTex, size_t BodyTex)
+{
+	Engine.AddObject(ID);
+
+	auto& ActorDescriptor = Engine.GetDescriptor(*ID);
+	auto& ActorPhysics = Engine.GetPhysics(*ID);
+	auto& ActorGraphics = Engine.GetGraphics(*ID);
+
+	ActorDescriptor.Type = ObjectType::Actor;
+	ActorDescriptor.Value = 100.f; // 100 HP
+	ActorDescriptor.Team = Team;
+
+	ActorPhysics.SetCollision(&Collision::Actor);
+	ActorPhysics.Box().SetDimensions({ 0.5f, 0.25f, 1.5f });
+	ActorPhysics.SetPosition({ 4.f, 4.f, 0.f });
+
+	Engine.AddSprite(&OBJ::SPRITE::BODY, *ID);
+	Engine.AddSprite(&OBJ::SPRITE::HEAD, *ID);
+
+	auto& Body = Engine.GetSprite(*ID, OBJ::SPRITE::BODY);
+	auto& Head = Engine.GetSprite(*ID, OBJ::SPRITE::HEAD);
+
+	ActorPhysics.SetMass(70.f);
+
+	float HeadSize = 1.25f;
+	float BodySize = 0.75f;
+
+	Body.SetTexture(TEX::BASIC_BODY);
+	Body.SetSize({ BodySize, BodySize });
+	Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
+	Body.SetTotal({ 10, 4 });
+	Body.SetDirection(Direction::Down);
+
+	Head.SetTexture(TEX::ISAAC_HEAD);
+	Head.SetSize({ HeadSize, HeadSize });
+	Head.SetTotal({ 2, 4 });
+	Head.SetDirection(Direction::Down);
+	Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
+}
+
 void Gameplay::Enter()
 {
+	size_t SOUND_TEST;
+
 	Engine.AddTexture(&TEX::BASIC_BODY, "./Resources/Characters/basic_body.png");
 	Engine.AddTexture(&TEX::ISAAC_HEAD, "./Resources/Characters/cain_head.png");
 	Engine.AddTexture(&TEX::EXPLOSION, "./Resources/explosion.png");
 	Engine.AddTexture(&TEX::TEAR, "./Resources/tear.png");
-	size_t SOUND_TEST;
 	Engine.AddSound(&SOUND_TEST, "./Resources/Sounds/Main.mp3", true);
 	//Engine.GetSound(SOUND_TEST).Play();
 
-	//Actor
-	{
-		Engine.AddObject(&OBJ::PLAYER);
-	
-		auto& ActorDescriptor = Engine.GetDescriptor(OBJ::PLAYER);
-		auto& ActorPhysics = Engine.GetPhysics(OBJ::PLAYER);
-		auto& ActorGraphics = Engine.GetGraphics(OBJ::PLAYER);
-
-		ActorDescriptor.Type = ObjectType::Actor;
-		ActorDescriptor.Value = 100.f; // 100 HP
-		ActorDescriptor.Team = OBJ::PLAYER;
-
-		ActorPhysics.SetCollision(&Collision::Actor);
-		ActorPhysics.Box().SetDimensions({0.5f, 0.25f, 1.5f});
-		ActorPhysics.SetPosition({ 4.f, 4.f, 0.f });
-
-		
-
-		Engine.AddSprite(&OBJ::SPRITE::BODY, OBJ::PLAYER);
-		Engine.AddSprite(&OBJ::SPRITE::HEAD, OBJ::PLAYER);
-
-		auto& Body = Engine.GetSprite(OBJ::PLAYER, OBJ::SPRITE::BODY);
-		auto& Head = Engine.GetSprite(OBJ::PLAYER, OBJ::SPRITE::HEAD);
-
-		ActorPhysics.SetMass(70.f);
-		
-		float HeadSize = 1.25f;
-		float BodySize = 0.75f;
-
-		Body.SetTexture(TEX::BASIC_BODY);
-		Body.SetSize({ BodySize, BodySize });
-		Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
-		Body.SetTotal({ 10, 4 });
-		Body.SetDirection(Direction::Down);
-
-		Head.SetTexture(TEX::ISAAC_HEAD);
-		Head.SetSize({ HeadSize, HeadSize });
-		Head.SetTotal({ 2, 4 });
-		Head.SetDirection(Direction::Down);
-		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
-	}
+	AddActor(&OBJ::PLAYER, OBJ::PLAYER, { 0.f, 0.f, 0.f }, TEX::ISAAC_HEAD, TEX::BASIC_BODY);
 
 	size_t PLAYER2;
 
