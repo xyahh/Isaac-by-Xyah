@@ -14,7 +14,7 @@ void Gameplay::AddActor(size_t * ID, size_t Team, DX XMVECTOR Position, size_t H
 	ActorDescriptor.Team = Team;
 
 	ActorPhysics.SetCollision(&Collision::Actor);
-	ActorPhysics.Box().SetDimensions({ 0.5f, 0.25f, 1.5f });
+	ActorPhysics.Box().SetDimensions({ 0.5f, 0.5f, 1.5f });
 	ActorPhysics.SetPosition({ 4.f, 4.f, 0.f });
 
 	Engine.AddSprite(&OBJ::SPRITE::BODY, *ID);
@@ -74,7 +74,7 @@ void Gameplay::Enter()
 		});
 
 		ActorPhysics.SetCollision(&Collision::Actor);
-		ActorPhysics.Box().SetDimensions({ 0.5f, 0.25f, 1.5f });
+		ActorPhysics.Box().SetDimensions({ 0.5f, 0.5f, 1.5f });
 		ActorPhysics.SetFriction(1.f);
 
 		size_t BODY;
@@ -112,7 +112,7 @@ void Gameplay::Enter()
 		Engine.AddStatePrototype<ChargeJumpState>(&ST::CHARGE_JUMP, 1.f, 40'000.f);
 		Engine.AddStatePrototype<ChargeSlamState>(&ST::CHARGE_SLAM, 1.f);
 		Engine.AddStatePrototype<SlamState>(&ST::SLAM, 200'000.f);
-		Engine.AddStatePrototype<ShootState>(&ST::SHOOT, TEX::TEAR, 5.f, 2'000.f);
+		Engine.AddStatePrototype<ShootState>(&ST::SHOOT, TEX::TEAR, 5.f, 1'000.f);
 		Engine.AddStatePrototype<DamagedState>(&ST::DAMAGED, 2.f, 10.f);
 	}
 
@@ -137,10 +137,15 @@ void Gameplay::Enter()
 		Engine.AddCommand<StateCommand>(&CMD::START_SHOOT, ST::SHOOT, ST_CMD::ON_PRESS | ST_CMD::PUSH_STATE);
 		Engine.AddCommand<StateCommand>(&CMD::END_SHOOT, NULL, ST_CMD::ON_RELEASE | ST_CMD::POP_STATE);
 
-		Engine.AddCommand<FaceCommand>(&CMD::FACE_UP,  OBJ::SPRITE::HEAD, Direction::Up);
-		Engine.AddCommand<FaceCommand>(&CMD::FACE_DOWN, OBJ::SPRITE::HEAD, Direction::Down);
-		Engine.AddCommand<FaceCommand>(&CMD::FACE_LEFT, OBJ::SPRITE::HEAD, Direction::Left);
-		Engine.AddCommand<FaceCommand>(&CMD::FACE_RIGHT, OBJ::SPRITE::HEAD, Direction::Right);
+		Engine.AddCommand<FaceCommand>(&CMD::HEAD_FACE_UP,  OBJ::SPRITE::HEAD, Direction::Up);
+		Engine.AddCommand<FaceCommand>(&CMD::HEAD_FACE_DOWN, OBJ::SPRITE::HEAD, Direction::Down);
+		Engine.AddCommand<FaceCommand>(&CMD::HEAD_FACE_LEFT, OBJ::SPRITE::HEAD, Direction::Left);
+		Engine.AddCommand<FaceCommand>(&CMD::HEAD_FACE_RIGHT, OBJ::SPRITE::HEAD, Direction::Right);
+
+		Engine.AddCommand<FaceCommand>(&CMD::BODY_FACE_UP, OBJ::SPRITE::BODY, Direction::Up);
+		Engine.AddCommand<FaceCommand>(&CMD::BODY_FACE_DOWN, OBJ::SPRITE::BODY, Direction::Down);
+		Engine.AddCommand<FaceCommand>(&CMD::BODY_FACE_LEFT, OBJ::SPRITE::BODY, Direction::Left);
+		Engine.AddCommand<FaceCommand>(&CMD::BODY_FACE_RIGHT, OBJ::SPRITE::BODY, Direction::Right);
 	}
 
 	//Actor Input
@@ -174,10 +179,15 @@ void Gameplay::Enter()
 		MoveInput.MapControl('S', CMD::MOVE_DOWN);
 		MoveInput.MapControl('D', CMD::MOVE_RIGHT);
 
-		MoveInput.MapControl('W', CMD::FACE_UP);
-		MoveInput.MapControl('A', CMD::FACE_LEFT);
-		MoveInput.MapControl('S', CMD::FACE_DOWN);
-		MoveInput.MapControl('D', CMD::FACE_RIGHT);
+		MoveInput.MapControl('W', CMD::HEAD_FACE_UP);
+		MoveInput.MapControl('A', CMD::HEAD_FACE_LEFT);
+		MoveInput.MapControl('S', CMD::HEAD_FACE_DOWN);
+		MoveInput.MapControl('D', CMD::HEAD_FACE_RIGHT);
+
+		MoveInput.MapControl('W', CMD::BODY_FACE_UP);
+		MoveInput.MapControl('A', CMD::BODY_FACE_LEFT);
+		MoveInput.MapControl('S', CMD::BODY_FACE_DOWN);
+		MoveInput.MapControl('D', CMD::BODY_FACE_RIGHT);
 
 		MoveInput.MapControl(VK_SPACE, CMD::START_CHARGE_JUMP);
 		MoveInput.MapControl(VK_RIGHT, CMD::START_SHOOT);
@@ -192,10 +202,15 @@ void Gameplay::Enter()
 		ChargeJump.MapControl('S', CMD::SLOW_MOVE_DOWN);
 		ChargeJump.MapControl('D', CMD::SLOW_MOVE_RIGHT);
 
-		ChargeJump.MapControl('W', CMD::FACE_UP);
-		ChargeJump.MapControl('A', CMD::FACE_LEFT);
-		ChargeJump.MapControl('S', CMD::FACE_DOWN);
-		ChargeJump.MapControl('D', CMD::FACE_RIGHT);
+		ChargeJump.MapControl('W', CMD::BODY_FACE_UP);
+		ChargeJump.MapControl('A', CMD::BODY_FACE_LEFT);
+		ChargeJump.MapControl('S', CMD::BODY_FACE_DOWN);
+		ChargeJump.MapControl('D', CMD::BODY_FACE_RIGHT);
+
+		ChargeJump.MapControl('W', CMD::HEAD_FACE_UP);
+		ChargeJump.MapControl('A', CMD::HEAD_FACE_LEFT);
+		ChargeJump.MapControl('S', CMD::HEAD_FACE_DOWN);
+		ChargeJump.MapControl('D', CMD::HEAD_FACE_RIGHT);
 
 		ChargeJump.MapControl(VK_SPACE, CMD::START_IN_AIR);
 		
@@ -208,10 +223,15 @@ void Gameplay::Enter()
 		ShootInput.MapControl('S', CMD::MOVE_DOWN);
 		ShootInput.MapControl('D', CMD::MOVE_RIGHT);
 
-		ShootInput.MapControl(VK_RIGHT, CMD::FACE_RIGHT);
-		ShootInput.MapControl(VK_LEFT,	CMD::FACE_LEFT);
-		ShootInput.MapControl(VK_UP,	CMD::FACE_UP);
-		ShootInput.MapControl(VK_DOWN,	CMD::FACE_DOWN);
+		ShootInput.MapControl('W', CMD::BODY_FACE_UP);
+		ShootInput.MapControl('A', CMD::BODY_FACE_LEFT);
+		ShootInput.MapControl('S', CMD::BODY_FACE_DOWN);
+		ShootInput.MapControl('D', CMD::BODY_FACE_RIGHT);
+
+		ShootInput.MapControl(VK_RIGHT, CMD::HEAD_FACE_RIGHT);
+		ShootInput.MapControl(VK_LEFT,	CMD::HEAD_FACE_LEFT);
+		ShootInput.MapControl(VK_UP,	CMD::HEAD_FACE_UP);
+		ShootInput.MapControl(VK_DOWN,	CMD::HEAD_FACE_DOWN);
 
 		ShootInput.MapControl(VK_RIGHT, CMD::END_SHOOT);
 		ShootInput.MapControl(VK_LEFT,	CMD::END_SHOOT);

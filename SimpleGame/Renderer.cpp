@@ -33,9 +33,6 @@ STD vector<unsigned char> GetImageBits(const CImage & Image)
 
 DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 {
-	float Scale = Engine.GetWorld().GetScale();
-	float WinX, WinY;
-	Engine.GetFramework().GetWindowSizef(&WinX, &WinY);
 	return DX Multiply
 	(
 		Position,
@@ -49,9 +46,6 @@ DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 
 DX XMVECTOR XM_CALLCONV Renderer::GetGLSize(DX FXMVECTOR Size) const
 {
-	float Scale = Engine.GetWorld().GetScale();
-	float WinX, WinY;
-	Engine.GetFramework().GetWindowSizef(&WinX, &WinY);
 	return DX Multiply
 	(
 		Size,
@@ -127,6 +121,17 @@ u_int Renderer::GenerateTexture(const STD string& filePath) const
 void Renderer::DeleteTexture(u_int TexID) const
 {
 	glDeleteTextures(1, &TexID);
+}
+
+void Renderer::UpdateWindow(float X, float Y)
+{
+	WinX = X;
+	WinY = Y;
+}
+
+void Renderer::UpdateScale(float N)
+{
+	Scale = N;
 }
 
 void Renderer::AddShader(u_int ShaderProgram, const STD string& pShaderText, u_int ShaderType) const

@@ -220,6 +220,11 @@ Window & Cyan::GetFramework()
 	return m_Window;
 }
 
+Renderer & Cyan::GetRenderer()
+{
+	return m_Renderer;
+}
+
 Descriptor & Cyan::GetDescriptor(size_t ObjectIndex)
 {
 	return m_Descriptors[GetIndex(ObjectIndex)];

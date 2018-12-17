@@ -17,7 +17,7 @@
 class Cyan
 {
 	using Action = STD function<void()>;
-	
+
 public:
 	Cyan() {}
 	~Cyan() {}
@@ -89,6 +89,7 @@ public:
 	/*---------Components Getters-----------------------*/
 	World& GetWorld();
 	Window& GetFramework();
+	Renderer& GetRenderer();
 
 	Descriptor& GetDescriptor(size_t Index);
 	Graphics& GetGraphics(size_t Index);
@@ -100,8 +101,7 @@ public:
 
 	Command*& GetCommand(size_t Index);
 	u_int GetTexture(size_t Index);
-	Sound& GetSound(size_t Index);
-
+	Sound& GetSound(size_t Index);	
 	/*---------Components Deletion----------------------*/
 
 	void DeleteComponents();

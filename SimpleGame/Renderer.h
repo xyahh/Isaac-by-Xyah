@@ -28,6 +28,8 @@ public:
 	u_int GenerateTexture(const STD string& filePath) const;
 	void DeleteTexture(u_int texID) const;
 
+	void UpdateWindow(float X, float Y);
+	void UpdateScale(float N);
 
 private:
 
@@ -41,6 +43,8 @@ private:
 	DX XMVECTOR XM_CALLCONV GetGLSize(DX FXMVECTOR Size) const;
 
 private:
+	float Scale;
+	float WinX, WinY;
 
 	u_int m_TexShadow = 0;
 

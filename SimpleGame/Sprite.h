@@ -52,13 +52,14 @@ public:
 
 	size_t GetTexture() const;
 	u_int GetDirection() const;
+
 	DX XMVECTOR XM_CALLCONV GetSize() const;
 	DX XMVECTOR XM_CALLCONV GetCurrent() const;
 	DX XMVECTOR XM_CALLCONV GetTotal() const;
 	DX XMVECTOR XM_CALLCONV GetOffset() const;
 
 private:
-	SpriteType	Type;
+	u_int		Type;
 	size_t		TexIndex;
 	float		FrameRate;
 	float		CurrentFrame;

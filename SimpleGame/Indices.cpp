@@ -42,10 +42,15 @@ namespace CMD
 	size_t START_SHOOT;
 	size_t END_SHOOT;
 
-	size_t FACE_UP;
-	size_t FACE_DOWN;
-	size_t FACE_RIGHT;
-	size_t FACE_LEFT;
+	size_t HEAD_FACE_UP;
+	size_t HEAD_FACE_DOWN;
+	size_t HEAD_FACE_RIGHT;
+	size_t HEAD_FACE_LEFT;
+
+	size_t BODY_FACE_UP;
+	size_t BODY_FACE_DOWN;
+	size_t BODY_FACE_RIGHT;
+	size_t BODY_FACE_LEFT;
 
 }
 

@@ -16,6 +16,8 @@ public:
 
 private:
 
+
+
 	void Render
 	(
 		const Renderer& RenderDevice,

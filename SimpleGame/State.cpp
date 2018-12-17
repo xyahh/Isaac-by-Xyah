@@ -48,7 +48,6 @@ void MoveState::Enter(size_t ObjectIndex)
 {
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
 	BodySprite.SetFrameRate(30.f);
-	BodySprite.ResetSprite();
 }
 
 void MoveState::Update(size_t ObjectIndex)
@@ -251,6 +250,7 @@ void ShootState::Update(size_t ObjectIndex)
 			{ 0.f, 0.f, 0.75f }));
 		TPhysics.SetMass(0.5f);
 		TPhysics.SetFriction(0.2f);
+		TPhysics.SetGravity(1.f);
 		TPhysics.Box().SetDimensions({ 0.5f, 0.125f, 0.5f });
 
 		u_int Dir = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).GetDirection();

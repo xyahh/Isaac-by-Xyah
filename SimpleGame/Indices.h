@@ -41,12 +41,15 @@ namespace CMD
 	extern size_t START_SHOOT;
 	extern size_t END_SHOOT;
 
-	extern size_t FACE_UP;
-	extern size_t FACE_DOWN;
-	extern size_t FACE_RIGHT;
-	extern size_t FACE_LEFT;
+	extern size_t HEAD_FACE_UP;
+	extern size_t HEAD_FACE_DOWN;
+	extern size_t HEAD_FACE_RIGHT;
+	extern size_t HEAD_FACE_LEFT;
 
-
+	extern size_t BODY_FACE_UP;
+	extern size_t BODY_FACE_DOWN;
+	extern size_t BODY_FACE_RIGHT;
+	extern size_t BODY_FACE_LEFT;
 }
 
 namespace OBJ

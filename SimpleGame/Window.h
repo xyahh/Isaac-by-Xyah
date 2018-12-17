@@ -5,9 +5,6 @@ class Window
 	friend Cyan;
 
 public:
-	
-	void GetWindowSizei(int* WinWidth, int * WinHeight) const;
-	void GetWindowSizef(float * WinWidth, float * WinHeight) const;
 	LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM) const;
 
 	template<class T>
@@ -52,8 +49,6 @@ private:
 	HINSTANCE	m_hInstance;
 
 	STD string  m_WindowTitle	{ "Default Title" };
-	int			m_WindowWidth	{ 500 };
-	int			m_WindowHeight	{ 500 };
 
 	Scene*		m_Scene	{ NULL };
 };

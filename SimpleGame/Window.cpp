@@ -15,10 +15,11 @@ bool Window::Initialize(const STD string & Title, int Width, int Height, bool En
 		DevConsole::Create();
 
 	m_WindowTitle = Title;
-	m_WindowWidth = Width;
-	m_WindowHeight = Height;
 
 	STD wstring WinTitle{ Title.begin(), Title.end() };
+
+	Engine.GetRenderer().UpdateWindow(Width, Height);
+
 	RECT WindowRect
 	{
 		0, 0,
@@ -114,15 +115,17 @@ LRESULT CALLBACK Window::WndProc(HWND  hWnd, UINT    uMsg, WPARAM  wParam, LPARA
 	{
 		Engine.Destroy();
 		PostQuitMessage(0);
-		return 0;
+		return FALSE;
 	}
 	case WM_SIZE:
 	{
 		int x = LOWORD(lParam);
 		int y = HIWORD(lParam);
-		glViewport((x-y)/2, 0, y, y);
+		int MINVAL = min(x, y);
+		glViewport((x- MINVAL) / 2, (y- MINVAL) / 2, MINVAL, MINVAL);
 		GetClientRect(m_HWND, (LPRECT)&m_ClientRect);
-		return 0;
+		
+		return FALSE;
 	}
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -135,23 +138,10 @@ void Window::Close()
 	ReleaseDC(m_HWND, m_HDC);
 	DestroyWindow(m_HWND);
 	UnregisterClass(L"OpenGL", m_hInstance);
-
 	m_HRC = NULL;
 	m_HDC = NULL;
 	m_HWND = NULL;
 	m_hInstance = NULL;
-}
-
-void Window::GetWindowSizei(int * WinWidth, int * WinHeight) const
-{
-	*WinWidth = m_WindowWidth;
-	*WinHeight = m_WindowHeight;
-}
-
-void Window::GetWindowSizef(float * WinWidth, float * WinHeight) const
-{
-	*WinWidth = static_cast<float>(m_WindowWidth);
-	*WinHeight = static_cast<float>(m_WindowHeight);
 }
 
 int Window::ProcMessage()
