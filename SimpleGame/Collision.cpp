@@ -2,50 +2,50 @@
 #include "Collision.h"
 #include "CyanEngine.h"
 
-void XM_CALLCONV Collision::BBox::SetDimensions(DX FXMVECTOR v)
+void SSE_CALLCONV Collision::BBox::SetDimensions(SSE_VECTOR_PARAM1 v)
 {
-	Size = DX3 Store(v);
+	Size = StoreFloat3(v);
 }
 
-DX XMVECTOR XM_CALLCONV Collision::BBox::GetDimensions() const
+ SSE_VECTOR SSE_CALLCONV Collision::BBox::GetDimensions() const
 {
-	return DX3 Load(Size);
+	return LoadFloat3(Size);
 }
 
 
-void XM_CALLCONV BasicCollision::OnCollision
+void SSE_CALLCONV BasicCollision::OnCollision
 (
 	size_t MyID,
 	Physics* MyBody,
 	size_t CollidingID,
 	Physics* CollidingBody,
-	DX FXMVECTOR CollisionNormal
+	SSE_VECTOR_PARAM1 CollisionNormal
 ) 
 {
-	DX XMVECTOR v = DX Add(DX Scale(CollisionNormal, -1.f), DX XMVectorSplatOne());
-	CollidingBody->SetDeltaPosition(DX Multiply(CollidingBody->GetDeltaPosition(), v));
-	CollidingBody->SetVelocity(DX Multiply(CollidingBody->GetVelocity(), v));
+	 SSE_VECTOR v =  Add( Scale(CollisionNormal, -1.f),  VectorOne());
+	CollidingBody->SetDeltaPosition( Multiply(CollidingBody->GetDeltaPosition(), v));
+	CollidingBody->SetVelocity( Multiply(CollidingBody->GetVelocity(), v));
 }
 
 
-void XM_CALLCONV ActorCollision::OnCollision
+void SSE_CALLCONV ActorCollision::OnCollision
 (
 	size_t MyID,
 	Physics* MyBody,
 	size_t CollidingID,
 	Physics* CollidingBody,
-	DX FXMVECTOR CollisionNormal
+	SSE_VECTOR_PARAM1 CollisionNormal
 )
 {
 }
 
-void XM_CALLCONV ProjectileCollision::OnCollision
+void SSE_CALLCONV ProjectileCollision::OnCollision
 (
 	size_t MyID,
 	Physics* MyBody,
 	size_t CollidingID,
 	Physics* CollidingBody,
-	DX FXMVECTOR CollisionNormal
+	SSE_VECTOR_PARAM1 CollisionNormal
 )
 {
 	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
@@ -63,25 +63,25 @@ void XM_CALLCONV ProjectileCollision::OnCollision
 	}
 }
 
-void XM_CALLCONV StructureCollision::OnCollision
+void SSE_CALLCONV StructureCollision::OnCollision
 (
 	size_t MyID,
 	Physics* MyBody,
 	size_t CollidingID,
 	Physics* CollidingBody,
-	DX FXMVECTOR CollisionNormal
+	SSE_VECTOR_PARAM1 CollisionNormal
 ) 
 {
 	BasicCollision::OnCollision(MyID, MyBody, CollidingID, CollidingBody, CollisionNormal);
 }
 
-void XM_CALLCONV ExplosionCollision::OnCollision
+void SSE_CALLCONV ExplosionCollision::OnCollision
 (
 	size_t MyID, 
 	Physics * MyBody, 
 	size_t CollidingID, 
 	Physics * CollidingBody, 
-	DX FXMVECTOR CollisionNormal
+	SSE_VECTOR_PARAM1 CollisionNormal
 )
 {
 	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
@@ -89,10 +89,10 @@ void XM_CALLCONV ExplosionCollision::OnCollision
 	
 	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor)
 	{
-		DX XMVECTOR v = DX Subtract(CollidingBody->GetPosition(), MyBody->GetPosition());
-		v = DX2 Normalize(v);
-		v = DX Scale(v, 100'000.f);
-		v = DX Add(v, { 0.f, 0.f, 1'000.f });
+		 SSE_VECTOR v =  Subtract(CollidingBody->GetPosition(), MyBody->GetPosition());
+		v = Normalize2(v);
+		v =  Scale(v, 100'000.f);
+		v =  Add(v, { 0.f, 0.f, 1'000.f });
 		CollidingBody->ApplyForce(v);
 		Engine.ChangeState(CollidingID, ST::DAMAGED);
 		CollidingDesc.Value -= MyDesc.Value;

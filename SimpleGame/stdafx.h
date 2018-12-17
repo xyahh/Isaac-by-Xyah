@@ -57,8 +57,6 @@ inline void EraseByIndex(STD vector<T>& v, size_t Index)
 	}), v.end());
 }
 
-
-
 /* Core */
 class Window;
 class Scene;

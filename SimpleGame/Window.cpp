@@ -49,7 +49,7 @@ bool Window::Initialize(const STD string & Title, int Width, int Height, bool En
 	//dwStyle = WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_THICKFRAME;
 	dwStyle = WS_OVERLAPPEDWINDOW;
 	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);
-
+	
 	RECT ScreenSize;
 	GetWindowRect(GetDesktopWindow(), &ScreenSize);
 
@@ -67,7 +67,8 @@ bool Window::Initialize(const STD string & Title, int Width, int Height, bool En
 		WinTitle.c_str(),
 		dwStyle | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 		Center.x, Center.y,
-		Width, Height,
+		WindowRect.right - WindowRect.left,
+		WindowRect.bottom - WindowRect.top,
 		NULL,
 		NULL,
 		m_hInstance,

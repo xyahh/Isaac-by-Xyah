@@ -38,12 +38,12 @@ public:
 	bool IsConnected();
 	bool GetButton(int Button);
 
-	void XM_CALLCONV SetDeadzones(DX FXMVECTOR Deadzones);
-	DX XMVECTOR GetAnalog(int Control);
+	void SSE_CALLCONV SetDeadzones(SSE_VECTOR_PARAM1 Deadzones);
+	SSE_VECTOR GetAnalog(int Control);
 	
 	XINPUT_STATE State;
 	int			 GPID;
-	DX XMFLOAT2	 Deadzone;
+	FLOAT2		 Deadzone;
 };
 
 extern Gamepad Gamepad1;

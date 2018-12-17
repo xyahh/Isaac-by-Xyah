@@ -3,7 +3,7 @@
 
 void ForceCommand::execute(size_t ObjectIndex)
 {
-	Engine.GetPhysics(ObjectIndex).ApplyForce(DX3 Load(Force));
+	Engine.GetPhysics(ObjectIndex).ApplyForce(LoadFloat3(Force));
 }
 
 void FaceCommand::execute(size_t ObjectIndex)

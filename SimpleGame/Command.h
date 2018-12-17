@@ -32,7 +32,7 @@ public:
 	virtual void release(size_t Index) {}
 
 private:
-	DX XMFLOAT3 Force;
+	 FLOAT3 Force;
 };
 
 class FaceCommand : public Command

@@ -2,21 +2,19 @@
 class Graphics
 {
 	friend Cyan;
-
+	
 public:
 
-	Graphics() :
-		m_Color(1.f, 1.f, 1.f, 1.f)
-	{}
+	Graphics();
 	~Graphics() {}
 
-	void SetColor(DX XMVECTOR Color);
+	void SetLayerGroup(u_int Layer);
+
+	void SetColor( SSE_VECTOR Color);
 	void SetAlpha(float Value);
-	DX XMVECTOR XM_CALLCONV GetColor() const;
+	 SSE_VECTOR SSE_CALLCONV GetColor() const;
 
 private:
-
-
 
 	void Render
 	(
@@ -27,5 +25,6 @@ private:
 	);
 
 protected:
-	DX XMFLOAT4			m_Color;
+	 FLOAT4		m_Color;
+	u_int			m_LayerGroup;
 };

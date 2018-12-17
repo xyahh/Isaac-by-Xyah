@@ -7,6 +7,12 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WSTD vectorANTY.
 */
 
+enum LayerGroup
+{
+	Background,
+	Middleground,
+	Foreground,
+};
 
 class Renderer
 {
@@ -19,11 +25,13 @@ public:
 	void Prepare();
 
 #ifdef CYAN_DEBUG_COLLISION
-	void XM_CALLCONV DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size) const;
+	void SSE_CALLCONV DrawCollisionRect( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_PARAM1 Size) const;
 #endif
-	void XM_CALLCONV DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
-		DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR CurrentSprite, DX HXMVECTOR TotalSprite) const;
-	void XM_CALLCONV DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color) const;
+	
+	void SSE_CALLCONV DrawShadow(SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size, float Alpha) const;
+	void SSE_CALLCONV DrawSprite( SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size,
+		const  FLOAT4& Color, u_int TexID, const  UINT2& CurrentSprite, const  UINT2& TotalSprite,
+		u_int LayerGrouping) const;
 
 	u_int GenerateTexture(const STD string& filePath) const;
 	void DeleteTexture(u_int texID) const;
@@ -32,25 +40,24 @@ public:
 	void UpdateScale(float N);
 
 private:
+	void SSE_CALLCONV DrawTexRect(const FLOAT3& Position, const FLOAT2& Size, const FLOAT4& Color, u_int TexID) const;
+
+	 SSE_VECTOR SSE_CALLCONV GetGLPos( SSE_VECTOR_PARAM1 Position) const;
+	 SSE_VECTOR SSE_CALLCONV GetGLSize( SSE_VECTOR_PARAM1 Size) const;
 
 	bool Initialize();
-	void XM_CALLCONV DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const;
 	bool ReadFile(const STD string& filename, STD string *target) const;
 	void AddShader(u_int ShaderProgram, const STD string& pShaderText, u_int ShaderType) const;
 	u_int CompileShaders(const STD string&  filenameVS, const STD string& filenameFS) const;
 	void CreateVertexBufferObjects();
-	DX XMVECTOR XM_CALLCONV GetGLPos(DX FXMVECTOR Position) const;
-	DX XMVECTOR XM_CALLCONV GetGLSize(DX FXMVECTOR Size) const;
-
+	
 private:
 	float Scale;
 	float WinX, WinY;
-
-	u_int m_TexShadow = 0;
-
 #ifdef CYAN_DEBUG_COLLISION
 	u_int m_DebugRect = 0;
 #endif
+	u_int m_TexShadow = 0;
 
 	u_int m_VBOTexRect = 0;
 	u_int m_TextureRectShader = 0;

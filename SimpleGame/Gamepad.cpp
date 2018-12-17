@@ -34,12 +34,12 @@ bool Gamepad::GetButton(int Button)
 	return State.Gamepad.wButtons & Button;
 }
 
-void XM_CALLCONV Gamepad::SetDeadzones(DX FXMVECTOR Deadzones)
+void SSE_CALLCONV Gamepad::SetDeadzones(SSE_VECTOR_PARAM1 Deadzones)
 {
-	Deadzone = DX2 Store(Deadzones);
+	Deadzone = StoreFloat2(Deadzones);
 }
 
-DX XMVECTOR Gamepad::GetAnalog(int Control)
+ SSE_VECTOR Gamepad::GetAnalog(int Control)
 {
 	float x = 0.f, y = 0.f;
 

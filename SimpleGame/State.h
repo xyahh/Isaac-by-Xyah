@@ -307,6 +307,6 @@ private:
 	float BlinkingRate;
 	float BlinkingTimer;
 	float DurationTimer;
-	DX XMFLOAT4 Color;
+	 FLOAT4 Color;
 	int Alpha;
 };

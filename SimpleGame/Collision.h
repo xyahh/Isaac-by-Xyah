@@ -8,13 +8,13 @@ public:
 	BasicCollision() {}
 	virtual ~BasicCollision() {}
 
-	virtual void XM_CALLCONV OnCollision
+	virtual void SSE_CALLCONV OnCollision
 	(
 		size_t MyID,
 		Physics* MyBody,
 		size_t CollidingID,
 		Physics* CollidingBody,
-		DX FXMVECTOR CollisionNormal
+		SSE_VECTOR_PARAM1 CollisionNormal
 	);
 
 private:
@@ -26,13 +26,13 @@ public:
 	ActorCollision() {}
 	virtual ~ActorCollision() {}
 
-	virtual void XM_CALLCONV OnCollision
+	virtual void SSE_CALLCONV OnCollision
 	(
 		size_t MyID,
 		Physics* MyBody,
 		size_t CollidingID,
 		Physics* CollidingBody,
-		DX FXMVECTOR CollisionNormal
+		SSE_VECTOR_PARAM1 CollisionNormal
 	);
 };
 
@@ -42,13 +42,13 @@ public:
 	ProjectileCollision() {}
 	virtual	~ProjectileCollision() {}
 
-	virtual void XM_CALLCONV OnCollision
+	virtual void SSE_CALLCONV OnCollision
 	(
 		size_t MyID,
 		Physics* MyBody,
 		size_t CollidingID,
 		Physics* CollidingBody,
-		DX FXMVECTOR CollisionNormal
+		SSE_VECTOR_PARAM1 CollisionNormal
 	);
 };
 
@@ -58,13 +58,13 @@ public:
 	StructureCollision() {}
 	virtual	~StructureCollision() {}
 
-	virtual void XM_CALLCONV OnCollision
+	virtual void SSE_CALLCONV OnCollision
 	(
 		size_t MyID,
 		Physics* MyBody, 
 		size_t CollidingID,
 		Physics* CollidingBody, 
-		DX FXMVECTOR CollisionNormal
+		SSE_VECTOR_PARAM1 CollisionNormal
 	);
 };
 
@@ -75,13 +75,13 @@ public:
 	ExplosionCollision() {}
 	virtual ~ExplosionCollision() {}
 
-	virtual void XM_CALLCONV OnCollision
+	virtual void SSE_CALLCONV OnCollision
 	(
 		size_t MyID,
 		Physics* MyBody,
 		size_t CollidingID,
 		Physics* CollidingBody,
-		DX FXMVECTOR CollisionNormal
+		SSE_VECTOR_PARAM1 CollisionNormal
 	);
 
 private:
@@ -101,51 +101,51 @@ class BBox
 		BBox() :
 			Size(0.f, 0.f, 0.f) {}
 
-		void XM_CALLCONV SetDimensions(DX FXMVECTOR v);
-		DX XMVECTOR XM_CALLCONV GetDimensions() const;
-		friend void XM_CALLCONV GetExtents(DX XMVECTOR* Min, DX XMVECTOR* Max, DX FXMVECTOR position, const BBox& box);
+		void SSE_CALLCONV SetDimensions(SSE_VECTOR_PARAM1 v);
+		SSE_VECTOR SSE_CALLCONV GetDimensions() const;
+		friend void SSE_CALLCONV GetExtents(SSE_VECTOR* Min,  SSE_VECTOR* Max,  SSE_VECTOR_PARAM1 position, const BBox& box);
 
 	private:
-		DX XMFLOAT3	Size;
+		 FLOAT3	Size;
 	};
 
-inline DX XMVECTOR XM_CALLCONV GetBBoxCenter(DX FXMVECTOR ObjectPosition, float BBoxHeight)
+inline  SSE_VECTOR SSE_CALLCONV GetBBoxCenter(SSE_VECTOR_PARAM1 ObjectPosition, float BBoxHeight)
 {
-	return DX Add(ObjectPosition, {0.f, 0.f, BBoxHeight * 0.5f});
+	return  Add(ObjectPosition, {0.f, 0.f, BBoxHeight * 0.5f});
 }
 
-inline void XM_CALLCONV GetExtents(DX XMVECTOR* Min, DX XMVECTOR* Max, DX FXMVECTOR position, const BBox& box)
+inline void SSE_CALLCONV GetExtents( SSE_VECTOR* Min,  SSE_VECTOR* Max,  SSE_VECTOR_PARAM1 position, const BBox& box)
 {
-	DX XMVECTOR Half = DX Scale({ box.Size.x, box.Size.y }, 0.5f);
-	*Max = DX Add(position, Half);
-	*Min = DX Subtract(position, Half);
-	*Max = DX Add(*Max, { 0.f, 0.f, box.Size.z });
+	 SSE_VECTOR Half =  Scale({ box.Size.x, box.Size.y }, 0.5f);
+	*Max =  Add(position, Half);
+	*Min =  Subtract(position, Half);
+	*Max =  Add(*Max, { 0.f, 0.f, box.Size.z });
 }
 
-inline bool XM_CALLCONV HandleCollision(DX FXMVECTOR A_Min, DX FXMVECTOR A_Max, DX FXMVECTOR B_Min, DX GXMVECTOR B_Max)
+inline bool SSE_CALLCONV HandleCollision( SSE_VECTOR_PARAM1 A_Min,  SSE_VECTOR_PARAM1 A_Max,  SSE_VECTOR_PARAM1 B_Min,  SSE_VECTOR_PARAM2 B_Max)
 {
-	return !(DX AnyTrue(DX Or(DX Greater(A_Min, B_Max), DX Greater(B_Min, A_Max))));
+	return !( AnyTrue( Or( Greater(A_Min, B_Max),  Greater(B_Min, A_Max))));
 }
 
-inline DX XMVECTOR XM_CALLCONV GetNormal(DX FXMVECTOR A_Min, DX FXMVECTOR A_Max, DX FXMVECTOR B_Min, DX GXMVECTOR B_Max)
+inline  SSE_VECTOR SSE_CALLCONV GetNormal( SSE_VECTOR_PARAM1 A_Min,  SSE_VECTOR_PARAM1 A_Max,  SSE_VECTOR_PARAM1 B_Min,  SSE_VECTOR_PARAM2 B_Max)
 {
-	DX XMVECTOR DiffA = DX Subtract(A_Max, B_Min);
-	DX XMVECTOR DiffB = DX Subtract(B_Max, A_Min);
+	 SSE_VECTOR DiffA =  Subtract(A_Max, B_Min);
+	 SSE_VECTOR DiffB =  Subtract(B_Max, A_Min);
 
-	DX XMVECTOR MinA = DX XMVectorSplatOne();
-	DX XMVECTOR MinB = DX XMVectorSplatOne();
-	DX SetW(&DiffA, (float)0xFFFFFFFF); //Max Value To Check for Min
-	DX SetW(&DiffB, (float)0xFFFFFFFF); // Max Value To Check for Min
+	 SSE_VECTOR MinA = VectorOne();
+	 SSE_VECTOR MinB = VectorOne();
+	 SetW(&DiffA, (float)0xFFFFFFFF); //Max Value To Check for Min
+	 SetW(&DiffB, (float)0xFFFFFFFF); // Max Value To Check for Min
 
 	//Find Min of Both Vectors
 	for (int i = 1; i <= 3; ++i)
 	{
-		MinA = DX Multiply(MinA, DX Evaluate(DX Less(DiffA, DX ShiftLeft(DiffA, i))));
-		MinB = DX Multiply(MinB, DX Evaluate(DX Less(DiffB, DX ShiftLeft(DiffB, i))));
+		MinA =  Multiply(MinA,  Evaluate( Less(DiffA,  ShiftLeft(DiffA, i))));
+		MinB =  Multiply(MinB,  Evaluate( Less(DiffB,  ShiftLeft(DiffB, i))));
 	}
 
-	float FA = DX4 MagnitudeSQ(DX Multiply(DiffA, MinA));
-	float FB = DX4 MagnitudeSQ(DX Multiply(DiffB, MinB));
+	float FA = MagnitudeSq4( Multiply(DiffA, MinA));
+	float FB = MagnitudeSq4( Multiply(DiffB, MinB));
 	if (FA < FB) return 
 		MinA;	
 	else return 

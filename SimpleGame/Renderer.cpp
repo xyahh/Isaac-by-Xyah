@@ -5,9 +5,6 @@
 #include <fstream>
 
 #include "Dependencies/GL/glew.h"
-#include "CyanEngine.h"
-#include "World.h"
-
 
 /* CImage to Unsigned Char Vector */
 STD vector<unsigned char> GetImageBits(const CImage & Image)
@@ -31,9 +28,9 @@ STD vector<unsigned char> GetImageBits(const CImage & Image)
 	return ImageBits;
 }
 
-DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
+ SSE_VECTOR SSE_CALLCONV Renderer::GetGLPos( SSE_VECTOR_PARAM1 Position) const
 {
-	return DX Multiply
+	return  Multiply
 	(
 		Position,
 		{
@@ -44,12 +41,12 @@ DX XMVECTOR XM_CALLCONV Renderer::GetGLPos(DX FXMVECTOR Position) const
 	);
 }
 
-DX XMVECTOR XM_CALLCONV Renderer::GetGLSize(DX FXMVECTOR Size) const
+ SSE_VECTOR SSE_CALLCONV Renderer::GetGLSize( SSE_VECTOR_PARAM1 Size) const
 {
-	return DX Multiply
+	return  Multiply
 	(
 		Size,
-		{ 
+		{
 			Scale / WinX,
 			Scale / WinY,
 			Scale / WinY
@@ -62,13 +59,11 @@ bool Renderer::Initialize()
 	//Load shaders
 	m_TextureRectShader = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
 	m_TextureSpriteShader = CompileShaders("./Shaders/TextureRectSeq.vs", "./Shaders/TextureRectSeq.fs");
-
-	//Load shadow texture
 	m_TexShadow = GenerateTexture("./Resources/shadow.png");
+
 #ifdef CYAN_DEBUG_COLLISION
 	m_DebugRect = GenerateTexture("./Resources/debug_rect.png");
 #endif
-
 	//Create VBOs
 	CreateVertexBufferObjects();
 
@@ -167,43 +162,6 @@ void Renderer::AddShader(u_int ShaderProgram, const STD string& pShaderText, u_i
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
-void XM_CALLCONV Renderer::DrawTexture(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color, u_int TexID) const
-{
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
-	//Program select
-	glUseProgram(m_TextureRectShader);
-
-	//Shadow to render last (thus Z depth will be "FARTHEST")
-	glUniform3f(glGetUniformLocation(m_TextureRectShader, "u_Trans"), DX GetX(Position), DX GetY(Position), DX GetZ(Position));
-	glUniform2f(glGetUniformLocation(m_TextureRectShader, "u_Size"), DX GetX(Size), DX GetY(Size));
-	glUniform4f(glGetUniformLocation(m_TextureRectShader, "u_Color"), DX GetX(Color), DX GetY(Color), DX GetZ(Color), DX GetW(Color));
-	int texUniform = glGetUniformLocation(m_TextureRectShader, "u_Texture");
-	glUniform1i(texUniform, 0);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, TexID);
-
-	int attribPosition = glGetAttribLocation(m_TextureRectShader, "a_Position");
-	int attribTexture = glGetAttribLocation(m_TextureRectShader, "a_TexPos");
-
-	glEnableVertexAttribArray(attribPosition);
-	glEnableVertexAttribArray(attribTexture);
-
-	//Render shadow first
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTexRect);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-	glVertexAttribPointer(attribTexture, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(3 * sizeof(float)));
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	glDisableVertexAttribArray(attribPosition);
-	glDisableVertexAttribArray(attribTexture);
-
-	glDisable(GL_BLEND);
-}
-
 bool Renderer::ReadFile(const STD string& filename, STD string *target) const
 {
 	STD ifstream file(filename);
@@ -270,35 +228,35 @@ u_int Renderer::CompileShaders(const STD string& filenameVS, const STD string&  
 
 void Renderer::Prepare()
 {
-	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClearDepth(FARTHEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 }
 
 #ifdef CYAN_DEBUG_COLLISION
-void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR Size) const
+void SSE_CALLCONV Renderer::DrawCollisionRect( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_PARAM1 Size) const
 {
-	DX XMVECTOR GLSize = GetGLSize(Size);
+	 SSE_VECTOR GLSize = GetGLSize(Size);
 
-	DX XMVECTOR GLPos = GetGLPos(Position);
-	DX XMVECTOR BlueRect = GLPos;
-	DX XMVECTOR GreenRect = GLPos;
-	DX XMVECTOR YellowRect = GLPos;
+	 SSE_VECTOR GLPos = GetGLPos(Position);
+	 SSE_VECTOR BlueRect = GLPos;
+	 SSE_VECTOR GreenRect = GLPos;
+	 SSE_VECTOR YellowRect = GLPos;
 
-	DX XMVECTOR BlueSize = DX Swizzle(GLSize, 0, 2, 2, 3);
-	float BlueRectY = DX GetY(BlueRect) + DX GetZ(BlueRect);
-	float BlueSizeY = DX GetY(BlueSize);
-	DX SetY(&BlueRect, BlueRectY );
-	DX SetY(&GreenRect, BlueRectY + BlueSizeY);
-	DX SetY(&YellowRect, BlueRectY - BlueSizeY);
+	 SSE_VECTOR BlueSize =  Swizzle(GLSize, 0, 2, 2, 3);
+	float BlueRectY =  GetY(BlueRect) +  GetZ(BlueRect);
+	float BlueSizeY =  GetY(BlueSize);
+	 SetY(&BlueRect, BlueRectY );
+	 SetY(&GreenRect, BlueRectY + BlueSizeY);
+	 SetY(&YellowRect, BlueRectY - BlueSizeY);
 
-	float Depth = DX GetY(GLPos);
+	float Depth =  GetY(GLPos);
 
-	DX SetZ(&GLPos, Depth);
-	DX SetZ(&BlueRect, Depth);
-	DX SetZ(&GreenRect, Depth);
-	DX SetZ(&YellowRect, Depth);
+	 SetZ(&GLPos, Depth);
+	 SetZ(&BlueRect, Depth);
+	 SetZ(&GreenRect, Depth);
+	 SetZ(&YellowRect, Depth);
 
 	DrawTexture(YellowRect, GLSize, { 1.f, 1.f, 0.f, 1.f }, m_DebugRect);
 	DrawTexture(GLPos, GLSize, { 1.f, 0.f, 0.f, 1.f }, m_DebugRect);
@@ -307,23 +265,79 @@ void XM_CALLCONV Renderer::DrawCollisionRect(DX FXMVECTOR Position, DX FXMVECTOR
 }
 #endif
 
-void XM_CALLCONV Renderer::DrawShadow(DX FXMVECTOR Position, DX FXMVECTOR Size, DX FXMVECTOR Color) const
+void SSE_CALLCONV Renderer::DrawTexRect(const FLOAT3& Position, const FLOAT2& Size, const FLOAT4& Color, u_int TexID) const
 {
-	DX XMVECTOR GLPos = GetGLPos(Position);
-	DX XMVECTOR GLSize = GetGLSize(Size);
-	DX SetZ(&GLPos, FARTHEST);
-	DrawTexture(GLPos, GLSize, { 1.f, 1.f, 1.f, DX GetW(Color) }, m_TexShadow);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glUseProgram(m_TextureRectShader);
+
+	glUniform3f(glGetUniformLocation(m_TextureRectShader, "u_Trans"), Position.x, Position.y, Position.z);
+	glUniform2f(glGetUniformLocation(m_TextureRectShader, "u_Size"), Size.x, Size.y);
+	glUniform4f(glGetUniformLocation(m_TextureRectShader, "u_Color"), Color.x, Color.y, Color.z, Color.w);
+	int texUniform = glGetUniformLocation(m_TextureRectShader, "u_Texture");
+	glUniform1i(texUniform, 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, TexID);
+
+	int attribPosition = glGetAttribLocation(m_TextureRectShader, "a_Position");
+	int attribTexture = glGetAttribLocation(m_TextureRectShader, "a_TexPos");
+
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTexture);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTexRect);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTexture, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(3 * sizeof(float)));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTexture);
+
+	glDisable(GL_BLEND);
 }
 
-void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
-	DX FXMVECTOR Color, u_int TexID, DX GXMVECTOR CurrentSprite, DX HXMVECTOR TotalSprite) const
+void SSE_CALLCONV Renderer::DrawShadow(SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size, float Alpha) const
 {
-	DX XMVECTOR GLPos = GetGLPos(Position);
-	DX XMVECTOR GLSize = GetGLSize(Size);
+	FLOAT3 GLPos = StoreFloat3(GetGLPos(Position));
+	FLOAT2 GLSize = StoreFloat2(GetGLSize(Size));
+	GLPos.z = FARTHEST;
+	DrawTexRect(GLPos, GLSize, { 1.f, 1.f, 1.f, 1.f }, m_TexShadow);
+}
+
+void SSE_CALLCONV Renderer::DrawSprite( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_PARAM1 Size,
+	const  FLOAT4& Color, u_int TexID, const  UINT2& CurrentSprite, const  UINT2& TotalSprite,
+	u_int LayerGrouping) const
+{
+	 FLOAT3 GLPos = StoreFloat3(GetGLPos(Position));
+	 FLOAT2 GLSize = StoreFloat2(GetGLSize(Size));
+
+	switch (LayerGrouping)
+	{
+	case LayerGroup::Background:
+	{
+		GLPos.y += GLPos.z;
+		GLPos.z = FARTHEST;
+		break;
+	}
+	case LayerGroup::Middleground:
+	{
+		float Y = GLPos.y;
+		GLPos.y += GLPos.z;
+		GLPos.z = Y;
+		break;
+	}
+	case LayerGroup::Foreground:
+	{
+		GLPos.y += GLPos.z;
+		GLPos.z = NEAREST;
+		break;
+	}
+	}
 
 	u_int shader = m_TextureSpriteShader;
-
-	//Program select
 	glUseProgram(shader);
 
 	glEnable(GL_BLEND);
@@ -347,14 +361,17 @@ void XM_CALLCONV Renderer::DrawSprite(DX FXMVECTOR Position, DX FXMVECTOR Size,
 	glEnableVertexAttribArray(attribPosition);
 	glEnableVertexAttribArray(attribTexture);
 
-	//Render Object
-	glUniform3f(u_Trans, DX GetX(GLPos), DX GetY(GLPos) + DX GetZ(GLPos), DX GetY(GLPos));
-	glUniform2f(u_Size, DX GetX(GLSize), DX GetY(GLSize));
-	glUniform4f(u_Color, DX GetX(Color), DX GetY(Color), DX GetZ(Color), DX GetW(Color));
-	glUniform1f(u_CurrSeqX, DX GetX(CurrentSprite));
-	glUniform1f(u_CurrSeqY, DX GetY(TotalSprite) - DX GetY(CurrentSprite) - 1);
-	glUniform1f(u_TotalSeqX, DX GetX(TotalSprite));
-	glUniform1f(u_TotalSeqY, DX GetY(TotalSprite));
+	//glBindBuffer(GL_ARRAY_BUFFER, m_VBOTexRect);
+	//glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	//glVertexAttribPointer(attribTexture, 2, GL_FLOAT, GL_FALSE,  sizeof(float) * 5, (void*)(sizeof(float) * 3));
+
+	glUniform3f(u_Trans, GLPos.x, GLPos.y, GLPos.z);
+	glUniform2f(u_Size, GLSize.x, GLSize.y);
+	glUniform4f(u_Color, Color.x, Color.y, Color.z, Color.w);
+	glUniform1f(u_CurrSeqX, CurrentSprite.x);
+	glUniform1f(u_CurrSeqY, TotalSprite.y - CurrentSprite.y - 1);
+	glUniform1f(u_TotalSeqX, TotalSprite.x);
+	glUniform1f(u_TotalSeqY, TotalSprite.y);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TexID);

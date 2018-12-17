@@ -21,20 +21,20 @@ public:
 	{}
 	~Physics() {}
 
-	void XM_CALLCONV ApplyForce(DX FXMVECTOR force);
-	void XM_CALLCONV SetForce(DX FXMVECTOR force);
-	DX XMVECTOR GetForce() const;
+	void SSE_CALLCONV ApplyForce(SSE_VECTOR_PARAM1 force);
+	void SSE_CALLCONV SetForce(SSE_VECTOR_PARAM1 force);
+	SSE_VECTOR GetForce() const;
 
 	void SetPosition(float x, float y, float z);
-	void XM_CALLCONV SetPosition(DX FXMVECTOR v);
-	DX XMVECTOR XM_CALLCONV GetPosition() const;
-	DX XMVECTOR XM_CALLCONV GetPrevPosition() const;
+	void SSE_CALLCONV SetPosition(SSE_VECTOR_PARAM1 v);
+	SSE_VECTOR SSE_CALLCONV GetPosition() const;
+	SSE_VECTOR SSE_CALLCONV GetPrevPosition() const;
 
-	DX XMVECTOR XM_CALLCONV GetDeltaPosition() const;
-	void XM_CALLCONV SetDeltaPosition(DX FXMVECTOR v);
+	 SSE_VECTOR SSE_CALLCONV GetDeltaPosition() const;
+	void SSE_CALLCONV SetDeltaPosition(SSE_VECTOR_PARAM1 v);
 
-	void XM_CALLCONV SetVelocity(DX FXMVECTOR v);
-	DX XMVECTOR XM_CALLCONV GetVelocity() const;
+	void SSE_CALLCONV SetVelocity(SSE_VECTOR_PARAM1 v);
+	 SSE_VECTOR SSE_CALLCONV GetVelocity() const;
 
 	void SetMass(float mass);
 	float GetMass() const;
@@ -59,11 +59,11 @@ private:
 private:
 
 	float			m_Mass;
-	DX XMFLOAT3		m_Position;
-	DX XMFLOAT3		m_DeltaPos; //For Collision
-	DX XMFLOAT3		m_PrevPos;  //For Interpolation
-	DX XMFLOAT3		m_Acceleration;
-	DX XMFLOAT3		m_Velocity;
+	FLOAT3			m_Position;
+	FLOAT3			m_DeltaPos; //For Collision
+	FLOAT3			m_PrevPos;  //For Interpolation
+	FLOAT3			m_Acceleration;
+	FLOAT3			m_Velocity;
 	float			m_Gravity;
 	float			m_Friction;
 	Collision::BBox	m_Box;

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Gameplay.h"
 
-void Gameplay::AddActor(size_t * ID, size_t Team, DX XMVECTOR Position, size_t HeadTex, size_t BodyTex)
+void Gameplay::AddActor(size_t * ID, size_t Team,  SSE_VECTOR Position, size_t HeadTex, size_t BodyTex)
 {
 	Engine.AddObject(ID);
 
@@ -47,62 +47,27 @@ void Gameplay::Enter()
 
 	Engine.AddTexture(&TEX::BASIC_BODY, "./Resources/Characters/basic_body.png");
 	Engine.AddTexture(&TEX::ISAAC_HEAD, "./Resources/Characters/cain_head.png");
+	Engine.AddTexture(&TEX::DEPTHS, "./Resources/Levels/Depths.png");
 	Engine.AddTexture(&TEX::EXPLOSION, "./Resources/explosion.png");
 	Engine.AddTexture(&TEX::TEAR, "./Resources/tear.png");
-	Engine.AddSound(&SOUND_TEST, "./Resources/Sounds/Main.mp3", true);
-	//Engine.GetSound(SOUND_TEST).Play();
 
+	Engine.AddSound(&SOUND_TEST, "./Resources/Sounds/Main.mp3", TRUE);
+
+	//Map
+	{
+		size_t DEPTHS;
+		Engine.AddObject(&DEPTHS);
+		size_t MAP;
+		Engine.AddSprite(&MAP, DEPTHS);
+		Sprite& Map = Engine.GetSprite(DEPTHS, MAP);
+		Map.SetSize({ 20.f, 20.f });
+		Map.SetTexture(TEX::DEPTHS);
+		Engine.GetGraphics(DEPTHS).SetLayerGroup(LayerGroup::Background);
+	}
+
+	//Engine.GetSound(SOUND_TEST).Play();
 	AddActor(&OBJ::PLAYER, OBJ::PLAYER, { 0.f, 0.f, 0.f }, TEX::ISAAC_HEAD, TEX::BASIC_BODY);
 
-	size_t PLAYER2;
-
-	//Actor
-	{
-		Engine.AddObject(&PLAYER2);
-
-		auto& ActorDescriptor = Engine.GetDescriptor(PLAYER2);
-		auto& ActorPhysics = Engine.GetPhysics(PLAYER2);
-		auto& ActorGraphics = Engine.GetGraphics(PLAYER2);
-
-		ActorDescriptor.Type = ObjectType::Actor;
-		ActorDescriptor.Value = 100.f; // 100 HP
-		ActorDescriptor.Team = PLAYER2;
-		ActorDescriptor.AddEvent(DescriptorEvent::ValueZeroNegative, [PLAYER2]()
-		{
-			STD cout << "Player2 Died!\n";
-			Engine.DeleteObject(PLAYER2);
-		});
-
-		ActorPhysics.SetCollision(&Collision::Actor);
-		ActorPhysics.Box().SetDimensions({ 0.5f, 0.5f, 1.5f });
-		ActorPhysics.SetFriction(1.f);
-
-		size_t BODY;
-		size_t HEAD;
-
-		Engine.AddSprite(&BODY, PLAYER2);
-		Engine.AddSprite(&HEAD, PLAYER2);
-
-		auto& Body = Engine.GetSprite(PLAYER2, BODY);
-		auto& Head = Engine.GetSprite(PLAYER2, HEAD);
-
-		ActorPhysics.SetMass(70.f);
-
-		float HeadSize = 1.25f;
-		float BodySize = 0.75f;
-
-		Body.SetTexture(TEX::BASIC_BODY);
-		Body.SetSize({ BodySize, BodySize });
-		Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
-		Body.SetTotal({ 10, 4 });
-		Body.SetDirection(Direction::Down);
-
-		Head.SetTexture(TEX::ISAAC_HEAD);
-		Head.SetSize({ HeadSize, HeadSize });
-		Head.SetTotal({ 2, 4 });
-		Head.SetDirection(Direction::Down);
-		Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
-	}
 
 	//Actor States
 	{
@@ -156,8 +121,6 @@ void Gameplay::Enter()
 		Engine.AddController(OBJ::PLAYER, ST::CHARGE_JUMP);
 		Engine.AddController(OBJ::PLAYER, ST::IN_AIR);
 		Engine.AddController(OBJ::PLAYER, ST::SHOOT);
-
-		Engine.AddController(PLAYER2, ST::IDLE);
 
 		Controller& IdleInput = Engine.GetController(OBJ::PLAYER, ST::IDLE);
 
@@ -238,10 +201,7 @@ void Gameplay::Enter()
 		ShootInput.MapControl(VK_UP,	CMD::END_SHOOT);
 		ShootInput.MapControl(VK_DOWN,	CMD::END_SHOOT);
 		
-		
-
 		Engine.ChangeState(OBJ::PLAYER, ST::IDLE);
-		Engine.ChangeState(PLAYER2, ST::IDLE);
 	}
 
 	//Boundaries

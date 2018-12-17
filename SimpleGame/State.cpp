@@ -30,10 +30,10 @@ void IdleState::Enter(size_t ObjectIndex)
 
 void IdleState::Update(size_t ObjectIndex)
 {
-	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetForce();
-	if (!Zero(DX GetZ(Velocity)))
+	 SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetForce();
+	if (!Zero( GetZ(Velocity)))
 		Engine.ChangeState(ObjectIndex, ST::IN_AIR);		
-	else if (!Zero(DX2 Magnitude(Velocity)))
+	else if (!Zero(Magnitude2(Velocity)))
 		Engine.ChangeState(ObjectIndex, ST::MOVE);
 }
 
@@ -53,12 +53,12 @@ void MoveState::Enter(size_t ObjectIndex)
 void MoveState::Update(size_t ObjectIndex)
 {
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
-	DX XMVECTOR Velocity = ObjPhysics.GetVelocity();
-	DX XMVECTOR Force = ObjPhysics.GetForce();
+	 SSE_VECTOR Velocity = ObjPhysics.GetVelocity();
+	 SSE_VECTOR Force = ObjPhysics.GetForce();
 
-	if (!Zero(DX GetZ(Velocity)))
+	if (!Zero( GetZ(Velocity)))
 		Engine.ChangeState(ObjectIndex, ST::IN_AIR);
-	else if (Zero(DX2 Magnitude(Velocity)) && Zero(DX2 Magnitude(Force)))
+	else if (Zero(Magnitude2(Velocity)) && Zero(Magnitude2(Force)))
 		Engine.ChangeState(ObjectIndex, ST::IDLE);		
 }
 
@@ -81,8 +81,8 @@ void ChargeJumpState::Update(size_t ObjectIndex)
 	RageAmount += UPDATE_TIME * RageRate;
 
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
-	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
-	if (!Zero(DX2 Magnitude(Velocity)))
+	 SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	if (!Zero(Magnitude2(Velocity)))
 		BodySprite.SetFrameRate(10.f);
 	else
 	{
@@ -116,9 +116,9 @@ void InAirState::Enter(size_t ObjectIndex)
 void InAirState::Update(size_t ObjectIndex)
 {
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
-	if (Zero(DX GetZ(ObjPhysics.GetPosition())) && Zero(DX GetZ(ObjPhysics.GetForce())))
+	if (Zero( GetZ(ObjPhysics.GetPosition())) && Zero( GetZ(ObjPhysics.GetForce())))
 	{
-		if (Zero(DX2 Magnitude(ObjPhysics.GetVelocity())))
+		if (Zero(Magnitude2(ObjPhysics.GetVelocity())))
 			Engine.ChangeState(ObjectIndex, ST::IDLE);
 		else
 			Engine.ChangeState(ObjectIndex, ST::MOVE);
@@ -136,7 +136,7 @@ void ChargeSlamState::Enter(size_t ObjectIndex)
 {
 	RageAmount = 0.f;
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
-	ObjPhysics.SetVelocity(DX XMVectorZero());
+	ObjPhysics.SetVelocity(VectorZero());
 	ObjGravity = ObjPhysics.GetGravity();
 	ObjPhysics.SetGravity(0.f);
 
@@ -171,7 +171,7 @@ void SlamState::Enter(size_t ObjectIndex)
 void SlamState::Update(size_t ObjectIndex)
 {
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
-	if (Zero(DX GetZ(ObjPhysics.GetPosition())))
+	if (Zero( GetZ(ObjPhysics.GetPosition())))
 		Engine.ChangeState(ObjectIndex, ST::IDLE);
 }
 
@@ -184,6 +184,8 @@ void SlamState::Exit(size_t ObjectIndex)
 	EffectDesc.Type = (ObjectType::Projectile);
 	EffectDesc.Value = (50.f);
 	EffectDesc.Team = (Engine.GetDescriptor(ObjectIndex).Team);
+
+	Engine.GetGraphics(Effect).SetLayerGroup(LayerGroup::Background);
 
 	size_t EffSpIdx;
 	Engine.AddSprite(&EffSpIdx, Effect);
@@ -217,8 +219,8 @@ void ShootState::Update(size_t ObjectIndex)
 {
 	Sprite& HeadSprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD);
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
-	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
-	if (!Zero(DX2 Magnitude(Velocity)))
+	 SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	if (!Zero(Magnitude2(Velocity)))
 		BodySprite.SetFrameRate(30.f);
 	else
 	{
@@ -246,7 +248,7 @@ void ShootState::Update(size_t ObjectIndex)
 
 		Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
 		Physics& TPhysics = Engine.GetPhysics(Tear);
-		TPhysics.SetPosition(DX Add(ObjPhysics.GetPosition(),
+		TPhysics.SetPosition( Add(ObjPhysics.GetPosition(),
 			{ 0.f, 0.f, 0.75f }));
 		TPhysics.SetMass(0.5f);
 		TPhysics.SetFriction(0.2f);
@@ -256,7 +258,7 @@ void ShootState::Update(size_t ObjectIndex)
 		u_int Dir = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).GetDirection();
 		TPhysics.SetCollision(&Collision::Projectile);
 		TPhysics.SetVelocity(ObjPhysics.GetVelocity());
-		TPhysics.ApplyForce(DX Scale(GetDirectionVector(Dir), ShootingForce));
+		TPhysics.ApplyForce( Scale(GetDirectionVector(Dir), ShootingForce));
 	}
 }
 
@@ -275,7 +277,7 @@ void DamagedState::Enter(size_t ObjectIndex)
 
 	DurationTimer = 0.f;
 	BlinkingTimer = 0.f;
-	Color = DX4 Store(Engine.GetGraphics(ObjectIndex).GetColor());
+	Color = StoreFloat4(Engine.GetGraphics(ObjectIndex).GetColor());
 	Alpha = 0;
 }
 
@@ -285,8 +287,8 @@ void DamagedState::Update(size_t ObjectIndex)
 	BlinkingTimer += UPDATE_TIME * BlinkingRate;
 
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
-	DX XMVECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
-	if (!Zero(DX2 Magnitude(Velocity)))
+	 SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	if (!Zero(Magnitude2(Velocity)))
 		BodySprite.SetFrameRate(10.f);
 	else
 	{
@@ -310,6 +312,6 @@ void DamagedState::Update(size_t ObjectIndex)
 
 void DamagedState::Exit(size_t ObjectIndex)
 {
-	Engine.GetGraphics(ObjectIndex).SetColor(DX4 Load(Color));
+	Engine.GetGraphics(ObjectIndex).SetColor(LoadFloat4(Color));
 	Engine.GetDescriptor(ObjectIndex).Type = static_cast<ObjectType>(Type);
 }

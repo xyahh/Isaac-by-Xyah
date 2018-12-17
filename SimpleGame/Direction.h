@@ -7,7 +7,7 @@ enum Direction
 	Right,
 };
 
-inline DX XMVECTOR GetDirectionVector(u_int dir)
+inline SSE_VECTOR GetDirectionVector(u_int dir)
 {
 	switch (dir)
 	{
@@ -20,5 +20,5 @@ inline DX XMVECTOR GetDirectionVector(u_int dir)
 	case Direction::Right:
 		return {  1.f, 0.f, 0.f };
 	}
-	return DX XMVectorZero();
+	return VectorZero();
 }

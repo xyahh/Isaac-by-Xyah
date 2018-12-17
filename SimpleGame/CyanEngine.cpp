@@ -20,9 +20,7 @@ void Cyan::MainLoop()
 
 		m_Timer.Tick();
 		while (m_Timer.FlushAccumulatedTime())
-		{
 			Update();
-		}
 
 		m_Renderer.Prepare(); 
 		Render(m_Timer.Interpolation());
@@ -120,10 +118,10 @@ void Cyan::Update()
 	for (size_t i = 0; i < m_Physics.size(); ++i)
 	{
 		m_Physics[i].Update();
-		m_Physics[i].SetDeltaPosition(DX Subtract(m_Physics[i].GetPosition(), m_Physics[i].GetPrevPosition()));
+		m_Physics[i].SetDeltaPosition( Subtract(m_Physics[i].GetPosition(), m_Physics[i].GetPrevPosition()));
 		for (size_t j = i + 1; j < m_Physics.size(); ++j)
 			m_Physics[i].HandleCollision(GetID(i), &m_Physics[j], GetID(j));
-		m_Physics[i].SetPosition(DX Add(m_Physics[i].GetPrevPosition(), m_Physics[i].GetDeltaPosition()));
+		m_Physics[i].SetPosition(Add(m_Physics[i].GetPrevPosition(), m_Physics[i].GetDeltaPosition()));
 
 	}
 

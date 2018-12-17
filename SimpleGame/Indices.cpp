@@ -7,6 +7,7 @@ namespace TEX
 	size_t ISAAC_HEAD;
 	size_t EXPLOSION;
 	size_t TEAR;
+	size_t DEPTHS;
 }
 
 
@@ -59,6 +60,7 @@ namespace OBJ
 	size_t PLAYER;
 	namespace SPRITE
 	{
+		size_t SHADOW;
 		size_t BODY;
 		size_t HEAD;
 	}

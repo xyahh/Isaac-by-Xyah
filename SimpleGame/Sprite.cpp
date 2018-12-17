@@ -11,9 +11,9 @@ void Sprite::SetDirection(u_int _State)
 	Current.y = _State;
 }
 
-void XM_CALLCONV Sprite::SetOffset(DX FXMVECTOR _Offset)
+void SSE_CALLCONV Sprite::SetOffset( SSE_VECTOR_PARAM1 _Offset)
 {
-	Offset = DX3 Store(_Offset);
+	Offset = StoreFloat3(_Offset);
 }
 
 void Sprite::SetSpriteType(SpriteType _Type)
@@ -26,14 +26,14 @@ void Sprite::SetFrameRate(float _FrameRate)
 	FrameRate = _FrameRate;
 }
 
-void XM_CALLCONV Sprite::SetSize(DX FXMVECTOR _Size)
+void SSE_CALLCONV Sprite::SetSize(SSE_VECTOR_PARAM1 _Size)
 {
-	Size = DX2 Store(_Size);
+	Size = StoreFloat2(_Size);
 }
 
-void XM_CALLCONV Sprite::SetTotal(DX FXMVECTOR _Total)
+void SSE_CALLCONV Sprite::SetTotal(SSE_VECTOR_PARAM1 _Total)
 {
-	Total = DX2 StoreUINT(_Total);
+	Total = StoreUint2(_Total);
 }
 
 void Sprite::ResetSprite()
@@ -96,22 +96,22 @@ u_int Sprite::GetDirection() const
 	return Current.y;
 }
 
-DX XMVECTOR XM_CALLCONV Sprite::GetSize() const
+ SSE_VECTOR SSE_CALLCONV Sprite::GetSize() const
 {
-	return DX2 Load(Size);
+	return LoadFloat2(Size);
 }
 
-DX XMVECTOR XM_CALLCONV Sprite::GetCurrent() const
+ SSE_VECTOR SSE_CALLCONV Sprite::GetCurrent() const
 {
-	return DX2 LoadUINT(Current);
+	return LoadUint2(Current);
 }
 
-DX XMVECTOR XM_CALLCONV Sprite::GetTotal() const
+ SSE_VECTOR SSE_CALLCONV Sprite::GetTotal() const
 {
-	return DX2 LoadUINT(Total);
+	return LoadUint2(Total);
 }
 
-DX XMVECTOR XM_CALLCONV Sprite::GetOffset() const
+ SSE_VECTOR SSE_CALLCONV Sprite::GetOffset() const
 {
-	return DX3 Load(Offset);
+	return LoadFloat3(Offset);
 }

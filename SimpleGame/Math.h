@@ -1,12 +1,6 @@
 #pragma once
 #include <float.h>
-#define DX		DirectX::
-#define DX2		DX V2::
-#define DX3		DX V3::
-#define DX4		DX V4::
-
-#define NS_DX_START namespace DirectX {
-#define NS_DX_END }
+#define SSE_CALLCONV XM_CALLCONV
 
 inline bool Zero(float fValue)
 {
@@ -23,264 +17,284 @@ inline void Clamp(float lowest, float * n, float highest)
 	*n = max(lowest, min(*n, highest));
 }
 
-NS_DX_START
+using SSE_VECTOR = DirectX::XMVECTOR;
+using SSE_VECTOR_PARAM1 = DirectX::FXMVECTOR;
+using SSE_VECTOR_PARAM2 = DirectX::GXMVECTOR;
+using SSE_VECTOR_PARAM3 = DirectX::HXMVECTOR;
+using SSE_VECTOR_PARAM4 = DirectX::CXMVECTOR;
 
-inline float XM_CALLCONV GetX(FXMVECTOR v)
+using FLOAT2 = DirectX::XMFLOAT2;
+using FLOAT3 = DirectX::XMFLOAT3;
+using FLOAT4 = DirectX::XMFLOAT4;
+
+using UINT2 = DirectX::XMUINT2;
+
+/* Setters & Getters */
+
+inline float SSE_CALLCONV GetX(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorGetX(v);
+	return DirectX::XMVectorGetX(v);
 }
 
-inline float XM_CALLCONV GetY(FXMVECTOR v)
+inline float SSE_CALLCONV GetY(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorGetY(v);
+	return DirectX::XMVectorGetY(v);
 }
 
-inline float XM_CALLCONV GetZ(FXMVECTOR v)
+inline float SSE_CALLCONV GetZ(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorGetZ(v);
+	return DirectX::XMVectorGetZ(v);
 }
 
-inline float XM_CALLCONV GetW(FXMVECTOR v)
+inline float SSE_CALLCONV GetW(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorGetW(v);
+	return DirectX::XMVectorGetW(v);
 }
 
-inline XMVECTOR XM_CALLCONV Abs(FXMVECTOR v)
+inline void SSE_CALLCONV SetX(SSE_VECTOR* out, float value)
 {
-	return XMVectorAbs(v);
+	*out = DirectX::XMVectorSetX(*out, value);
 }
 
-inline XMVECTOR XM_CALLCONV ShiftLeft(FXMVECTOR v, int Amount)
+inline void SSE_CALLCONV SetY(SSE_VECTOR* out, float value)
 {
-	return XMVectorShiftLeft(v, v, Amount);
+	*out = DirectX::XMVectorSetY(*out, value);
 }
 
-inline XMVECTOR XM_CALLCONV Swizzle(FXMVECTOR v, uint32_t x, uint32_t y, uint32_t z, uint32_t w)
-	{
-		return XMVectorSwizzle(v, x, y, z, w);
-	}
+inline void SSE_CALLCONV SetZ(SSE_VECTOR* out, float value)
+{
+	*out = DirectX::XMVectorSetZ(*out, value);
+}
 
-inline bool XM_CALLCONV AnyTrue(FXMVECTOR v)
+inline void SSE_CALLCONV SetW(SSE_VECTOR* out, float value)
+{
+	*out = DirectX::XMVectorSetW(*out, value);
+}
+
+inline STD ostream& SSE_CALLCONV operator<<(STD ostream& out, SSE_VECTOR_PARAM1 v)
+{
+	out << "(" << GetX(v) << ", " << GetY(v) << ", " << GetZ(v) << ", " << GetW(v) << ")";
+	return out;
+}
+
+/* BOOLEAN, DEF VECTORS */
+
+inline SSE_VECTOR SSE_CALLCONV VectorZero()
+{
+	return DirectX::XMVectorZero();
+}
+
+inline SSE_VECTOR SSE_CALLCONV VectorOne()
+{
+	return DirectX::XMVectorSplatOne();
+}
+
+inline SSE_VECTOR SSE_CALLCONV Abs(SSE_VECTOR_PARAM1 v)
+{
+	return DirectX::XMVectorAbs(v);
+}
+
+inline SSE_VECTOR SSE_CALLCONV ShiftLeft(SSE_VECTOR_PARAM1 v, int Amount)
+{
+	return DirectX::XMVectorShiftLeft(v, v, Amount);
+}
+
+inline SSE_VECTOR SSE_CALLCONV Swizzle(SSE_VECTOR_PARAM1 v, uint32_t x, uint32_t y, uint32_t z, uint32_t w)
+{
+	return DirectX::XMVectorSwizzle(v, x, y, z, w);
+}
+
+inline bool SSE_CALLCONV AnyTrue(SSE_VECTOR_PARAM1 v)
 	{
 		uint32_t out;
-		XMVectorEqualIntR(&out, Swizzle(v, 0, 1, 2, 0), XMVectorTrueInt());
-		return XMComparisonAnyTrue(out);
+		DirectX::XMVectorEqualIntR(&out, Swizzle(v, 0, 1, 2, 0), DirectX::XMVectorTrueInt());
+		return DirectX::XMComparisonAnyTrue(out);
 	}
 
-inline XMVECTOR XM_CALLCONV Or(FXMVECTOR v1, FXMVECTOR v2)
+inline SSE_VECTOR SSE_CALLCONV Or(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
 	{
-		return XMVectorOrInt(v1, v2);
+		return DirectX::XMVectorOrInt(v1, v2);
 	}
 
-inline XMVECTOR XM_CALLCONV Greater(FXMVECTOR v1, FXMVECTOR v2)
+inline SSE_VECTOR SSE_CALLCONV Greater(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
 {
-	return XMVectorGreater(v1, v2);
+	return DirectX::XMVectorGreater(v1, v2);
 }
 
-inline XMVECTOR XM_CALLCONV GreaterOrEqual(FXMVECTOR v1, FXMVECTOR v2)
+inline SSE_VECTOR SSE_CALLCONV GreaterOrEqual(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
 {
-	return XMVectorGreaterOrEqual(v1, v2);
+	return DirectX::XMVectorGreaterOrEqual(v1, v2);
 }
 
-inline XMVECTOR XM_CALLCONV Less(FXMVECTOR v1, FXMVECTOR v2)
+inline SSE_VECTOR SSE_CALLCONV Less(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
 {
-	return XMVectorLess(v1, v2);
+	return DirectX::XMVectorLess(v1, v2);
 }
 
-inline void XM_CALLCONV Print(FXMVECTOR v, char end = ' ')
+/* OPERATORS */
+
+inline SSE_VECTOR SSE_CALLCONV Scale(SSE_VECTOR_PARAM1 v, float scale)
 {
-	printf("(%f, %f, %f, %f) %c", GetX(v), GetY(v), GetZ(v), GetW(v), end);
+	return DirectX::XMVectorScale(v, scale);
 }
 
-inline void XM_CALLCONV SetX(XMVECTOR* out, float value)
+inline SSE_VECTOR SSE_CALLCONV Add(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
 {
-	*out = XMVectorSetX(*out, value);
+	return DirectX::XMVectorAdd(v1, v2);
 }
 
-inline void XM_CALLCONV SetY(XMVECTOR* out, float value)
+inline SSE_VECTOR SSE_CALLCONV Subtract(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
 {
-	*out = XMVectorSetY(*out, value);
+	return DirectX::XMVectorSubtract(v1, v2);
 }
 
-inline void XM_CALLCONV SetZ(XMVECTOR* out, float value)
+inline SSE_VECTOR SSE_CALLCONV Multiply(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
 {
-	*out = XMVectorSetZ(*out, value);
+	return DirectX::XMVectorMultiply(v1, v2);
 }
 
-inline void XM_CALLCONV SetW(XMVECTOR* out, float value)
+inline SSE_VECTOR SSE_CALLCONV Evaluate(SSE_VECTOR_PARAM1 v1) //Checks if each component is NOT A Zero
 {
-	*out = XMVectorSetW(*out, value);
+	return DirectX::XMVectorClamp
+	(
+		DirectX::XMVectorNotEqual(v1, DirectX::XMVectorZero()), 
+		DirectX::XMVectorZero(), 
+		DirectX::XMVectorSplatOne()
+	);
 }
 
-inline XMVECTOR XM_CALLCONV Scale(FXMVECTOR v, float scale)
+inline float SSE_CALLCONV MagnitudeSq2(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorScale(v, scale);
+	return DirectX::XMVectorGetX(DirectX::XMVector2LengthSq(v));
 }
 
-inline XMVECTOR XM_CALLCONV Add(FXMVECTOR v1, FXMVECTOR v2)
+inline float SSE_CALLCONV MagnitudeSq3(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorAdd(v1, v2);
+	return DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(v));
 }
 
-inline XMVECTOR XM_CALLCONV Subtract(FXMVECTOR v1, FXMVECTOR v2)
+inline float SSE_CALLCONV MagnitudeSq4(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorSubtract(v1, v2);
+	return DirectX::XMVectorGetX(DirectX::XMVector4LengthSq(v));
 }
 
-inline XMVECTOR XM_CALLCONV Multiply(FXMVECTOR v1, FXMVECTOR v2)
+inline float SSE_CALLCONV Magnitude2(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorMultiply(v1, v2);
+	return DirectX::XMVectorGetX(DirectX::XMVector2Length(v));
 }
 
-
-inline XMVECTOR XM_CALLCONV Evaluate(FXMVECTOR v1) //Checks if each component is NOT A Zero
+inline float SSE_CALLCONV Magnitude3(SSE_VECTOR_PARAM1 v)
 {
-	return XMVectorClamp(XMVectorNotEqual(v1, XMVectorZero()), XMVectorZero(), XMVectorSplatOne());
+	return DirectX::XMVectorGetX(DirectX::XMVector3Length(v));
 }
 
-namespace V2
+inline float SSE_CALLCONV Magnitude4(SSE_VECTOR_PARAM1 v)
 {
-	inline XMFLOAT2 XM_CALLCONV Store(FXMVECTOR v)
-	{
-		XMFLOAT2 Storage;
-		XMStoreFloat2(&Storage, v);
-		return Storage;
-	}
-
-	inline XMUINT2 XM_CALLCONV StoreUINT(FXMVECTOR v)
-	{
-		XMUINT2 Storage;
-		XMStoreUInt2(&Storage, v);
-		return Storage;
-	}
-
-	inline XMVECTOR XM_CALLCONV Load(const XMFLOAT2& v)
-	{
-		return XMLoadFloat2(&v);
-	}
-
-	inline XMVECTOR XM_CALLCONV LoadUINT(const XMUINT2& v)
-	{
-		return XMLoadUInt2(&v);
-	}
-
-
-	inline float XM_CALLCONV Dot(FXMVECTOR v1, FXMVECTOR v2)
-	{
-		return XMVectorGetX(XMVector2Dot(v1, v2));
-	}
-
-	inline XMVECTOR XM_CALLCONV Cross(FXMVECTOR v1, FXMVECTOR v2)
-	{
-		return XMVector2Cross(v1, v2);
-	}
-
-	inline XMVECTOR XM_CALLCONV Normalize(FXMVECTOR v)
-	{
-		return XMVector2Normalize(v);
-	}
-
-	inline float XM_CALLCONV Magnitude(FXMVECTOR v)
-	{
-		return XMVectorGetX(XMVector2Length(v));
-	}
-
-	inline float XM_CALLCONV MagnitudeSQ(FXMVECTOR v)
-	{
-		return XMVectorGetX(XMVector2LengthSq(v));
-	}
-
-	inline float XM_CALLCONV Distance(FXMVECTOR v1, FXMVECTOR v2)
-	{
-		return XMVectorGetX(XMVector2Length(XMVectorSubtract(v2, v1)));
-	}
-
-	inline float XM_CALLCONV DistanceSQ(FXMVECTOR v1, FXMVECTOR v2)
-	{
-		return XMVectorGetX(XMVector2LengthSq(XMVectorSubtract(v2, v1)));
-	}
+	return DirectX::XMVectorGetX(DirectX::XMVector4Length(v));
 }
 
-namespace V3
+inline SSE_VECTOR SSE_CALLCONV Normalize2(SSE_VECTOR_PARAM1 v)
 {
-	inline XMFLOAT3 XM_CALLCONV Store(FXMVECTOR v)
-	{
-		XMFLOAT3 Storage;
-		XMStoreFloat3(&Storage, v);
-		return Storage;
-	}
-
-	inline bool XM_CALLCONV AnyZero(FXMVECTOR v)
-	{
-		XMFLOAT3 Storage = Store(v);
-		return Storage.x*Storage.y*Storage.z == 0.f; //return False if there 
-	}
-
-	inline XMVECTOR XM_CALLCONV Load(const XMFLOAT3& v)
-	{
-		return XMLoadFloat3(&v);
-	}
-
-	inline float XM_CALLCONV Dot(FXMVECTOR v1, FXMVECTOR v2)
-	{
-		return XMVectorGetX(XMVector3Dot(v1, v2));
-	}
-
-	inline XMVECTOR XM_CALLCONV Cross(FXMVECTOR v1, FXMVECTOR v2)
-	{
-		return XMVector3Cross(v1, v2);
-	}
-
-	inline XMVECTOR XM_CALLCONV Normalize(FXMVECTOR v)
-	{
-		return XMVector3Normalize(v);
-	}
-
-	inline float XM_CALLCONV Magnitude(FXMVECTOR v)
-	{
-		return XMVectorGetX(XMVector3Length(v));
-	}
-
-	inline float XM_CALLCONV MagnitudeSQ(FXMVECTOR v)
-	{
-		return XMVectorGetX(XMVector3LengthSq(v));
-	}
-
-	inline float XM_CALLCONV Distance(FXMVECTOR v1, FXMVECTOR v2)
-	{
-		return XMVectorGetX(XMVector3Length(XMVectorSubtract(v2, v1)));
-	}
-
-	inline float XM_CALLCONV DistanceSQ(FXMVECTOR v1, FXMVECTOR v2)
-	{
-		return XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(v2, v1)));
-	}
+	return DirectX::XMVector2Normalize(v);
 }
 
-namespace V4
+inline SSE_VECTOR SSE_CALLCONV Normalize3(SSE_VECTOR_PARAM1 v)
 {
-	inline XMFLOAT4 XM_CALLCONV Store(FXMVECTOR v)
-	{
-		XMFLOAT4 Storage;
-		XMStoreFloat4(&Storage, v);
-		return Storage;
-	}
-
-	inline float XM_CALLCONV Magnitude(FXMVECTOR v)
-	{
-		return XMVectorGetX(XMVector4Length(v));
-	}
-
-	inline float XM_CALLCONV MagnitudeSQ(FXMVECTOR v)
-	{
-		return XMVectorGetX(XMVector4LengthSq(v));
-	}
-
-	inline XMVECTOR XM_CALLCONV Load(const XMFLOAT4& v)
-	{
-		return XMLoadFloat4(&v);
-	}
+	return DirectX::XMVector3Normalize(v);
 }
 
-NS_DX_END
+inline FLOAT2 SSE_CALLCONV StoreFloat2(SSE_VECTOR_PARAM1 v)
+{
+	FLOAT2 Storage;
+	DirectX::XMStoreFloat2(&Storage, v);
+	return Storage;
+}
+
+inline UINT2 SSE_CALLCONV StoreUint2(SSE_VECTOR_PARAM1 v)
+{
+	UINT2 Storage;
+	DirectX::XMStoreUInt2(&Storage, v);
+	return Storage;
+}
+
+inline FLOAT3 SSE_CALLCONV StoreFloat3(SSE_VECTOR_PARAM1 v)
+{
+	FLOAT3 Storage;
+	DirectX::XMStoreFloat3(&Storage, v);
+	return Storage;
+}
+
+inline FLOAT4 SSE_CALLCONV StoreFloat4(SSE_VECTOR_PARAM1 v)
+{
+	FLOAT4 Storage;
+	DirectX::XMStoreFloat4(&Storage, v);
+	return Storage;
+}
+
+inline SSE_VECTOR SSE_CALLCONV LoadFloat2(const FLOAT2& v)
+{
+	return DirectX::XMLoadFloat2(&v);
+}
+
+inline SSE_VECTOR SSE_CALLCONV LoadUint2(const UINT2& v)
+{
+	return DirectX::XMLoadUInt2(&v);
+}
+
+inline SSE_VECTOR SSE_CALLCONV LoadFloat3(const FLOAT3& v)
+{
+	return DirectX::XMLoadFloat3(&v);
+}
+
+inline SSE_VECTOR SSE_CALLCONV LoadFloat4(const FLOAT4& v)
+{
+	return DirectX::XMLoadFloat4(&v);
+}
+
+inline float SSE_CALLCONV Dot2(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
+{
+	return DirectX::XMVectorGetX(DirectX::XMVector2Dot(v1, v2));
+}
+
+inline float SSE_CALLCONV Dot3(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
+{
+	return DirectX::XMVectorGetX(DirectX::XMVector3Dot(v1, v2));
+}
+
+inline SSE_VECTOR SSE_CALLCONV Cross2(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
+{
+	return DirectX::XMVector2Cross(v1, v2);
+}
+
+inline SSE_VECTOR SSE_CALLCONV Cross3(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
+{
+	return DirectX::XMVector3Cross(v1, v2);
+}
+
+inline float SSE_CALLCONV Distance2(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
+{
+	return DirectX::XMVectorGetX(DirectX::XMVector2Length(DirectX::XMVectorSubtract(v2, v1)));
+}
+
+inline float SSE_CALLCONV Distance3(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
+{
+	return DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(v2, v1)));
+}
+
+inline float SSE_CALLCONV DistanceSq2(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
+{
+	return DirectX::XMVectorGetX(DirectX::XMVector2LengthSq(DirectX::XMVectorSubtract(v2, v1)));
+}
+
+inline float SSE_CALLCONV DistanceSq3(SSE_VECTOR_PARAM1 v1, SSE_VECTOR_PARAM1 v2)
+{
+	return DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(DirectX::XMVectorSubtract(v2, v1)));
+}
+
+inline bool SSE_CALLCONV AnyZero3(SSE_VECTOR_PARAM1 v)
+{
+	FLOAT3 Storage = StoreFloat3(v);
+	return Zero(Storage.x*Storage.y*Storage.z);
+}
+
 

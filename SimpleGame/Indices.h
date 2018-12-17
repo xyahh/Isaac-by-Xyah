@@ -5,6 +5,8 @@ namespace TEX
 	extern size_t ISAAC_HEAD;
 	extern size_t EXPLOSION;
 	extern size_t TEAR;
+	extern size_t DEPTHS;
+	extern size_t SHADOW;
 }
 
 

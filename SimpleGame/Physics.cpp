@@ -4,9 +4,9 @@
 
 /* Basic Physics */
 
-DX XMVECTOR XM_CALLCONV Physics::GetPosition() const
+SSE_VECTOR SSE_CALLCONV Physics::GetPosition() const
 {
-	return DX3 Load(m_Position);
+	return LoadFloat3(m_Position);
 }
 
 void Physics::SetCollision(BasicCollision* collision)
@@ -22,13 +22,13 @@ BasicCollision * Physics::GetCollision() const
 void Physics::HandleCollision(size_t MyID, Physics* OtherPhysics, size_t OtherID)
 {
 
-	DX XMVECTOR Min, Max, OtherMin, OtherMax;
+	SSE_VECTOR Min, Max, OtherMin, OtherMax;
 	Collision::GetExtents(&Min, &Max, GetPosition(), m_Box);
 	Collision::GetExtents(&OtherMin, &OtherMax, OtherPhysics->GetPosition(), OtherPhysics->m_Box);
 
 	if (Collision::HandleCollision(Min, Max, OtherMin, OtherMax))
 	{
-		DX XMVECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
+		 SSE_VECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
 		if (m_Collision)
 			m_Collision->OnCollision(MyID, this, OtherID, 
 				OtherPhysics, Normal);
@@ -55,57 +55,57 @@ float Physics::GetMass() const
 }
 
 
-void XM_CALLCONV Physics::ApplyForce(DX FXMVECTOR Force)
+void SSE_CALLCONV Physics::ApplyForce( SSE_VECTOR_PARAM1 Force)
 {
-	DX XMVECTOR AddedAccel = DX Scale(Force, 1.f / m_Mass);
-	m_Acceleration = DX3 Store(DX Add(DX3 Load(m_Acceleration), AddedAccel));
+	 SSE_VECTOR AddedAccel =  Scale(Force, 1.f / m_Mass);
+	m_Acceleration = StoreFloat3( Add(LoadFloat3(m_Acceleration), AddedAccel));
 }
 
 void Physics::SetPosition(float x, float y, float z)
 {
-	m_Position = DX XMFLOAT3(x, y, z);
+	m_Position =  FLOAT3(x, y, z);
 	m_PrevPos = m_Position;
 }
 
-void XM_CALLCONV Physics::SetPosition(DX FXMVECTOR v)
+void SSE_CALLCONV Physics::SetPosition( SSE_VECTOR_PARAM1 v)
 {
-	m_Position = DX3 Store(v);
-	m_PrevPos = DX3 Store(v);
+	m_Position = StoreFloat3(v);
+	m_PrevPos = StoreFloat3(v);
 }
 
-DX XMVECTOR XM_CALLCONV Physics::GetPrevPosition() const
+ SSE_VECTOR SSE_CALLCONV Physics::GetPrevPosition() const
 {
-	return DX3 Load(m_PrevPos);
+	return LoadFloat3(m_PrevPos);
 }
 
-void XM_CALLCONV Physics::SetForce(DX FXMVECTOR Force)
+void SSE_CALLCONV Physics::SetForce( SSE_VECTOR_PARAM1 Force)
 {
-	m_Acceleration = DX3 Store(DX Scale(Force, 1.f / m_Mass));
+	m_Acceleration = StoreFloat3( Scale(Force, 1.f / m_Mass));
 }
 
-DX XMVECTOR Physics::GetForce() const
+ SSE_VECTOR Physics::GetForce() const
 {
-	return DX Scale(DX3 Load(m_Acceleration), m_Mass);
+	return  Scale(LoadFloat3(m_Acceleration), m_Mass);
 }
 
-DX XMVECTOR XM_CALLCONV Physics::GetDeltaPosition() const
+ SSE_VECTOR SSE_CALLCONV Physics::GetDeltaPosition() const
 {
-	return DX3 Load(m_DeltaPos);
+	return LoadFloat3(m_DeltaPos);
 }
 
-void XM_CALLCONV Physics::SetDeltaPosition(DX FXMVECTOR v)
+void SSE_CALLCONV Physics::SetDeltaPosition( SSE_VECTOR_PARAM1 v)
 {
-	m_DeltaPos = DX3 Store(v);
+	m_DeltaPos = StoreFloat3(v);
 }
 
-void XM_CALLCONV Physics::SetVelocity(DX FXMVECTOR v)
+void SSE_CALLCONV Physics::SetVelocity( SSE_VECTOR_PARAM1 v)
 {
-	m_Velocity = DX3 Store(v);
+	m_Velocity = StoreFloat3(v);
 }
 
-DX XMVECTOR XM_CALLCONV Physics::GetVelocity() const
+ SSE_VECTOR SSE_CALLCONV Physics::GetVelocity() const
 {
-	return DX3 Load(m_Velocity);
+	return LoadFloat3(m_Velocity);
 }
 
 void Physics::SetFriction(float Coeff)
@@ -133,49 +133,49 @@ void Physics::Update()
 	/* Interpolation */
 	m_PrevPos = m_Position;
 
-	DX XMVECTOR Position = DX3 Load(m_Position);
-	DX XMVECTOR Velocity = DX3 Load(m_Velocity);
-	DX XMVECTOR Acceleration = DX3 Load(m_Acceleration);
+	 SSE_VECTOR Position = LoadFloat3(m_Position);
+	 SSE_VECTOR Velocity = LoadFloat3(m_Velocity);
+	 SSE_VECTOR Acceleration = LoadFloat3(m_Acceleration);
 
 
 	/* --- Gravity -----------------------------------------------------------------------------*/
-	Acceleration = DX Add(Acceleration, { 0.f, 0.f, m_Gravity });
+	Acceleration =  Add(Acceleration, { 0.f, 0.f, m_Gravity });
 	/* -----------------------------------------------------------------------------------------*/
 
 	/* --- Friction ----------------------------------------------------------------------------*/
 	float FrictionAccel = m_Friction * m_Gravity;
 	float FrictionSpeed = FrictionAccel * UPDATE_TIME;
 
-	DX XMVECTOR FrictionVelocity = DX Scale(DX3 Normalize(Velocity), FrictionSpeed);
-	DX XMVECTOR PreviousVelocity = Velocity;
+	 SSE_VECTOR FrictionVelocity =  Scale(Normalize3(Velocity), FrictionSpeed);
+	 SSE_VECTOR PreviousVelocity = Velocity;
 
-	Velocity = DX Add(Velocity, FrictionVelocity);
+	Velocity =  Add(Velocity, FrictionVelocity);
 
-	DX XMVECTOR FrictionError = DX GreaterOrEqual
+	 SSE_VECTOR FrictionError =  GreaterOrEqual
 	(
-		DX Multiply(Velocity, PreviousVelocity),
-		DX XMVectorZero()
+		 Multiply(Velocity, PreviousVelocity),
+		 VectorZero()
 	);
 	
-	Velocity = DX Multiply(Velocity, DX Evaluate(FrictionError));
+	Velocity =  Multiply(Velocity,  Evaluate(FrictionError));
 	/* -----------------------------------------------------------------------------------------*/
 
-	Velocity = DX Add(Velocity, DX Scale(Acceleration, UPDATE_TIME));
-	Position = DX Add(Position, DX Scale(Velocity, UPDATE_TIME));
+	Velocity =  Add(Velocity,  Scale(Acceleration, UPDATE_TIME));
+	Position =  Add(Position,  Scale(Velocity, UPDATE_TIME));
 
 	/* --- Reset & Store For Next Physics Cycle -----------------------------------------------*/
-	Acceleration = DX XMVectorZero();
+	Acceleration = VectorZero();
 	//m_Friction = 0.f;
 
-	if (DX GetZ(Position) < 0.f)
+	if ( GetZ(Position) < 0.f)
 	{
-		DX SetZ(&Position, 0.f);
-		DX SetZ(&Velocity, 0.f);
+		 SetZ(&Position, 0.f);
+		 SetZ(&Velocity, 0.f);
 	}
 
-	m_Acceleration =  DX3 Store(Acceleration);
-	m_Velocity		= DX3 Store(Velocity);
-	m_Position		= DX3 Store(Position);
+	m_Acceleration =  StoreFloat3(Acceleration);
+	m_Velocity		= StoreFloat3(Velocity);
+	m_Position		= StoreFloat3(Position);
 	/* -----------------------------------------------------------------------------------------*/
 
 	

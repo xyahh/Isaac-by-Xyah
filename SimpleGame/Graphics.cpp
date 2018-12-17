@@ -3,17 +3,26 @@
 #include "CyanEngine.h"
 
 #ifdef CYAN_DEBUG_COLLISION
-void DrawBoundingBoxes(const Renderer& RenderDevice,  DX FXMVECTOR Position, DX FXMVECTOR Size)
+void DrawBoundingBoxes(const Renderer& RenderDevice,   SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_PARAM1 Size)
 {
-	DX XMVECTOR BBoxCenter = Collision::GetBBoxCenter(Position, DX GetZ(Size));
+	 SSE_VECTOR BBoxCenter = Collision::GetBBoxCenter(Position,  GetZ(Size));
 	RenderDevice.DrawCollisionRect(BBoxCenter, Size);
 }	 
 #endif
 
+Graphics::Graphics() :
+	m_LayerGroup(LayerGroup::Middleground),
+	m_Color(1.f, 1.f, 1.f, 1.f)
+{}
 
-void Graphics::SetColor(DX XMVECTOR Color)
+void Graphics::SetLayerGroup(u_int Layer)
 {
-	m_Color = DX4 Store(Color);
+	m_LayerGroup = Layer;
+}
+
+void Graphics::SetColor( SSE_VECTOR Color)
+{
+	m_Color = StoreFloat4(Color);
 }
 
 void Graphics::SetAlpha(float Value)
@@ -21,9 +30,9 @@ void Graphics::SetAlpha(float Value)
 	m_Color.w = Value;
 }
 
-DX XMVECTOR XM_CALLCONV Graphics::GetColor() const
+ SSE_VECTOR SSE_CALLCONV Graphics::GetColor() const
 {
-	return DX4 Load(m_Color);
+	return LoadFloat4(m_Color);
 }
 
 void Graphics::Render (
@@ -32,27 +41,27 @@ void Graphics::Render (
 	const STD vector<Sprite>& ObjectSprite, 
 	float Interpolation)
 {
-	DX XMVECTOR Color = DX4 Load(m_Color);
-	DX XMVECTOR Position = DX Add
+	 SSE_VECTOR Position =  Add
 	(
-		DX Scale(ObjectPhysics.GetPosition(), Interpolation),
-		DX Scale(ObjectPhysics.GetPrevPosition(), 1.f - Interpolation)
+		 Scale(ObjectPhysics.GetPosition(), Interpolation),
+		 Scale(ObjectPhysics.GetPrevPosition(), 1.f - Interpolation)
 	);
 
 	for (auto& Sprite : ObjectSprite)
 	{
-		DX XMVECTOR SpriteSize = Sprite.GetSize();
-		DX XMVECTOR SpriteOffset = Sprite.GetOffset();
+		 SSE_VECTOR SpriteSize = Sprite.GetSize();
+		 SSE_VECTOR SpriteOffset = Sprite.GetOffset();
 
-		RenderDevice.DrawShadow(Position, SpriteSize, Color);
+		RenderDevice.DrawShadow(Position, SpriteSize, m_Color.w);
 		RenderDevice.DrawSprite
 		(
-			DX Add(Position, SpriteOffset)
+			 Add(Position, SpriteOffset)
 			, SpriteSize
-			, Color
+			, m_Color
 			, Engine.GetTexture(Sprite.GetTexture())
-			, Sprite.GetCurrent()
-			, Sprite.GetTotal()
+			, Sprite.Current
+			, Sprite.Total
+			, m_LayerGroup
 		);
 	}
 

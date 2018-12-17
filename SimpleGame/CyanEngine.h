@@ -70,13 +70,13 @@ public:
 	template<class T, class... Args>
 	void AddStatePrototype(size_t* Out, Args&&... Ax)
 	{
-		Add<T>(m_StatePrototypes, Out, Ax...);
+		AddComponent<T>(m_StatePrototypes, Out, Ax...);
 	}
 
 	template<class T, class... Args>
 	void AddCommand(size_t* Out, Args&&... Ax)
 	{
-		Add<T>(m_Commands, Out, Ax...);
+		AddComponent<T>(m_Commands, Out, Ax...);
 	}
 
 	void AddTexture(size_t * Out, const STD string& ImagePath);
@@ -111,7 +111,7 @@ private:
 	void ReleaseComponentData();
 
 	template<class T, class V, class... Args>
-	void Add(STD vector<V>& v, size_t* Out, Args&&... Ax)
+	void AddComponent(STD vector<V>& v, size_t* Out, Args&&... Ax)
 	{
 		v.emplace_back(new T(STD forward<Args>(Ax)...));
 		*Out = Last(v);
