@@ -1,21 +1,20 @@
 #include "stdafx.h"
 #include "Gameplay.h"
 
-void Gameplay::AddActor(size_t * ID, size_t Team,  SSE_VECTOR Position, size_t HeadTex, size_t BodyTex)
+void Gameplay::AddActor(size_t * ID, size_t Team,  SSE_VECTOR Position, size_t HeadTex, size_t BodyTex, BasicCollision* pCollision)
 {
 	Engine.AddObject(ID);
 
 	auto& ActorDescriptor = Engine.GetDescriptor(*ID);
 	auto& ActorPhysics = Engine.GetPhysics(*ID);
-	auto& ActorGraphics = Engine.GetGraphics(*ID);
 
 	ActorDescriptor.Type = ObjectType::Actor;
 	ActorDescriptor.Value = 100.f; // 100 HP
 	ActorDescriptor.Team = Team;
 
-	ActorPhysics.SetCollision(&Collision::Actor);
+	ActorPhysics.SetCollision(pCollision);
 	ActorPhysics.Box().SetDimensions({ 0.5f, 0.5f, 1.5f });
-	ActorPhysics.SetPosition({ 4.f, 4.f, 0.f });
+	ActorPhysics.SetPosition(Position);
 
 	Engine.AddSprite(&OBJ::SPRITE::BODY, *ID);
 	Engine.AddSprite(&OBJ::SPRITE::HEAD, *ID);
@@ -28,13 +27,13 @@ void Gameplay::AddActor(size_t * ID, size_t Team,  SSE_VECTOR Position, size_t H
 	float HeadSize = 1.25f;
 	float BodySize = 0.75f;
 
-	Body.SetTexture(TEX::BASIC_BODY);
+	Body.SetTexture(BodyTex);
 	Body.SetSize({ BodySize, BodySize });
 	Body.SetOffset({ 0.f, 0.f, BodySize * 0.5f - 0.1f });
 	Body.SetTotal({ 10, 4 });
 	Body.SetDirection(Direction::Down);
 
-	Head.SetTexture(TEX::ISAAC_HEAD);
+	Head.SetTexture(HeadTex);
 	Head.SetSize({ HeadSize, HeadSize });
 	Head.SetTotal({ 2, 4 });
 	Head.SetDirection(Direction::Down);
@@ -44,13 +43,17 @@ void Gameplay::AddActor(size_t * ID, size_t Team,  SSE_VECTOR Position, size_t H
 void Gameplay::Enter()
 {
 	size_t SOUND_TEST;
-
+	
+	size_t ZOMBIE_HEAD, ZOMBIE_BODY;
 	Engine.AddTexture(&TEX::BASIC_BODY, "./Resources/Characters/basic_body.png");
-	Engine.AddTexture(&TEX::ISAAC_HEAD, "./Resources/Characters/cain_head.png");
+	Engine.AddTexture(&TEX::ISAAC_HEAD, "./Resources/Characters/isaac_head.png");
+
+	Engine.AddTexture(&ZOMBIE_BODY, "./Resources/Characters/zombie_body.png");
+	Engine.AddTexture(&ZOMBIE_HEAD, "./Resources/Characters/zombie_head.png");
+
 	Engine.AddTexture(&TEX::DEPTHS, "./Resources/Levels/Depths.png");
 	Engine.AddTexture(&TEX::EXPLOSION, "./Resources/explosion.png");
 	Engine.AddTexture(&TEX::TEAR, "./Resources/tear.png");
-
 	Engine.AddSound(&SOUND_TEST, "./Resources/Sounds/Main.mp3", TRUE);
 
 	//Map
@@ -62,11 +65,14 @@ void Gameplay::Enter()
 		Sprite& Map = Engine.GetSprite(DEPTHS, MAP);
 		Map.SetSize({ 20.f, 20.f });
 		Map.SetTexture(TEX::DEPTHS);
-		Engine.GetGraphics(DEPTHS).SetLayerGroup(LayerGroup::Background);
+		Map.SetLayerGroup(LayerGroup::Background);
 	}
 
+	size_t TEST_MONSTER;
+
 	//Engine.GetSound(SOUND_TEST).Play();
-	AddActor(&OBJ::PLAYER, OBJ::PLAYER, { 0.f, 0.f, 0.f }, TEX::ISAAC_HEAD, TEX::BASIC_BODY);
+	AddActor(&OBJ::PLAYER, 0, { 0.f, 0.f, 0.f }, TEX::ISAAC_HEAD, TEX::BASIC_BODY, &Collision::Actor);
+	AddActor(&TEST_MONSTER, 1, { 0.f, 3.f, 0.f }, ZOMBIE_HEAD, ZOMBIE_BODY, &Collision::Monster);
 
 
 	//Actor States
@@ -83,7 +89,7 @@ void Gameplay::Enter()
 
 	//Commands
 	{
-		float Move = 1'500.f;
+		float Move = 1'500;
 		Engine.AddCommand<ForceCommand>(&CMD::MOVE_UP, 0.f, Move, 0.f);
 		Engine.AddCommand<ForceCommand>(&CMD::MOVE_DOWN, 0.f, -Move, 0.f);
 		Engine.AddCommand<ForceCommand>(&CMD::MOVE_LEFT, -Move, 0.f, 0.f);
@@ -202,20 +208,21 @@ void Gameplay::Enter()
 		ShootInput.MapControl(VK_DOWN,	CMD::END_SHOOT);
 		
 		Engine.ChangeState(OBJ::PLAYER, ST::IDLE);
+		Engine.ChangeState(TEST_MONSTER, ST::IDLE);
 	}
 
 	//Boundaries
 	{
 
-		float Min = 12.f;
+		float Min = 15.f;
 		float Max = 30.f;
 		{
 			size_t Boundary;
 			Engine.AddObject(&Boundary);
 			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
 			Physics& BPhysics = Engine.GetPhysics(Boundary);
-			BPhysics.Box().SetDimensions({ Min, Max + Min, 10.f });
-			BPhysics.SetPosition({ 16.f, 0.f, 0.f });
+			BPhysics.Box().SetDimensions({ Min, Max + Min, Max });
+			BPhysics.SetPosition({ 16.5f, 0.f, 0.f });
 			BPhysics.SetCollision(&Collision::Structure);
 		}
 
@@ -224,8 +231,8 @@ void Gameplay::Enter()
 			Engine.AddObject(&Boundary);
 			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
 			Physics& BPhysics = Engine.GetPhysics(Boundary);
-			BPhysics.Box().SetDimensions({ Min, Max + Min, 10.f });
-			BPhysics.SetPosition({ -16.f, 0.f, 0.f });
+			BPhysics.Box().SetDimensions({ Min, Max + Min, Max });
+			BPhysics.SetPosition({ -16.5f, 0.f, 0.f });
 			BPhysics.SetCollision(&Collision::Structure);
 		}
 
@@ -234,7 +241,7 @@ void Gameplay::Enter()
 			Engine.AddObject(&Boundary);
 			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
 			Physics& BPhysics = Engine.GetPhysics(Boundary);
-			BPhysics.Box().SetDimensions({ Max, Min, 10.f });
+			BPhysics.Box().SetDimensions({ Max, Min, Max });
 			BPhysics.SetPosition({ 0.f, 16.f, 0.f });
 			BPhysics.SetCollision(&Collision::Structure);
 		}

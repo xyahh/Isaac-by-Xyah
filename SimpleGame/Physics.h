@@ -30,11 +30,11 @@ public:
 	SSE_VECTOR SSE_CALLCONV GetPosition() const;
 	SSE_VECTOR SSE_CALLCONV GetPrevPosition() const;
 
-	 SSE_VECTOR SSE_CALLCONV GetDeltaPosition() const;
+	SSE_VECTOR SSE_CALLCONV GetDeltaPosition() const;
 	void SSE_CALLCONV SetDeltaPosition(SSE_VECTOR_PARAM1 v);
 
 	void SSE_CALLCONV SetVelocity(SSE_VECTOR_PARAM1 v);
-	 SSE_VECTOR SSE_CALLCONV GetVelocity() const;
+	SSE_VECTOR SSE_CALLCONV GetVelocity() const;
 
 	void SetMass(float mass);
 	float GetMass() const;

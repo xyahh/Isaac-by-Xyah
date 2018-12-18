@@ -3,7 +3,6 @@
 #include "Window.h"
 #include "Descriptor.h"
 #include "Renderer.h"
-#include "Graphics.h"
 #include "Physics.h"
 #include "Command.h"
 #include "State.h"
@@ -37,6 +36,8 @@ public:
 			return obj->second;
 		assert("Hello" && false);
 	}
+
+	void ResetClock();
 
 	/*---------Action Queue-----------------------------*/
 
@@ -91,17 +92,16 @@ public:
 	Window& GetFramework();
 	Renderer& GetRenderer();
 
-	Descriptor& GetDescriptor(size_t Index);
-	Graphics& GetGraphics(size_t Index);
-	Physics& GetPhysics(size_t Index);
-	State*& GetCurrentState(size_t Index);
+	Descriptor& GetDescriptor(size_t ObjectIndex);
+	Physics& GetPhysics(size_t ObjectIndex);
+	State*& GetCurrentState(size_t ObjectIndex);
 	Controller& GetController(size_t ObjectIndex, size_t StateIndex);
 
-	Sprite& GetSprite(size_t Index, size_t SpriteNumber);
+	Sprite& GetSprite(size_t ObjectIndex, size_t SpriteNumber);
 
-	Command*& GetCommand(size_t Index);
-	u_int GetTexture(size_t Index);
-	Sound& GetSound(size_t Index);	
+	Command*& GetCommand(size_t ObjectIndex);
+	u_int GetTexture(size_t ObjectIndex);
+	Sound& GetSound(size_t ObjectIndex);
 	/*---------Components Deletion----------------------*/
 
 	void DeleteComponents();
@@ -149,7 +149,6 @@ private:
 	STD map<size_t, size_t>		m_ObjectLocator;
 
 	STD vector<Descriptor>		m_Descriptors;
-	STD vector<Graphics>		m_Graphics;
 	STD vector<Physics>			m_Physics;
 	STD vector<Input>			m_Input;
 	STD vector<ObjSprite>		m_Sprites;

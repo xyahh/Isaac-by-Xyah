@@ -1,5 +1,19 @@
 #include "stdafx.h"
 #include "Sprite.h"
+#include "CyanEngine.h"
+
+Sprite::Sprite() :
+	Type(SpriteType::Linear),
+	FrameRate(0),
+	CurrentFrame(0.f),
+	Current(0, 0),
+	Total(1, 1),
+	Size(1.f, 1.f),
+	Offset(0.f, 0.f, 0.f),
+	TexIndex(0),
+	Color(1.f, 1.f, 1.f, 1.f),
+	Layer(LayerGroup::Middleground)
+{}
 
 void Sprite::SetTexture(size_t TexIdx)
 {
@@ -96,22 +110,60 @@ u_int Sprite::GetDirection() const
 	return Current.y;
 }
 
- SSE_VECTOR SSE_CALLCONV Sprite::GetSize() const
+SSE_VECTOR SSE_CALLCONV Sprite::GetSize() const
 {
 	return LoadFloat2(Size);
 }
 
- SSE_VECTOR SSE_CALLCONV Sprite::GetCurrent() const
+SSE_VECTOR SSE_CALLCONV Sprite::GetCurrent() const
 {
 	return LoadUint2(Current);
 }
 
- SSE_VECTOR SSE_CALLCONV Sprite::GetTotal() const
+SSE_VECTOR SSE_CALLCONV Sprite::GetTotal() const
 {
 	return LoadUint2(Total);
 }
 
- SSE_VECTOR SSE_CALLCONV Sprite::GetOffset() const
+SSE_VECTOR SSE_CALLCONV Sprite::GetOffset() const
 {
 	return LoadFloat3(Offset);
+}
+
+void Sprite::SetLayerGroup(u_int _Layer)
+{	 
+	Layer = _Layer;
+}
+
+void Sprite::SetColor(SSE_VECTOR _Color)
+{	 
+	Color = StoreFloat4(_Color);
+}
+
+void Sprite::SetAlpha(float Value)
+{	 
+	Color.w = Value;
+}
+
+SSE_VECTOR SSE_CALLCONV Sprite::GetColor() const
+{	 
+	return LoadFloat4(Color);
+}
+
+void Sprite::Render(const Renderer & RenderDevice, SSE_VECTOR_PARAM1 Position)
+{
+	SSE_VECTOR SpriteSize = GetSize();
+	SSE_VECTOR SpriteOffset = GetOffset();
+
+	RenderDevice.DrawShadow(Position, SpriteSize, Color.w);
+	RenderDevice.DrawSprite
+	(
+		Add(Position, SpriteOffset)
+		, SpriteSize
+		, Color
+		, Engine.GetTexture(TexIndex)
+		, Current
+		, Total
+		, Layer
+	);
 }

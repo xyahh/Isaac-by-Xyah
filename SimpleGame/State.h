@@ -298,15 +298,13 @@ private:
 	virtual void Exit(size_t ObjectIndex);
 
 	virtual size_t Name() const { return ST::DAMAGED; }
-
 	virtual State* Make() { return Assemble(new DamagedState(Duration, BlinkingRate)); }
 
 
-	u_int Type;
 	float Duration;
 	float BlinkingRate;
 	float BlinkingTimer;
 	float DurationTimer;
-	 FLOAT4 Color;
+	FLOAT4 Color;
 	int Alpha;
 };

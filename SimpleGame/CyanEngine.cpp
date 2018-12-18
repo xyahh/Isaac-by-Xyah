@@ -3,6 +3,11 @@
 
 Cyan Engine;
 
+void Cyan::ResetClock()
+{
+	m_Timer.Reset();
+}
+
 bool Cyan::Init(const STD string& Title, int X, int Y,bool Dev)
 {
 	m_Window.Initialize(Title, X, Y, Dev);
@@ -130,15 +135,22 @@ void Cyan::Update()
 
 void Cyan::Render(float fInterpolation)
 {
-	for (size_t i = 0; i < m_Graphics.size(); ++i)
-		m_Graphics[i].Render(m_Renderer, m_Physics[i], m_Sprites[i], fInterpolation);
+	for (size_t i = 0; i < m_Sprites.size(); ++i)
+	{
+		SSE_VECTOR Position = Add
+		(
+			Scale(m_Physics[i].GetPosition(), fInterpolation),
+			Scale(m_Physics[i].GetPrevPosition(), 1.f - fInterpolation)
+		);
+		for (auto& S : m_Sprites[i])
+			S.Render(m_Renderer, Position);
+	}
 }
 
 void Cyan::AddObject(size_t * Out)
 {
 	m_Descriptors.emplace_back();
 	m_Controllers.emplace_back();
-	m_Graphics.emplace_back();
 	m_Physics.emplace_back();
 	m_Sprites.emplace_back();
 	m_States.emplace_back();
@@ -169,7 +181,6 @@ void Cyan::DeleteObject(size_t ObjectIndex)
 		auto Found = m_ObjectLocator.find(ObjectIndex);
 
 		EraseByIndex(m_Descriptors, Found->second);
-		EraseByIndex(m_Graphics, Found->second);
 		EraseByIndex(m_Physics, Found->second);
 		EraseByIndex(m_Input, Found->second);
 		EraseByIndex(m_Sprites, Found->second);
@@ -228,11 +239,6 @@ Descriptor & Cyan::GetDescriptor(size_t ObjectIndex)
 	return m_Descriptors[GetIndex(ObjectIndex)];
 }
 
-Graphics& Cyan::GetGraphics(size_t ObjectIndex)
-{
-	return m_Graphics[GetIndex(ObjectIndex)];
-}
-
 Physics & Cyan::GetPhysics(size_t ObjectIndex)
 {
 	return m_Physics[GetIndex(ObjectIndex)];
@@ -277,7 +283,6 @@ void Cyan::DeleteComponents()
 
 	/* Clear Data */
 	m_Descriptors.clear();
-	m_Graphics.clear();
 	m_Physics.clear();
 	m_Input.clear();
 

@@ -14,21 +14,10 @@ enum SpriteEvent
 class Sprite : public EventDispatcher
 {
 	friend Cyan;
-	friend Graphics;
 
 public:
 
-	Sprite() :
-		Type(SpriteType::Linear),
-		FrameRate(0),
-		CurrentFrame(0.f),
-		Current(0, 0),
-		Total(1, 1),
-		Size(1.f, 1.f),
-		Offset(0.f, 0.f, 0.f),
-		TexIndex(0)
-	{}
-
+	Sprite();
 	~Sprite() {}
 
 	void SetTexture(size_t TexIdx);
@@ -53,12 +42,20 @@ public:
 	size_t GetTexture() const;
 	u_int GetDirection() const;
 
-	 SSE_VECTOR SSE_CALLCONV GetSize() const;
-	 SSE_VECTOR SSE_CALLCONV GetCurrent() const;
-	 SSE_VECTOR SSE_CALLCONV GetTotal() const;
-	 SSE_VECTOR SSE_CALLCONV GetOffset() const;
+	SSE_VECTOR SSE_CALLCONV GetSize() const;
+	SSE_VECTOR SSE_CALLCONV GetCurrent() const;
+	SSE_VECTOR SSE_CALLCONV GetTotal() const;
+	SSE_VECTOR SSE_CALLCONV GetOffset() const;
+
+	void SetLayerGroup(u_int Layer);
+	void SetColor(SSE_VECTOR Color);
+	void SetAlpha(float Value);
+	SSE_VECTOR SSE_CALLCONV GetColor() const;
+
+	void Render(const Renderer& RenderDevice, SSE_VECTOR_PARAM1 Position);
 
 private:
+
 	u_int	Type;
 	size_t	TexIndex;
 	float	FrameRate;
@@ -67,4 +64,6 @@ private:
 	UINT2	Total; //How many Columns/Rows in SpriteSheet
 	FLOAT2	Size;
 	FLOAT3	Offset;
+	FLOAT4  Color;
+	u_int	Layer;
 };

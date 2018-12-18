@@ -64,7 +64,6 @@ class Cyan;
 class Timer;
 
 /* Components */
-class Graphics;
 class Physics;
 class Input;
 class Sprite;

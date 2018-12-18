@@ -28,7 +28,7 @@ void Physics::HandleCollision(size_t MyID, Physics* OtherPhysics, size_t OtherID
 
 	if (Collision::HandleCollision(Min, Max, OtherMin, OtherMax))
 	{
-		 SSE_VECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
+		SSE_VECTOR Normal = Collision::GetNormal(Min, Max, OtherMin, OtherMax);
 		if (m_Collision)
 			m_Collision->OnCollision(MyID, this, OtherID, 
 				OtherPhysics, Normal);
@@ -133,10 +133,9 @@ void Physics::Update()
 	/* Interpolation */
 	m_PrevPos = m_Position;
 
-	 SSE_VECTOR Position = LoadFloat3(m_Position);
-	 SSE_VECTOR Velocity = LoadFloat3(m_Velocity);
-	 SSE_VECTOR Acceleration = LoadFloat3(m_Acceleration);
-
+	SSE_VECTOR Position = LoadFloat3(m_Position);
+	SSE_VECTOR Velocity = LoadFloat3(m_Velocity);
+	SSE_VECTOR Acceleration = LoadFloat3(m_Acceleration);
 
 	/* --- Gravity -----------------------------------------------------------------------------*/
 	Acceleration =  Add(Acceleration, { 0.f, 0.f, m_Gravity });
@@ -146,12 +145,12 @@ void Physics::Update()
 	float FrictionAccel = m_Friction * m_Gravity;
 	float FrictionSpeed = FrictionAccel * UPDATE_TIME;
 
-	 SSE_VECTOR FrictionVelocity =  Scale(Normalize3(Velocity), FrictionSpeed);
-	 SSE_VECTOR PreviousVelocity = Velocity;
+	SSE_VECTOR FrictionVelocity =  Scale(Normalize3(Velocity), FrictionSpeed);
+	SSE_VECTOR PreviousVelocity = Velocity;
 
 	Velocity =  Add(Velocity, FrictionVelocity);
 
-	 SSE_VECTOR FrictionError =  GreaterOrEqual
+	SSE_VECTOR FrictionError =  GreaterOrEqual
 	(
 		 Multiply(Velocity, PreviousVelocity),
 		 VectorZero()
@@ -163,6 +162,7 @@ void Physics::Update()
 	Velocity =  Add(Velocity,  Scale(Acceleration, UPDATE_TIME));
 	Position =  Add(Position,  Scale(Velocity, UPDATE_TIME));
 
+
 	/* --- Reset & Store For Next Physics Cycle -----------------------------------------------*/
 	Acceleration = VectorZero();
 	//m_Friction = 0.f;
@@ -172,11 +172,8 @@ void Physics::Update()
 		 SetZ(&Position, 0.f);
 		 SetZ(&Velocity, 0.f);
 	}
-
 	m_Acceleration =  StoreFloat3(Acceleration);
 	m_Velocity		= StoreFloat3(Velocity);
 	m_Position		= StoreFloat3(Position);
 	/* -----------------------------------------------------------------------------------------*/
-
-	
 }

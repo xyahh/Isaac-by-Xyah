@@ -20,11 +20,11 @@ public:
 private:
 };
 
-class ActorCollision : public BasicCollision
+class PlayerCollision : public BasicCollision
 {
 public:
-	ActorCollision() {}
-	virtual ~ActorCollision() {}
+	PlayerCollision() {}
+	virtual ~PlayerCollision() {}
 
 	virtual void SSE_CALLCONV OnCollision
 	(
@@ -35,6 +35,23 @@ public:
 		SSE_VECTOR_PARAM1 CollisionNormal
 	);
 };
+
+class MonsterCollision : public BasicCollision
+{
+public:
+	MonsterCollision() {}
+	virtual ~MonsterCollision() {}
+
+	virtual void SSE_CALLCONV OnCollision
+	(
+		size_t MyID,
+		Physics* MyBody,
+		size_t CollidingID,
+		Physics* CollidingBody,
+		SSE_VECTOR_PARAM1 CollisionNormal
+	);
+};
+
 
 class ProjectileCollision : public BasicCollision
 {
@@ -90,10 +107,11 @@ private:
 NS_COLLISION_START
 
 static BasicCollision		Basic;
-static ActorCollision		Actor;
+static PlayerCollision		Actor;
 static ProjectileCollision	Projectile;
 static StructureCollision	Structure;
 static ExplosionCollision	Explosion;
+static MonsterCollision		Monster;
 
 class BBox
 	{

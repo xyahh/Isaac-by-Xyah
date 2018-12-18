@@ -162,7 +162,6 @@
     <ClInclude Include="Window.h" />
     <ClInclude Include="CyanEngine.h" />
     <ClInclude Include="Gamepad.h" />
-    <ClInclude Include="Graphics.h" />
     <ClInclude Include="Indices.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Math.h" />
@@ -191,7 +190,6 @@
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="CyanEngine.cpp" />
     <ClCompile Include="Gamepad.cpp" />
-    <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Indices.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Physics.cpp" />

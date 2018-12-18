@@ -81,7 +81,7 @@ void ChargeJumpState::Update(size_t ObjectIndex)
 	RageAmount += UPDATE_TIME * RageRate;
 
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
-	 SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
 	if (!Zero(Magnitude2(Velocity)))
 		BodySprite.SetFrameRate(10.f);
 	else
@@ -89,14 +89,17 @@ void ChargeJumpState::Update(size_t ObjectIndex)
 		BodySprite.SetFrameRate(0.f);
 		BodySprite.ResetSprite();
 	}
-	Engine.GetGraphics(ObjectIndex).SetColor({ 1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f });
+	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).SetColor({ 1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f });
 	Clamp(0.f, &RageAmount, 1.f);
 }
 
 void ChargeJumpState::Exit(size_t ObjectIndex)
 {
-	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).ResetSprite();
-	Engine.GetGraphics(ObjectIndex).SetColor({ 1.f, 1.f, 1.f, 1.f });
+	Sprite& Head = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD);
+
+	Head.ResetSprite();
+	Head.SetColor({ 1.f, 1.f, 1.f, 1.f });
+
 	float Amount = Force * (1.f + RageAmount);
 	Engine.GetPhysics(ObjectIndex).ApplyForce({ 0.f, 0.f,  Amount});
 }
@@ -148,7 +151,7 @@ void ChargeSlamState::Enter(size_t ObjectIndex)
 void ChargeSlamState::Update(size_t ObjectIndex)
 {
 	RageAmount += UPDATE_TIME * RageRate;
-	Engine.GetGraphics(ObjectIndex).SetColor({ 1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f });
+	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).SetColor({ 1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f });
 	if (RageAmount >= 1.f)
 		Engine.ChangeState(ObjectIndex, ST::SLAM);
 }
@@ -185,11 +188,10 @@ void SlamState::Exit(size_t ObjectIndex)
 	EffectDesc.Value = (50.f);
 	EffectDesc.Team = (Engine.GetDescriptor(ObjectIndex).Team);
 
-	Engine.GetGraphics(Effect).SetLayerGroup(LayerGroup::Background);
-
 	size_t EffSpIdx;
 	Engine.AddSprite(&EffSpIdx, Effect);
 	Sprite& EffectSprite = Engine.GetSprite(Effect, EffSpIdx);
+	EffectSprite.SetLayerGroup(LayerGroup::Background);
 	EffectSprite.SetSpriteType(SpriteType::Grid);
 	EffectSprite.SetTexture(TEX::EXPLOSION);
 	EffectSprite.SetSize({ 5.f, 5.f });
@@ -204,7 +206,8 @@ void SlamState::Exit(size_t ObjectIndex)
 	EffectPhysics.Box().SetDimensions({ 3.f, 3.f, 0.5f });
 	EffectPhysics.SetCollision(&Collision::Explosion);
 	EffectPhysics.SetPosition(Engine.GetPhysics(ObjectIndex).GetPosition());
-	Engine.GetGraphics(ObjectIndex).SetColor({ 1.f, 1.f, 1.f, 1.f });
+
+	Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).SetColor({ 1.f, 1.f, 1.f, 1.f });
 }
 
 /* Shooting State*/
@@ -272,12 +275,9 @@ void ShootState::Exit(size_t ObjectIndex)
 void DamagedState::Enter(size_t ObjectIndex)
 {
 	Descriptor& Desc = Engine.GetDescriptor(ObjectIndex);
-	Type = Desc.Type;
-	Desc.Type = ObjectType::DamagedActor;
-
 	DurationTimer = 0.f;
 	BlinkingTimer = 0.f;
-	Color = StoreFloat4(Engine.GetGraphics(ObjectIndex).GetColor());
+	//Color = StoreFloat4(Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).GetColor());
 	Alpha = 0;
 }
 
@@ -287,7 +287,9 @@ void DamagedState::Update(size_t ObjectIndex)
 	BlinkingTimer += UPDATE_TIME * BlinkingRate;
 
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, OBJ::SPRITE::BODY);
-	 SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+
+	Physics& p = Engine.GetPhysics(ObjectIndex);
+	SSE_VECTOR Velocity = p.GetVelocity();
 	if (!Zero(Magnitude2(Velocity)))
 		BodySprite.SetFrameRate(10.f);
 	else
@@ -296,9 +298,15 @@ void DamagedState::Update(size_t ObjectIndex)
 		BodySprite.ResetSprite();
 	}
 
+	if (!Zero(GetZ(Velocity)))
+		p.SetFriction(0.1f);
+	else
+		p.SetFriction(1.f);
+
 	if (BlinkingTimer >= 1.f)
 	{
-		Engine.GetGraphics(ObjectIndex).SetAlpha(Alpha);
+		Engine.GetSprite(ObjectIndex, OBJ::SPRITE::HEAD).SetAlpha(Alpha);
+		BodySprite.SetAlpha(Alpha);
 		Alpha = (Alpha + 1) % 2;
 		BlinkingTimer = 0.f;
 	}
@@ -312,6 +320,4 @@ void DamagedState::Update(size_t ObjectIndex)
 
 void DamagedState::Exit(size_t ObjectIndex)
 {
-	Engine.GetGraphics(ObjectIndex).SetColor(LoadFloat4(Color));
-	Engine.GetDescriptor(ObjectIndex).Type = static_cast<ObjectType>(Type);
 }

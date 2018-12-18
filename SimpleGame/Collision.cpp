@@ -28,7 +28,7 @@ void SSE_CALLCONV BasicCollision::OnCollision
 }
 
 
-void SSE_CALLCONV ActorCollision::OnCollision
+void SSE_CALLCONV PlayerCollision::OnCollision
 (
 	size_t MyID,
 	Physics* MyBody,
@@ -51,7 +51,7 @@ void SSE_CALLCONV ProjectileCollision::OnCollision
 	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
 	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
 
-	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor)
+	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor && Engine.GetCurrentState(CollidingID)->Name() != ST::DAMAGED)
 	{
 		CollidingDesc.Value -= MyDesc.Value;
 		Engine.ChangeState(CollidingID, ST::DAMAGED);
@@ -87,9 +87,9 @@ void SSE_CALLCONV ExplosionCollision::OnCollision
 	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
 	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
 	
-	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor)
+	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor && Engine.GetCurrentState(CollidingID)->Name() != ST::DAMAGED)
 	{
-		 SSE_VECTOR v =  Subtract(CollidingBody->GetPosition(), MyBody->GetPosition());
+		SSE_VECTOR v =  Subtract(CollidingBody->GetPosition(), MyBody->GetPosition());
 		v = Normalize2(v);
 		v =  Scale(v, 100'000.f);
 		v =  Add(v, { 0.f, 0.f, 1'000.f });
@@ -97,5 +97,20 @@ void SSE_CALLCONV ExplosionCollision::OnCollision
 		Engine.ChangeState(CollidingID, ST::DAMAGED);
 		CollidingDesc.Value -= MyDesc.Value;
 	}
+}
 
+void SSE_CALLCONV MonsterCollision::OnCollision(size_t MyID, Physics * MyBody, size_t CollidingID, Physics * CollidingBody, SSE_VECTOR_PARAM1 CollisionNormal)
+{
+	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
+	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
+	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor && Engine.GetCurrentState(CollidingID)->Name() != ST::DAMAGED)
+	{
+		SSE_VECTOR v = Subtract(CollidingBody->GetPosition(), MyBody->GetPosition());
+		v = Normalize2(v);
+		v = Scale(v, 100'000.f);
+		SetZ(&v, 0.f);
+		CollidingBody->ApplyForce(v);
+		Engine.ChangeState(CollidingID, ST::DAMAGED);
+		CollidingDesc.Value -= 5.f;
+	}
 }

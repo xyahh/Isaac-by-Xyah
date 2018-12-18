@@ -1,4 +1,10 @@
 #pragma once
+
+/* 
+Temp place to store all the IDs 
+Will change in future implementations
+ */
+
 namespace TEX
 {
 	extern size_t BASIC_BODY;

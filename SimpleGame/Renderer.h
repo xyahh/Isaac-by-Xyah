@@ -4,7 +4,7 @@ Copyright 2017 Lee Taek Hee (Korea Polytech University)
 This program is free software: you can redistribute it and/or modify
 it under the terms of the What The Hell License. Do it plz.
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WSTD vectorANTY.
+but WITHOUT ANY WARRANTY.
 */
 
 enum LayerGroup

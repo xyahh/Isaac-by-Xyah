@@ -1,9 +1,5 @@
 #pragma once
-#include "Gamepad.h"
-
-/* Devices */
-#define KEYBOARD	0x01
-#define GAMEPAD		0x02
+//#include "Gamepad.h"
 #define KEY_PRESSED(key) (GetAsyncKeyState(key) & 0x8000)
 
 class Input

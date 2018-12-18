@@ -361,9 +361,9 @@ void SSE_CALLCONV Renderer::DrawSprite( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_
 	glEnableVertexAttribArray(attribPosition);
 	glEnableVertexAttribArray(attribTexture);
 
-	//glBindBuffer(GL_ARRAY_BUFFER, m_VBOTexRect);
-	//glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-	//glVertexAttribPointer(attribTexture, 2, GL_FLOAT, GL_FALSE,  sizeof(float) * 5, (void*)(sizeof(float) * 3));
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTexRect);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTexture, 2, GL_FLOAT, GL_FALSE,  sizeof(float) * 5, (void*)(sizeof(float) * 3));
 
 	glUniform3f(u_Trans, GLPos.x, GLPos.y, GLPos.z);
 	glUniform2f(u_Size, GLSize.x, GLSize.y);

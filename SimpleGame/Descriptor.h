@@ -2,9 +2,8 @@
 
 enum ObjectType
 {
-	None,
+	Default,
 	Actor,
-	DamagedActor,
 	Projectile,
 	Structure
 };
@@ -21,7 +20,7 @@ class Descriptor : public EventDispatcher
 public:
 
 	Descriptor() : 
-		Type(ObjectType::None), 
+		Type(ObjectType::Default), 
 		Value(0.f)
 	{}
 
