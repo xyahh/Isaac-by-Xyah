@@ -4,13 +4,12 @@
 
 void Logo::Enter()
 {
-	size_t LOGO = Engine.AddObject();
+	IDType& LOGO = Engine.AddObject();
 	Engine.AddTexture("Logo", "./Resources/logo_anim.png");
-	
-	IDType& LogoID = Engine.LocateObject(LOGO);
-	Engine.AddSprite(LogoID, "Logo");
 
-	Sprite& LogoSprite = Engine.GetSprite(LogoID, "Logo");
+	Engine.AddSprite(LOGO, "Logo");
+
+	Sprite& LogoSprite = Engine.GetSprite(LOGO, "Logo");
 	LogoSprite.SetTexture("Logo");	
 	LogoSprite.SetSize({ 15.f, 1.5f });
 	LogoSprite.SetTotal({ 11, 22 });

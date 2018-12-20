@@ -159,13 +159,13 @@ void Physics::Update()
 
 	/* --- Reset & Store For Next Physics Cycle -----------------------------------------------*/
 	Acceleration = VectorZero();
-	//m_Friction = 0.f;
 
 	if ( GetZ(Position) < 0.f)
 	{
 		 SetZ(&Position, 0.f);
 		 SetZ(&Velocity, 0.f);
 	}
+
 	m_Acceleration =  StoreFloat3(Acceleration);
 	m_Velocity		= StoreFloat3(Velocity);
 	m_Position		= StoreFloat3(Position);

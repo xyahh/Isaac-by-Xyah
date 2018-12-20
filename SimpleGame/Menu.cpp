@@ -5,12 +5,11 @@
 
 void Menu::Enter()
 {
-	Engine.AddSound("Menu", "./Resources/Sounds/menu.mp3", true);
-	Engine.GetSound("Menu").Play();
+	Engine.GetSound().Add("Menu", "./Resources/Sounds/menu.mp3", true);
+	Engine.GetSound().Play("Menu");
 	Engine.AddTexture("Title", "./Resources/title.png");
 	
-	size_t TITLE = Engine.AddObject();
-	IDType& TitleID = Engine.LocateObject(TITLE);
+	IDType& TitleID = Engine.AddObject();
 
 	Engine.AddSprite(TitleID, "Title");
 	Sprite& TitleSprite = Engine.GetSprite(TitleID, "Title");
@@ -19,13 +18,13 @@ void Menu::Enter()
 	
 	Engine.AddCommand<SceneCommand<Gameplay>>("StartGame");
 	
-	Engine.AddController(TitleID, &STATE::None);
+	Engine.AddController(TitleID, &STATE::Global);
 
-	Controller& TitleInput = Engine.GetController(TitleID, &STATE::None);
+	Controller& TitleInput = Engine.GetController(TitleID, &STATE::Global);
 
 	TitleInput.MapControl(VK_RETURN, "StartGame");
 
-	Engine.ChangeState(TitleID, &STATE::None);
+	Engine.ChangeState(TitleID, &STATE::Global);
 }
 
 void Menu::Exit()

@@ -5,6 +5,7 @@
 enum StateType
 {
 	None,
+	Global,
 	Idle,
 	Move,
 	ChargeJump,
@@ -39,22 +40,22 @@ protected:
 	}
 };
 
-class NoneState : public State
+class GlobalState : public State
 {
 public:
 
-	NoneState() = default;
-	virtual ~NoneState() = default;
+	GlobalState() = default;
+	virtual ~GlobalState() = default;
 
 private:
 
-	virtual void Enter(const IDType& ObjectIndex);
-	virtual void Update(const IDType& ObjectIndex);
-	virtual void Exit(const IDType& ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex) {}
+	virtual void Update(const IDType& ObjectIndex) {}
+	virtual void Exit(const IDType& ObjectIndex) {}
 
-	virtual StateType Type() const { return StateType::None; }
+	virtual StateType Type() const { return StateType::Global; }
 
-	virtual State* Make()	{	return Assemble(new NoneState); }
+	virtual State* Make() { return Assemble(new GlobalState); }
 };
 
 class IdleState : public State
@@ -315,7 +316,7 @@ private:
 
 NS_STATE_START
 
-extern NoneState None;
+extern GlobalState Global;
 extern IdleState Idle;
 extern MoveState Move;
 extern ChargeJumpState ChargeJump;

@@ -4,7 +4,7 @@
 
 NS_STATE_START
 
-NoneState None;
+GlobalState Global;
 IdleState Idle;
 MoveState Move;
 InAirState InAir(0.f);
@@ -15,21 +15,6 @@ ShootState Shoot(5.f, 1'000.f);
 DamagedState Damaged(2.f, 10.f);
 
 NS_STATE_END
-
-
-/*Null State */
-
-void NoneState::Enter(const IDType& ObjectIndex)
-{
-}
-
-void NoneState::Update(const IDType& ObjectIndex)
-{
-}
-
-void NoneState::Exit(const IDType& ObjectIndex)
-{
-}
 
 /* Idle State */
 
@@ -195,10 +180,7 @@ void SlamState::Update(const IDType& ObjectIndex)
 
 void SlamState::Exit(const IDType& ObjectIndex)
 {
-	size_t Effect;
-	Effect = Engine.AddObject();
-
-	IDType& EffectID = Engine.LocateObject(Effect);
+	IDType& EffectID = Engine.AddObject();
 
 	Descriptor& EffectDesc = Engine.GetDescriptor(EffectID);
 	EffectDesc.Type = (ObjectType::Projectile);
@@ -254,11 +236,9 @@ void ShootState::Update(const IDType& ObjectIndex)
 	{
 		Time = 0.f;
 		HeadSprite.NextFrame();
-		size_t Tear;
-		Engine.GetSound("Pop").Play();
-		Tear = Engine.AddObject();
 
-		IDType& TearID = Engine.LocateObject(Tear);
+		Engine.GetSound().Play("Pop");
+		IDType& TearID = Engine.AddObject();
 
 		Engine.AddSprite(TearID, "Shadow");
 		Engine.AddSprite(TearID, "Tear");

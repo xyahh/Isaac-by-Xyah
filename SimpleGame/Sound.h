@@ -1,31 +1,34 @@
 #pragma once
 
-class Sound
+class Sound : public EventDispatcher
 {
 	friend Cyan;
 public:
 
-	Sound(const STD string& path, bool isBGM);
-	~Sound() { }
+	Sound();
+	~Sound();
 
 private:
 
-	void Release();
+	bool IsPlaying(size_t i);
+	void UnloadAll();
+
 
 public:
 
-	void Play();
-	void Stop(bool master_stop);
-	void FadeOut(int samples);
-	void SetPause(bool state);
-	bool IsPlaying();
+	void Add(const STD string& SoundID, const STD string& path, bool isBGM);
+
+	void Update();
+
+	void Play(const STD string& ID = "");
+	void Stop();
+	
 
 private:
-	FMOD::Sound*				m_Sound;
-	FMOD::Channel*				m_SoundChannel;
 
-	bool					m_isPaused;
-	unsigned long long	m_ParentClock;
-	FMOD::DSP*			m_DSP;
-	FMOD::System*		m_SoundSystem;
+	FMOD::System*	m_SoundSystem;
+
+	STD map<STD string, size_t>		m_SoundLocator;
+	STD vector<FMOD::Channel*>		m_SoundChannel;
+	STD vector<FMOD::Sound*>		m_Sounds;
 };

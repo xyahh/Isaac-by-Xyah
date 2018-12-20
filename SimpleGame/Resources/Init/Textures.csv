@@ -1,9 +1,0 @@
-TextureID,TexturePath
-Cain_Head,./Resources/Characters/cain_head.png
-Isaac_Head,./Resources/Characters/isaac_head.png
-Basic_Body,./Resources/Characters/basic_body.png
-Map,./Resources/Levels/Depths.png
-Tear,./Resources/tear.png
-HP,./Resources/hp_test.png
-Explosion,./Resources/explosion.png
-Tornado,./Resources/tornado.png

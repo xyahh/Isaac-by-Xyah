@@ -9,11 +9,15 @@ enum TEAM
 };
 
 u_int MonsterNumber = 0;
+int		SpawnNumber;
+float	SpawnRate;
+float	SoundRate;
+bool	win;
 
 void AddActor(const STD string& ActorName, size_t Team,  SSE_VECTOR Position, 
 	const STD string& HeadTex, const STD string& BodyTex, BasicCollision* pCollision)
 {
-	Engine.AddObject(ActorName);
+	Engine.AddObject(NULL, ActorName);
 
 	IDType& ActorID = Engine.LocateObject(ActorName);
 
@@ -34,8 +38,8 @@ void AddActor(const STD string& ActorName, size_t Team,  SSE_VECTOR Position,
 	Engine.AddSprite(ActorID, "Head");
 
 	auto& Shadow = Engine.GetSprite(ActorID, "Shadow");
-	auto& Body = Engine.GetSprite(ActorID, "Body");
-	auto& Head = Engine.GetSprite(ActorID, "Head");
+	auto& Body =   Engine.GetSprite(ActorID, "Body");
+	auto& Head =   Engine.GetSprite(ActorID, "Head");
 
 	float HeadSize = 1.25f;
 	float BodySize = 0.75f;
@@ -59,12 +63,10 @@ void AddActor(const STD string& ActorName, size_t Team,  SSE_VECTOR Position,
 
 void SpawnMonster()
 {
-	size_t Idx = Engine.AddObject();
-
-	IDType& MonsterID = Engine.LocateObject(Idx);
+	IDType& MonsterID = Engine.AddObject();
 
 	auto& ActorDescriptor = Engine.GetDescriptor(MonsterID);
-	auto& ActorPhysics = Engine.GetPhysics(MonsterID);
+	auto& ActorPhysics	= Engine.GetPhysics(MonsterID);
 
 	ActorDescriptor.Type = ObjectType::Actor;
 	ActorDescriptor.Value = 10;
@@ -89,9 +91,9 @@ void SpawnMonster()
 	Engine.AddSprite(MonsterID, "Head");
 	Engine.AddSprite(MonsterID, "Shadow");
 
+	auto& Shadow = Engine.GetSprite(MonsterID, "Shadow");
 	auto& Body = Engine.GetSprite(MonsterID, "Body");
 	auto& Head = Engine.GetSprite(MonsterID, "Head");
-	auto& Shadow = Engine.GetSprite(MonsterID, "Shadow");
 
 	float HeadSize = 1.25f;
 	float BodySize = 0.75f;
@@ -112,9 +114,25 @@ void SpawnMonster()
 	Head.SetDirection(Direction::Down);
 	Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
 
+	Engine.AddEvent(MonsterID, "GoToPlayer");
+
 	Engine.ChangeState(MonsterID, &STATE::InAir);
 
-	Engine.GetSound("Zombie").Play();
+	Event& E = Engine.GetEvent(MonsterID, "GoToPlayer");
+	E.Set([MonsterID]()
+	{
+		if (!Engine.GetCurrentState(MonsterID) || Engine.GetCurrentState(MonsterID)->Type() == StateType::InAir) return;
+		SSE_VECTOR PlayerPos = Engine.GetPhysics(Engine.LocateObject("Player")).GetPosition();
+		Physics& p = Engine.GetPhysics(MonsterID);
+		SSE_VECTOR Move = p.GetPosition();
+		Move = Subtract(PlayerPos, Move);
+		SetZ(&Move, 0.f);
+		Move = Scale(Normalize2(Move), 0.5f);
+		p.SetVelocity(Move);
+	});
+
+	
+	Engine.GetSound().Play("Zombie");
 }
 
 void Gameplay::Enter()
@@ -133,19 +151,21 @@ void Gameplay::Enter()
 	Engine.AddTexture("Explosion", "./Resources/explosion.png");
 	Engine.AddTexture("Tear", "./Resources/tear.png");
 
-	Engine.AddSound("Main", "./Resources/Sounds/Main.mp3", true);
-	Engine.AddSound("Pop", "./Resources/Sounds/Pop.mp3", false);
-	Engine.AddSound("Zombie", "./Resources/Sounds/Zombie.mp3", false);
+	Engine.AddTexture("Win", "./Resources/win.png");
 
-	Engine.GetSound("Main").Play();
+	Sound& Sounds = Engine.GetSound();
+	Sounds.Add("Main", "./Resources/Sounds/Main.mp3", true);
+	Sounds.Add("Pop", "./Resources/Sounds/Pop.mp3", false);
+	Sounds.Add("Zombie", "./Resources/Sounds/Zombie.mp3", false);
+	Sounds.Add("Win", "./Resources/Sounds/Win.mp3", true);
+
+	Engine.GetSound().Play("Main");
 
 	//Map
 	{
-		size_t DEPTHS =	Engine.AddObject();
-		Engine.AddSprite(Engine.LocateObject(DEPTHS), "Depths");
-
-		Sprite& Map = Engine.GetSprite(Engine.LocateObject(DEPTHS), "Depths");
-		
+		IDType& DEPTHS = Engine.AddObject();
+		Engine.AddSprite(DEPTHS, "Depths");
+		Sprite& Map = Engine.GetSprite(DEPTHS, "Depths");
 		Map.SetSize({20.f, 20.f });
 		Map.SetTexture("Depths");
 		Map.SetLayerGroup(LayerGroup::Background);
@@ -153,7 +173,8 @@ void Gameplay::Enter()
 
 	//Engine.GetSound(SOUND_TEST).Play();
 	AddActor("Player", RED, { 0.f, 0.f, 0.f }, "IsaacHead", "BasicBody", &Collision::Actor);
-	
+	IDType& Player = Engine.LocateObject("Player");
+
 	//Commands
 	{
 		float Move = 1'500;
@@ -173,7 +194,9 @@ void Gameplay::Enter()
 		Engine.AddCommand<StateCommand>("StartChargeSlam",	&STATE::ChargeSlam);
 		Engine.AddCommand<StateCommand>("StartInAir",		&STATE::InAir, ST_CMD::ON_RELEASE | ST_CMD::CHANGE_STATE);
 		Engine.AddCommand<StateCommand>("StartShoot",		&STATE::Shoot, ST_CMD::ON_PRESS | ST_CMD::PUSH_STATE);
-		Engine.AddCommand<StateCommand>("EndShoot",			&STATE::None, ST_CMD::ON_RELEASE | ST_CMD::POP_STATE);
+		Engine.AddCommand<StateCommand>("EndShoot",			&STATE::Idle, ST_CMD::ON_RELEASE | ST_CMD::POP_STATE);
+
+		Engine.AddCommand<SceneCommand<Logo>>("Restart");
 
 		Engine.AddCommand<FaceCommand>("HeadFaceUp"   , "Head", Direction::Up);
 		Engine.AddCommand<FaceCommand>("HeadFaceDown" , "Head", Direction::Down);
@@ -188,9 +211,6 @@ void Gameplay::Enter()
 
 	//Actor Input
 	{
-		/* Adding the Inputs to Player */
-		IDType& Player = Engine.LocateObject("Player");
-
 		Engine.AddController(Player, &STATE::Idle);
 		Engine.AddController(Player, &STATE::Move);
 		Engine.AddController(Player, &STATE::ChargeJump);
@@ -209,7 +229,7 @@ void Gameplay::Enter()
 		IdleInput.MapControl(VK_LEFT,  "StartShoot");
 		IdleInput.MapControl(VK_UP,    "StartShoot");
 		IdleInput.MapControl(VK_DOWN,  "StartShoot");
-		
+
 		Controller&  MoveInput = Engine.GetController(Player, &STATE::Move);
 
 		MoveInput.MapControl('W', "MoveUp");
@@ -282,11 +302,15 @@ void Gameplay::Enter()
 
 	//Events
 	{
-		static int SpawnNumber = 0;
-		static float SpawnRate = 5.f;
-		static float SoundRate = 5.f;
+		
+		SpawnNumber = 0;
+		SpawnRate = 5.f;
+		SoundRate = 5.f;
+		win = false;
+		Engine.AddEvent(Player, "MonsterSpawn");
 
-		Engine.AddEvent([]()
+		Event& B = Engine.GetEvent(Player, "MonsterSpawn");
+		B.Set([]()
 		{
 			static float time = 0.f;
 			time += UPDATE_TIME;
@@ -296,19 +320,37 @@ void Gameplay::Enter()
 				++SpawnNumber;
 				time = 0.f;
 				if (SpawnNumber % 5 == 0 && SpawnRate > 1.f)
-					SpawnRate -= 0.25f;
+					SpawnRate -= 1.f;
 
 				Timer& T = Engine.GetTimer();
-				if (T.GetElapsedTime() > 100.f)
+				if (T.GetElapsedTime() > 90.f)
 				{
 					if (MonsterNumber == 0)
 					{
-						Window& w = Engine.GetWindow();
-						if (IDOK == w.MsgBox("You win!", "Winner", MB_OK))
+						if (!win)
 						{
-							SpawnRate = 5.f;
-							SpawnNumber = 0;
-							w.PlayScene<Logo>();
+							Engine.GetSound().Stop();
+							win = true;
+							Engine.GetSound().Play("Win");
+
+							IDType& Win = Engine.AddObject();
+
+
+							Engine.AddSprite(Win, "Win");
+
+							Sprite& s = Engine.GetSprite(Win, "Win");
+							s.SetSize({ 15.f, 3.f });
+							s.SetTotal({ 4, 15 });
+							s.SetTexture("Win");
+							s.SetLayerGroup(LayerGroup::Foreground);
+							s.SetFrameRate(10.f);
+
+							Engine.AddController(Win, &STATE::Global);
+							Controller& c = Engine.GetController(Win, &STATE::Global);
+							c.MapControl(VK_RETURN, "Restart");
+							Engine.UpdateInput();
+							
+							Engine.ChangeState(Win, &STATE::Global);
 						}
 					}
 				}
@@ -326,44 +368,36 @@ void Gameplay::Enter()
 		float Min = 15.f;
 		float Max = 30.f;
 		{
-			size_t Boundary;
-			Boundary = Engine.AddObject();
-			IDType& BoundaryID = Engine.LocateObject(Boundary);
-			Engine.GetDescriptor(BoundaryID).Type = ObjectType::Structure;
-			Physics& BPhysics = Engine.GetPhysics(BoundaryID);
+			IDType& Boundary = Engine.AddObject();
+			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
+			Physics& BPhysics = Engine.GetPhysics(Boundary);
 			BPhysics.Box().SetDimensions({ Min, Max + Min, Max });
 			BPhysics.SetPosition({ 16.5f, 0.f, 0.f });
 			BPhysics.SetCollision(&Collision::Structure);
 		}
 
 		{
-			size_t Boundary;
-			Boundary = Engine.AddObject();
-			IDType& BoundaryID = Engine.LocateObject(Boundary);
-			Engine.GetDescriptor(BoundaryID).Type = ObjectType::Structure;
-			Physics& BPhysics = Engine.GetPhysics(BoundaryID);
+			IDType& Boundary = Engine.AddObject();
+			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
+			Physics& BPhysics = Engine.GetPhysics(Boundary);
 			BPhysics.Box().SetDimensions({ Min, Max + Min, Max });
 			BPhysics.SetPosition({ -16.5f, 0.f, 0.f });
 			BPhysics.SetCollision(&Collision::Structure);
 		}
 
 		{
-			size_t Boundary;
-			Boundary = Engine.AddObject();
-			IDType& BoundaryID = Engine.LocateObject(Boundary);
-			Engine.GetDescriptor(BoundaryID).Type = ObjectType::Structure;
-			Physics& BPhysics = Engine.GetPhysics(BoundaryID);
+			IDType& Boundary = Engine.AddObject();
+			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
+			Physics& BPhysics = Engine.GetPhysics(Boundary);
 			BPhysics.Box().SetDimensions({ Max, Min, Max });
 			BPhysics.SetPosition({ 0.f, 16.f, 0.f });
 			BPhysics.SetCollision(&Collision::Structure);
 		}
 
 		{
-			size_t Boundary;
-			Boundary = Engine.AddObject();
-			IDType& BoundaryID = Engine.LocateObject(Boundary);
-			Engine.GetDescriptor(BoundaryID).Type = ObjectType::Structure;
-			Physics& BPhysics = Engine.GetPhysics(BoundaryID);
+			IDType& Boundary = Engine.AddObject();
+			Engine.GetDescriptor(Boundary).Type = ObjectType::Structure;
+			Physics& BPhysics = Engine.GetPhysics(Boundary);
 			BPhysics.Box().SetDimensions({ Max, Min, 10.f });
 			BPhysics.SetPosition({ 0.f, -16.f, 0.f });
 			BPhysics.SetCollision(&Collision::Structure);

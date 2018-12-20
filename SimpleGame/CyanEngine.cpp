@@ -68,32 +68,49 @@ void Cyan::ReserveObjects(size_t Number)
 	m_Descriptor.reserve(Number);
 	m_Controllers.reserve(Number);
 	m_Physics.reserve(Number);
-	m_Graphics.reserve(Number);
+	m_Sprites.reserve(Number);
 	m_States.reserve(Number);
 	m_Input.reserve(Number);
+	m_Events.reserve(Number);
+
 	m_SpriteLocator.reserve(Number);
+	m_EventLocator.reserve(Number);
 }
 
-size_t Cyan::AddObject(const STD string& ObjectName)
+IDType Cyan::AddObject(size_t * Out, const STD string & ObjectID)
 {
 	m_Descriptor.emplace_back();
 	m_Controllers.emplace_back();
 	m_Physics.emplace_back();
-	m_Graphics.emplace_back();
+	m_Sprites.emplace_back();
 	m_States.emplace_back();
 	m_Input.emplace_back();
+	m_Events.emplace_back();
+
 	m_SpriteLocator.emplace_back();
+	m_EventLocator.emplace_back();
 
 	static size_t Number = 0;
-	m_ObjectLocator.emplace(IDType(ObjectName, Number), Last(m_Descriptor));
-	return Number++;
+	IDType ID = IDType(ObjectID, Number++);
+	if (Out) *Out = Number;
+	m_ObjectLocator.emplace(ID, Last(m_Descriptor));
+	return ID;
 }
 
 void Cyan::AddSprite(const IDType& ObjectIndex, const STD string & SpriteID)
 {
 	size_t Index = m_ObjectLocator.find(ObjectIndex)->second;
-	m_Graphics[Index].emplace_back();
-	m_SpriteLocator[Index][SpriteID] = Last(m_Graphics[Index]);
+	m_Sprites[Index].emplace_back();
+	size_t SpriteIndex = Last(m_Sprites[Index]);
+	m_SpriteLocator[Index][SpriteID] = SpriteIndex;
+}
+
+void Cyan::AddEvent(const IDType & ObjectIndex, const STD string & BehaviorName)
+{
+	size_t Index = m_ObjectLocator.find(ObjectIndex)->second;
+	m_Events[Index].emplace_back();
+	size_t BehaviorIndex = Last(m_Events[Index]);
+	m_EventLocator[Index][BehaviorName] = BehaviorIndex;
 }
 
 void Cyan::AddController(const IDType & ObjectIndex, State * pState)
@@ -113,7 +130,7 @@ void Cyan::DeleteObject(const IDType& ObjectIndex)
 		EraseByIndex(m_Descriptor, Index);
 		EraseByIndex(m_Physics, Index);
 		EraseByIndex(m_Input, Index);
-		EraseByIndex(m_Graphics, Index);
+		EraseByIndex(m_Sprites, Index);
 		EraseByIndex(m_States, Index);
 		EraseByIndex(m_Controllers, Index);
 
@@ -124,22 +141,11 @@ void Cyan::DeleteObject(const IDType& ObjectIndex)
 	});
 }
 
-void Cyan::AddEvent(const STD function<void()>& Fx)
-{
-	m_ContinuousEvents.emplace_back(Fx);
-}
-
 void Cyan::AddTexture(const STD string & TexName, const STD string & ImagePath)
 {
 	u_int Tex = m_Renderer.GenerateTexture(ImagePath);
 	m_Textures.emplace_back(Tex);
 	m_TextureLocator[TexName] = Last(m_Textures);
-}
-
-void Cyan::AddSound(const STD string & SoundName, const STD string & ImagePath, bool isBGM)
-{
-	m_Sounds.emplace_back(ImagePath, isBGM);
-	m_SoundLocator[SoundName] = Last(m_Sounds);
 }
 
 void Cyan::PushState(const IDType & ObjectIndex, State * pState)
@@ -196,16 +202,18 @@ void Cyan::ChangeState(const IDType & ObjectIndex, State * pState)
 	});
 }
 
-
 void Cyan::Update()
 {
-	for (size_t i = 0; i < m_ContinuousEvents.size(); ++i)
-		m_ContinuousEvents[i].Execute();
+	m_Sound.Update();
+
+	for (size_t i = 0; i < m_Events.size(); ++i)
+		for (auto& B : m_Events[i])
+			B.Execute();
 
 	/* Sprite Update */
-	for (size_t i = 0; i < m_Graphics.size(); ++i)
+	for (size_t i = 0; i < m_Sprites.size(); ++i)
 	{
-		for (auto& Sprite : m_Graphics[i])
+		for (auto& Sprite : m_Sprites[i])
 			Sprite.Update();
 	}
 
@@ -243,7 +251,7 @@ void Cyan::Update()
 
 void Cyan::Render(float fInterpolation)
 {
-	for (size_t i = 0; i < m_Graphics.size(); ++i)
+	for (size_t i = 0; i < m_Sprites.size(); ++i)
 	{
 		SSE_VECTOR Position = Add
 		(
@@ -251,7 +259,7 @@ void Cyan::Render(float fInterpolation)
 			Scale(m_Physics[i].GetPrevPosition(), 1.f - fInterpolation)
 		);
 
-		for (auto& S : m_Graphics[i])
+		for (auto& S : m_Sprites[i])
 			S.Render(m_Renderer, Position);
 	}
 }
@@ -298,7 +306,7 @@ Sprite & Cyan::GetSprite(const IDType& ObjectIndex, const STD string & SpriteNam
 {
 	size_t Index = m_ObjectLocator[ObjectIndex];
 	size_t SpriteIndex = m_SpriteLocator[Index][SpriteName];
-	return m_Graphics[Index][SpriteIndex];
+	return m_Sprites[Index][SpriteIndex];
 }
 
 Physics & Cyan::GetPhysics(const IDType & ObjectIndex)
@@ -307,9 +315,10 @@ Physics & Cyan::GetPhysics(const IDType & ObjectIndex)
 	return m_Physics[Index];
 }
 
-State *& Cyan::GetCurrentState(const IDType & ObjectIndex)
+State* Cyan::GetCurrentState(const IDType & ObjectIndex)
 {
 	size_t Index = m_ObjectLocator[ObjectIndex];
+	if (m_States[Index].second.empty()) return nullptr;
 	return m_States[Index].second.top();
 }
 
@@ -319,7 +328,13 @@ Controller & Cyan::GetController(const IDType & ObjectIndex, State * pState)
 	return m_Controllers[Index][pState->Type()];
 }
 
-Command *& Cyan::GetCommand(const STD string& CommandName)
+Event & Cyan::GetEvent(const IDType & ObjectIndex, const STD string & EventName)
+{
+	size_t Index = m_ObjectLocator[ObjectIndex];
+	return m_Events[Index][m_EventLocator[Index][EventName]];
+}
+
+Command * Cyan::GetCommand(const STD string& CommandName)
 {
 	size_t Idx = m_CommandLocator[CommandName];
 	return m_Commands[Idx];
@@ -330,9 +345,9 @@ u_int Cyan::GetTexture(const STD string & TextureName)
 	return m_Textures[m_TextureLocator[TextureName]];
 }
 
-Sound & Cyan::GetSound(const STD string & SoundName)
+Sound & Cyan::GetSound()
 {
-	return m_Sounds[m_SoundLocator[SoundName]];
+	return m_Sound;
 }
 
 void Cyan::DeleteComponents()
@@ -340,34 +355,31 @@ void Cyan::DeleteComponents()
 	/* Release Data */
 	ReleaseComponentData();
 
+	m_Sound.UnloadAll();
+
 	/* Clear Data */
 	m_ObjectLocator.clear();
 	m_CommandLocator.clear();
 	m_TextureLocator.clear();
-	m_SoundLocator.clear();
+
 	m_SpriteLocator.clear();
+	m_EventLocator.clear();
 
 	m_Descriptor.clear();
-	m_Graphics.clear();
+	m_Sprites.clear();
 	m_Physics.clear();
 	m_Input.clear();
+	m_Events.clear();
 
-	m_States.clear();
 	m_Controllers.clear();
+	m_States.clear();
 
-	m_ContinuousEvents.clear();
 	m_Commands.clear();
 	m_Textures.clear();
-	m_Sounds.clear();
 }
 
 void Cyan::ReleaseComponentData()
 {
-	for (auto& Sound : m_Sounds)
-	{
-		Sound.Release();
-	}
-
 	for (auto& ObjStateStack : m_States)
 	{
 		while (!ObjStateStack.second.empty())

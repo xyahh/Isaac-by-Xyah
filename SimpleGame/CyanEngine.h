@@ -42,8 +42,9 @@ public:
 	/*---------Components Functions---------------------*/
 	void ReserveObjects(size_t Number);
 
-	size_t AddObject(const STD string& ObjectID = "");
+	IDType AddObject(size_t * Out = NULL, const STD string& ObjectID = "");
 	void AddSprite(const IDType& ObjectIndex, const STD string & SpriteID);
+	void AddEvent(const IDType& ObjectIndex, const STD string& BehaviorName);
 	void AddController(const IDType& ObjectIndex, State* pState);
 	void DeleteObject(const IDType& ObjectIndex);
 
@@ -56,10 +57,7 @@ public:
 		m_CommandLocator[ID] = Last(m_Commands);
 	}
 
-	void AddEvent(const STD function<void()>& Fx);
-
 	void AddTexture(const STD string& TexName, const STD string & ImagePath);
-	void AddSound(const STD string& SoundName, const STD string & ImagePath, bool isBGM);
 
 	void PushState(const IDType& ObjectIndex, State* pState);
 	void PopState(const IDType& ObjectIndex);
@@ -75,12 +73,13 @@ public:
 	Descriptor& GetDescriptor(const IDType& ObjectIndex);
 	Sprite&  GetSprite(const IDType& ObjectIndex, const STD string & SpriteName);
 	Physics& GetPhysics(const IDType& ObjectIndex);
-	State*&  GetCurrentState(const IDType& ObjectIndex);
+	State*  GetCurrentState(const IDType& ObjectIndex);
 	Controller& GetController(const IDType& ObjectIndex, State* pState);
+	Event&	GetEvent(const IDType& ObjectIndex, const STD string& EventName);
 
-	Command*& GetCommand(const STD string& CommandName);
+	Command* GetCommand(const STD string& CommandName);
 	u_int GetTexture(const STD string& TextureName);
-	Sound& GetSound(const STD string& SoundName);
+	Sound& GetSound();
 
 	/*---------Components Deletion----------------------*/
 
@@ -94,52 +93,37 @@ private:
 	void FlushActionQueue();
 
 private:
-
-	template<class T>
-	using Locator = STD map<T, size_t>;
-
-	template<class T>
-	using Service = STD vector<T>;
-
-	using StateControls = STD map <StateType, Controller>;
-	using Graphics = STD vector<Sprite>;
-	using SpriteLocator = STD map<STD string, size_t>;
-	using StateStack = STD pair<bool, STD stack<State*>>;
-
-	/*
-		The Bool in StateStack helps decide whether a
-		Change in State of an Object is Queued in the
-		Event Queue. This stops having two or more 
-		State changes for the same object.
-	*/	
-
 	/* Core */
 	Timer		m_Timer;
 	Window		m_Window;
 	Renderer	m_Renderer;
 	World		m_World;
+	Sound		m_Sound;
 
 	/* Locators */
-	Locator<IDType>			m_ObjectLocator;
-	Locator<STD string>		m_CommandLocator;
-	Locator<STD string>		m_TextureLocator;
-	Locator<STD string>		m_SoundLocator;
-	
+	STD map<IDType, size_t>			m_ObjectLocator;
+	STD map<STD string, size_t>		m_CommandLocator;
+	STD map<STD string, size_t>		m_TextureLocator;
+
+	STD vector<STD map<STD string, size_t>>	m_SpriteLocator;
+	STD vector<STD map<STD string, size_t>>	m_EventLocator;
+
 	/* Object Components */
-	Service<SpriteLocator>	m_SpriteLocator;
-	Service<Descriptor>		m_Descriptor;
-	Service<Graphics>		m_Graphics;
-	Service<Physics>		m_Physics;
-	Service<Input>			m_Input;
-	Service<StateStack>		m_States;
-	Service<StateControls>	m_Controllers;
+	STD vector <Descriptor>			m_Descriptor;
+	STD vector <STD vector<Sprite>>	m_Sprites;
+	STD vector <Physics>			m_Physics;
+	STD vector <Input>				m_Input;
+	STD vector<STD vector<Event>>	m_Events;
+
+	STD vector <STD map <StateType, Controller>>	m_Controllers;
+	STD vector <STD pair<bool, STD stack<State*>>>	m_States; 
+	/* The Bool in StateStack helps decide whether a change in State of an Object is Queued in the
+	Event Queue. This stops having two or more State changes for the same object.*/	
 
 	/* Integral Components */
-	Service<Event>		m_ContinuousEvents;
-	Service<Command*>	m_Commands;
-	Service<u_int>		m_Textures;
-	Service<Sound>		m_Sounds;
-	STD queue<Event>	m_EventQueue;
+	STD vector<Command*>	m_Commands;
+	STD vector<u_int>		m_Textures;
+	STD queue<Event>		m_EventQueue;
 };
 
 extern Cyan Engine;
