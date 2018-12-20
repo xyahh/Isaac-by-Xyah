@@ -12,6 +12,13 @@
 #include <fcntl.h>
 #include <io.h>
 
+int Window::MsgBox(const STD string & Text, const STD string & Title, UINT Type)
+{
+	STD wstring WText{ Text.begin(), Text.end() };
+	STD wstring WTitle{ Title.begin(), Title.end() };
+	return MessageBox(m_HWND, WText.c_str(), WTitle.c_str(), Type);
+}
+
 bool Window::Initialize(const STD string & Title, int Width, int Height, const STD string& DevConsoleTitle)
 {
 	if (!DevConsoleTitle.empty())
@@ -61,7 +68,7 @@ bool Window::Initialize(const STD string & Title, int Width, int Height, const S
 	m_hInstance = GetModuleHandle(NULL);
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	wc.lpfnWndProc = (WNDPROC)[](HWND h, UINT u, WPARAM w, LPARAM l)->LRESULT 
-	{ return Engine.GetFramework().WndProc(h, u, w, l); };
+	{ return Engine.GetWindow().WndProc(h, u, w, l); };
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = m_hInstance;

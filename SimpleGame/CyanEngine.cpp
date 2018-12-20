@@ -1,12 +1,20 @@
 #include "stdafx.h"
 #include "CyanEngine.h"
 
-
 Cyan Engine;
 
 IDType Cyan::LocateObject(size_t ID)
 {
 	return IDType("" , ID);
+}
+
+inline const IDType & Cyan::GetID(size_t Index)
+{
+	for (auto& obj : m_ObjectLocator)
+		if (Index == obj.second)
+			return obj.first;
+	assert("Index Out of Bounds!" && false);
+	return IDType("", ULLONG_MAX);
 }
 
 IDType Cyan::LocateObject(const STD string & ID)
@@ -19,10 +27,14 @@ void Cyan::ResetClock()
 	m_Timer.Reset();
 }
 
+void Cyan::QueueAction(const STD function<void()>& Fx)
+{
+	m_EventQueue.emplace(Fx);
+}
+
 bool Cyan::Init(const STD string& Title, int X, int Y, const STD string& Dev)
 {
 	m_Window.Initialize(Title, X, Y, Dev);
-	Sound::Initialize();
 	return m_Renderer.Initialize();
 }
 
@@ -49,7 +61,17 @@ void Cyan::Destroy()
 {
 	ReleaseComponentData();
 	m_Window.Close();
-	Sound::Destroy();
+}
+
+void Cyan::ReserveObjects(size_t Number)
+{
+	m_Descriptor.reserve(Number);
+	m_Controllers.reserve(Number);
+	m_Physics.reserve(Number);
+	m_Graphics.reserve(Number);
+	m_States.reserve(Number);
+	m_Input.reserve(Number);
+	m_SpriteLocator.reserve(Number);
 }
 
 size_t Cyan::AddObject(const STD string& ObjectName)
@@ -74,17 +96,20 @@ void Cyan::AddSprite(const IDType& ObjectIndex, const STD string & SpriteID)
 	m_SpriteLocator[Index][SpriteID] = Last(m_Graphics[Index]);
 }
 
-void Cyan::AddController(const IDType& ObjectIndex, const STD string & StateID)
+void Cyan::AddController(const IDType & ObjectIndex, State * pState)
 {
 	size_t Index = m_ObjectLocator.find(ObjectIndex)->second;
-	m_Controllers[Index][StateID];
+	m_Controllers[Index][pState->Type()];
 }
 
 void Cyan::DeleteObject(const IDType& ObjectIndex)
 {
 	QueueAction([this, ObjectIndex]()
 	{
-		size_t Index = m_ObjectLocator.find(ObjectIndex)->second;
+		auto Finder = m_ObjectLocator.find(ObjectIndex);
+		if (Finder == m_ObjectLocator.end()) return;
+
+		size_t Index = Finder->second;
 		EraseByIndex(m_Descriptor, Index);
 		EraseByIndex(m_Physics, Index);
 		EraseByIndex(m_Input, Index);
@@ -93,10 +118,15 @@ void Cyan::DeleteObject(const IDType& ObjectIndex)
 		EraseByIndex(m_Controllers, Index);
 
 		for (auto& i = m_ObjectLocator.begin(); i != m_ObjectLocator.end(); ++i)
-			if (i->second > Index)
+			if (i->second >= Index)
 				--i->second; //Decrease by one all the Indexes added after
 		m_ObjectLocator.erase(ObjectIndex);
 	});
+}
+
+void Cyan::AddEvent(const STD function<void()>& Fx)
+{
+	m_ContinuousEvents.emplace_back(Fx);
 }
 
 void Cyan::AddTexture(const STD string & TexName, const STD string & ImagePath)
@@ -112,19 +142,17 @@ void Cyan::AddSound(const STD string & SoundName, const STD string & ImagePath, 
 	m_SoundLocator[SoundName] = Last(m_Sounds);
 }
 
-void Cyan::PushState(const IDType& ObjectIndex, const STD string& StateIndex)
-{ 
+void Cyan::PushState(const IDType & ObjectIndex, State * pState)
+{
 	size_t Index = m_ObjectLocator.find(ObjectIndex)->second;
 	if (m_States[Index].first) return;
 	m_States[Index].first = true;
 
-	size_t StatePTIndex = m_StatePTLocator[StateIndex];
-
-	QueueAction([this, Index, ObjectIndex, StatePTIndex]()
+	QueueAction([this, Index, ObjectIndex, pState]()
 	{
 		if (!m_States[Index].second.empty())
 			m_States[Index].second.top()->Exit(ObjectIndex);
-		m_States[Index].second.emplace(m_StatePrototypes[StatePTIndex]->Make());
+		m_States[Index].second.emplace(pState->Make());
 		m_States[Index].second.top()->Enter(ObjectIndex);
 		m_States[Index].first = false;
 	});
@@ -148,16 +176,13 @@ void Cyan::PopState(const IDType&  ObjectIndex)
 	});
 }
 
-void Cyan::ChangeState(const IDType&  ObjectIndex, const STD string& StateIndex)
+void Cyan::ChangeState(const IDType & ObjectIndex, State * pState)
 {
-
 	size_t Index = m_ObjectLocator.find(ObjectIndex)->second;
 	if (m_States[Index].first) return;
 	m_States[Index].first = true;
 
-	size_t StatePTIndex = m_StatePTLocator[StateIndex];
-
-	QueueAction([this, Index, ObjectIndex, StatePTIndex]()
+	QueueAction([this, Index, ObjectIndex, pState]()
 	{
 		if (!m_States[Index].second.empty())
 		{
@@ -165,14 +190,18 @@ void Cyan::ChangeState(const IDType&  ObjectIndex, const STD string& StateIndex)
 			delete m_States[Index].second.top();
 			m_States[Index].second.pop();
 		}
-		m_States[Index].second.emplace(m_StatePrototypes[StatePTIndex]->Make());
+		m_States[Index].second.emplace(pState->Make());
 		m_States[Index].second.top()->Enter(ObjectIndex);
 		m_States[Index].first = false;
 	});
 }
 
+
 void Cyan::Update()
 {
+	for (size_t i = 0; i < m_ContinuousEvents.size(); ++i)
+		m_ContinuousEvents[i].Execute();
+
 	/* Sprite Update */
 	for (size_t i = 0; i < m_Graphics.size(); ++i)
 	{
@@ -192,13 +221,12 @@ void Cyan::Update()
 		if (m_States[i].second.empty())
 			continue;
 		m_Input[i].ProcessInput();
-		m_Controllers[i][m_States[i].second.top()->Name()].HandleControls
+		m_Controllers[i][m_States[i].second.top()->Type()].HandleControls
 			(GetID(i), m_Input[i].m_Pushed, m_Input[i].m_Released);
 		m_Input[i].m_Released.clear(); // Call only once;
 		m_States[i].second.top()->Update(GetID(i));
+		FlushActionQueue();
 	}
-
-	
 
 	/* Collision Check */
 	for (size_t i = 0; i < m_Physics.size(); ++i)
@@ -208,7 +236,6 @@ void Cyan::Update()
 		for (size_t j = i + 1; j < m_Physics.size(); ++j)
 			m_Physics[i].HandleCollision(GetID(i), &m_Physics[j], GetID(j));
 		m_Physics[i].SetPosition(Add(m_Physics[i].GetPrevPosition(), m_Physics[i].GetDeltaPosition()));
-
 	}
 
 	FlushActionQueue();
@@ -246,7 +273,7 @@ World & Cyan::GetWorld()
 	return m_World;
 }
 
-Window & Cyan::GetFramework()
+Window & Cyan::GetWindow()
 {
 	return m_Window;
 }
@@ -254,6 +281,11 @@ Window & Cyan::GetFramework()
 Renderer & Cyan::GetRenderer()
 {
 	return m_Renderer;
+}
+
+Timer & Cyan::GetTimer()
+{
+	return m_Timer;
 }
 
 Descriptor & Cyan::GetDescriptor(const IDType & ObjectIndex)
@@ -281,15 +313,16 @@ State *& Cyan::GetCurrentState(const IDType & ObjectIndex)
 	return m_States[Index].second.top();
 }
 
-Controller & Cyan::GetController(const IDType & ObjectIndex, const STD string & StateName)
+Controller & Cyan::GetController(const IDType & ObjectIndex, State * pState)
 {
 	size_t Index = m_ObjectLocator[ObjectIndex];
-	return m_Controllers[Index][StateName];
+	return m_Controllers[Index][pState->Type()];
 }
 
-Command *& Cyan::GetCommand(const STD string & CommandName)
+Command *& Cyan::GetCommand(const STD string& CommandName)
 {
-	return m_Commands[m_CommandLocator[CommandName]];
+	size_t Idx = m_CommandLocator[CommandName];
+	return m_Commands[Idx];
 }
 
 u_int Cyan::GetTexture(const STD string & TextureName)
@@ -307,18 +340,22 @@ void Cyan::DeleteComponents()
 	/* Release Data */
 	ReleaseComponentData();
 
-	m_ObjectLocator.clear();
-
 	/* Clear Data */
+	m_ObjectLocator.clear();
+	m_CommandLocator.clear();
+	m_TextureLocator.clear();
+	m_SoundLocator.clear();
+	m_SpriteLocator.clear();
+
 	m_Descriptor.clear();
+	m_Graphics.clear();
 	m_Physics.clear();
 	m_Input.clear();
 
-	m_Graphics.clear();
 	m_States.clear();
 	m_Controllers.clear();
 
-	m_StatePrototypes.clear();
+	m_ContinuousEvents.clear();
 	m_Commands.clear();
 	m_Textures.clear();
 	m_Sounds.clear();
@@ -341,12 +378,6 @@ void Cyan::ReleaseComponentData()
 		}
 	}
 
-	for (auto& ObjState : m_StatePrototypes)
-	{
-		delete ObjState;
-		ObjState = nullptr;
-	}
-
 	for (auto& Commands : m_Commands)
 	{
 		delete Commands;
@@ -356,5 +387,14 @@ void Cyan::ReleaseComponentData()
 	for (auto& Texture : m_Textures)
 	{
 		m_Renderer.DeleteTexture(Texture);
+	}
+}
+
+void Cyan::FlushActionQueue()
+{
+	while (!m_EventQueue.empty())
+	{
+		m_EventQueue.front().Execute();
+		m_EventQueue.pop();
 	}
 }

@@ -1,4 +1,20 @@
 #pragma once
+#define NS_STATE_START namespace STATE {
+#define NS_STATE_END }
+
+enum StateType
+{
+	None,
+	Idle,
+	Move,
+	ChargeJump,
+	InAir,
+	ChargeSlam,
+	Slam,
+	Shoot,
+	Damaged,
+};
+
 class State
 {
 	friend Cyan;
@@ -13,7 +29,7 @@ public:
 	virtual void Update(const IDType& Index) = 0;
 	virtual State* Make() = 0;
 
-	virtual STD string Name() const = 0;
+	virtual StateType Type() const = 0;
 
 
 protected:
@@ -23,12 +39,12 @@ protected:
 	}
 };
 
-class NullState : public State
+class NoneState : public State
 {
 public:
 
-	NullState() = default;
-	virtual ~NullState() = default;
+	NoneState() = default;
+	virtual ~NoneState() = default;
 
 private:
 
@@ -36,9 +52,9 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual STD string Name() const { return "Null"; }
+	virtual StateType Type() const { return StateType::None; }
 
-	virtual State* Make()	{	return Assemble(new NullState); }
+	virtual State* Make()	{	return Assemble(new NoneState); }
 };
 
 class IdleState : public State
@@ -64,7 +80,7 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual STD string Name() const { return "Idle"; }
+	virtual StateType Type() const { return StateType::Idle; }
 
 	virtual State* Make()	{ return Assemble(new IdleState); }
 };
@@ -92,7 +108,7 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual STD string Name() const { return "Move"; }
+	virtual StateType Type() const { return StateType::Move; }
 
 	virtual State* Make() { return Assemble(new MoveState); }
 };
@@ -120,7 +136,7 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 	
-	virtual STD string Name() const { return "ChargeJump"; }
+	virtual StateType Type() const { return StateType::ChargeJump; }
 
 	virtual State* Make() { return Assemble(new ChargeJumpState(RageRate, Force)); }
 
@@ -154,7 +170,7 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual STD string Name() const { return "InAir"; }
+	virtual StateType Type() const { return StateType::InAir; }
 
 	virtual State* Make() { return Assemble(new InAirState(AirResistance)); }
 
@@ -185,7 +201,7 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual STD string Name() const { return "ChargeSlam"; }
+	virtual StateType Type() const { return StateType::ChargeSlam; }
 
 	virtual State* Make() { return Assemble(new ChargeSlamState(RageRate)); }
 
@@ -220,7 +236,7 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual STD string Name() const { return "Slam"; }
+	virtual StateType Type() const { return StateType::Slam; }
 
 	virtual State* Make() { return Assemble(new SlamState(SlamForce)); }
 
@@ -252,7 +268,7 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual STD string Name() const { return "Shoot"; }
+	virtual StateType Type() const { return StateType::Shoot; }
 
 	virtual State* Make() { return Assemble(new ShootState(ShootingRate, ShootingForce)); }
 	
@@ -286,7 +302,7 @@ private:
 	virtual void Update(const IDType& ObjectIndex);
 	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual STD string Name() const { return "Damaged"; }
+	virtual StateType Type() const { return StateType::Damaged; }
 	virtual State* Make() { return Assemble(new DamagedState(Duration, BlinkingRate)); }
 
 
@@ -296,3 +312,17 @@ private:
 	float DurationTimer;
 	int Alpha;
 };
+
+NS_STATE_START
+
+extern NoneState None;
+extern IdleState Idle;
+extern MoveState Move;
+extern ChargeJumpState ChargeJump;
+extern InAirState InAir;
+extern ChargeSlamState ChargeSlam;
+extern SlamState Slam;
+extern ShootState Shoot;
+extern DamagedState Damaged;
+
+NS_STATE_END

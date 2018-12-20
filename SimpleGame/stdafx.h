@@ -35,8 +35,7 @@ constexpr float UPDATE_TIME			{ 1.f / UPDATE_FREQUENCY };
 template<class T>
 inline size_t Last(const STD vector<T>& v)
 {
-	auto a = v.size() - 1;
-	return a;
+	return v.size() - 1;
 }
 
 template<class T>
@@ -45,7 +44,6 @@ inline void EraseByValue(STD vector<T>& v, const T& value)
 	size_t Count = 0;
 	v.erase(STD remove(v.begin(), v.end(), value), v.end());
 }
-
 
 template<class T>
 inline void EraseByIndex(STD vector<T>& v, size_t Index)

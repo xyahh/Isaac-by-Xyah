@@ -2,39 +2,31 @@
 #include "Sound.h"
 #include "Dependencies/FMOD/fmod.hpp"
 
-bool				Sound::m_isPaused		{ true };
-unsigned long long	Sound::m_ParentClock	{ 0 };
-FMOD::DSP*			Sound::m_DSP			{ NULL };
-FMOD::System*		Sound::m_SoundSystem	{ NULL };
 
 Sound::Sound(const STD string& path, bool isBGM)
 {
+	
+	FMOD::System_Create(&m_SoundSystem);
+	m_SoundSystem->init(1, FMOD_INIT_NORMAL, nullptr);
+
+	m_isPaused = true;
+	m_ParentClock = 0;
+	m_DSP = NULL;
+
 	FMOD_RESULT result;
 	m_Sound = nullptr;
-	m_IsBGM = isBGM;
 
-	if (m_IsBGM)
+	if (isBGM)
 		result = m_SoundSystem->createStream(path.c_str(), FMOD_LOOP_NORMAL | FMOD_2D, nullptr, &m_Sound);
 	else
 		result = m_SoundSystem->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &m_Sound);
 }
 
-void Sound::Initialize()
-{
-	FMOD::System_Create(&m_SoundSystem);
-	m_SoundSystem->init(FMOD_MAX_CHANNEL_WIDTH,
-		FMOD_INIT_NORMAL, nullptr);
-}
-
-void Sound::Destroy()
-{
-	m_SoundSystem->close();
-	m_SoundSystem->release();
-}
-
 void Sound::Release()
 {
 	m_Sound->release();
+	m_SoundSystem->close();
+	m_SoundSystem->release();
 }
 
 void Sound::Stop(bool master_stop)
@@ -50,10 +42,7 @@ void Sound::Stop(bool master_stop)
 
 void Sound::Play()
 {
-	if (m_IsBGM)
-		m_SoundSystem->playSound(m_Sound, nullptr, false, &m_SoundChannel);
-	else
-		m_SoundSystem->playSound(m_Sound, nullptr, false, &m_SoundChannel);
+	m_SoundSystem->playSound(m_Sound, nullptr, false, &m_SoundChannel);
 	m_isPaused = false;
 }
 

@@ -12,6 +12,8 @@ public:
 	~Timer();
 
 	void  Tick();
+	float GetElapsedTime() const;
+	void  ResetElapsedTime();
 	bool  FlushAccumulatedTime();
 	void  Reset();
 	float Interpolation() const;
@@ -21,5 +23,6 @@ private:
 	TimePoint	m_PreviousTime;
 	float		m_TimeFrame;
 	float		m_TimeAccumulator;
+	float		m_ElapsedTime;
 };
 

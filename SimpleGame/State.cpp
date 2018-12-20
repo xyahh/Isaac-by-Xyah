@@ -2,17 +2,32 @@
 #include "State.h"
 #include "CyanEngine.h"
 
+NS_STATE_START
+
+NoneState None;
+IdleState Idle;
+MoveState Move;
+InAirState InAir(0.f);
+ChargeJumpState ChargeJump(1.f, 40'000.f);
+ChargeSlamState ChargeSlam(1.f);
+SlamState Slam(200'000.f);
+ShootState Shoot(5.f, 1'000.f);
+DamagedState Damaged(2.f, 10.f);
+
+NS_STATE_END
+
+
 /*Null State */
 
-void NullState::Enter(const IDType& ObjectIndex)
+void NoneState::Enter(const IDType& ObjectIndex)
 {
 }
 
-void NullState::Update(const IDType& ObjectIndex)
+void NoneState::Update(const IDType& ObjectIndex)
 {
 }
 
-void NullState::Exit(const IDType& ObjectIndex)
+void NoneState::Exit(const IDType& ObjectIndex)
 {
 }
 
@@ -32,9 +47,9 @@ void IdleState::Update(const IDType& ObjectIndex)
 {
 	 SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetForce();
 	if (!Zero( GetZ(Velocity)))
-		Engine.ChangeState(ObjectIndex, "InAir");		
+		Engine.ChangeState(ObjectIndex, &STATE::InAir);
 	else if (!Zero(Magnitude2(Velocity)))
-		Engine.ChangeState(ObjectIndex, "Move");
+		Engine.ChangeState(ObjectIndex, &STATE::Move);
 }
 
 void IdleState::Exit(const IDType& ObjectIndex)
@@ -57,9 +72,9 @@ void MoveState::Update(const IDType& ObjectIndex)
 	 SSE_VECTOR Force = ObjPhysics.GetForce();
 
 	if (!Zero( GetZ(Velocity)))
-		Engine.ChangeState(ObjectIndex, "InAir");
+		Engine.ChangeState(ObjectIndex, &STATE::InAir);
 	else if (Zero(Magnitude2(Velocity)) && Zero(Magnitude2(Force)))
-		Engine.ChangeState(ObjectIndex, "Idle");		
+		Engine.ChangeState(ObjectIndex, &STATE::Idle);
 }
 
 void MoveState::Exit(const IDType& ObjectIndex)
@@ -122,9 +137,9 @@ void InAirState::Update(const IDType& ObjectIndex)
 	if (Zero( GetZ(ObjPhysics.GetPosition())) && Zero( GetZ(ObjPhysics.GetForce())))
 	{
 		if (Zero(Magnitude2(ObjPhysics.GetVelocity())))
-			Engine.ChangeState(ObjectIndex, "Idle");
+			Engine.ChangeState(ObjectIndex, &STATE::Idle);
 		else
-			Engine.ChangeState(ObjectIndex, "Move");
+			Engine.ChangeState(ObjectIndex, &STATE::Move);
 	}
 }
 
@@ -153,7 +168,7 @@ void ChargeSlamState::Update(const IDType& ObjectIndex)
 	RageAmount += UPDATE_TIME * RageRate;
 	Engine.GetSprite(ObjectIndex, "Head").SetColor({ 1.f, 1.f - RageAmount, 1.f - RageAmount, 1.f });
 	if (RageAmount >= 1.f)
-		Engine.ChangeState(ObjectIndex, "Slam");
+		Engine.ChangeState(ObjectIndex, &STATE::Slam);
 }
 
 void ChargeSlamState::Exit(const IDType& ObjectIndex)
@@ -175,7 +190,7 @@ void SlamState::Update(const IDType& ObjectIndex)
 {
 	Physics& ObjPhysics = Engine.GetPhysics(ObjectIndex);
 	if (Zero( GetZ(ObjPhysics.GetPosition())))
-		Engine.ChangeState(ObjectIndex, "Idle");
+		Engine.ChangeState(ObjectIndex, &STATE::Idle);
 }
 
 void SlamState::Exit(const IDType& ObjectIndex)
@@ -187,15 +202,15 @@ void SlamState::Exit(const IDType& ObjectIndex)
 
 	Descriptor& EffectDesc = Engine.GetDescriptor(EffectID);
 	EffectDesc.Type = (ObjectType::Projectile);
-	EffectDesc.Value = (50.f);
+	EffectDesc.Value = (5.f);
 	EffectDesc.Team = (Engine.GetDescriptor(ObjectIndex).Team);
 
 	Engine.AddSprite(EffectID, "Sprite");
 	Sprite& EffectSprite = Engine.GetSprite(EffectID, "Sprite");
 	EffectSprite.SetLayerGroup(LayerGroup::Background);
-	EffectSprite.SetSpriteType(SpriteType::Grid);
+	EffectSprite.SetSpriteType(SpriteShape::Grid);
 	EffectSprite.SetTexture("Explosion");
-	EffectSprite.SetSize({ 5.f, 5.f });
+	EffectSprite.SetSize({ 10.f, 10.f });
 	EffectSprite.SetFrameRate(60);
 	EffectSprite.SetDirection(5);
 	EffectSprite.SetTotal({ 9, 9 });
@@ -205,7 +220,7 @@ void SlamState::Exit(const IDType& ObjectIndex)
 	});
 
 	Physics& EffectPhysics = Engine.GetPhysics(EffectID);
-	EffectPhysics.Box().SetDimensions({ 3.f, 3.f, 0.5f });
+	EffectPhysics.Box().SetDimensions({ 8.5f, 8.5f, 0.5f });
 	EffectPhysics.SetCollision(&Collision::Explosion);
 
 	SSE_VECTOR Position = Engine.GetPhysics(ObjectIndex).GetPosition();
@@ -240,6 +255,7 @@ void ShootState::Update(const IDType& ObjectIndex)
 		Time = 0.f;
 		HeadSprite.NextFrame();
 		size_t Tear;
+		Engine.GetSound("Pop").Play();
 		Tear = Engine.AddObject();
 
 		IDType& TearID = Engine.LocateObject(Tear);
@@ -325,7 +341,7 @@ void DamagedState::Update(const IDType& ObjectIndex)
 
 	if (DurationTimer >= Duration)
 	{
-		Engine.ChangeState(ObjectIndex, "Idle");
+		Engine.ChangeState(ObjectIndex, &STATE::Idle);
 		DurationTimer = 0.f;
 	}
 }

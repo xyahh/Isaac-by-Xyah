@@ -53,10 +53,10 @@ void SSE_CALLCONV ProjectileCollision::OnCollision
 	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
 
 	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor 
-		&& Engine.GetCurrentState(CollidingID)->Name() != "Damaged")
+		&& Engine.GetCurrentState(CollidingID)->Type() != StateType::Damaged)
 	{
 		CollidingDesc.Value -= MyDesc.Value;
-		Engine.ChangeState(CollidingID, "Damaged");
+		Engine.ChangeState(CollidingID, &STATE::Damaged);
 		Engine.DeleteObject(MyID);
 	}
 	else if (CollidingDesc.Type == ObjectType::Structure)
@@ -90,14 +90,14 @@ void SSE_CALLCONV ExplosionCollision::OnCollision
 	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
 	
 	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor 
-		&& Engine.GetCurrentState(CollidingID)->Name() != "Damaged")
+		&& Engine.GetCurrentState(CollidingID)->Type() != StateType::Damaged)
 	{
 		SSE_VECTOR v =  Subtract(CollidingBody->GetPosition(), MyBody->GetPosition());
 		v = Normalize2(v);
 		v =  Scale(v, 100'000.f);
 		v =  Add(v, { 0.f, 0.f, 1'000.f });
 		CollidingBody->ApplyForce(v);
-		Engine.ChangeState(CollidingID, "Damaged");
+		Engine.ChangeState(CollidingID, &STATE::Damaged);
 		CollidingDesc.Value -= MyDesc.Value;
 	}
 }
@@ -113,12 +113,12 @@ void SSE_CALLCONV MonsterCollision::OnCollision
 	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
 	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
 	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor 
-		&& Engine.GetCurrentState(CollidingID)->Name() != "Damaged")
+		&& Engine.GetCurrentState(CollidingID)->Type() != StateType::Damaged)
 	{
 		SSE_VECTOR Coll_Vel = CollidingBody->GetVelocity();
 		SSE_VECTOR Resultant = Subtract(Coll_Vel, Scale(CollisionNormal, 2.f * Dot2(Coll_Vel, CollisionNormal)));
 		CollidingBody->SetVelocity(Resultant);
-		Engine.ChangeState(CollidingID, "Damaged");
+		Engine.ChangeState(CollidingID, &STATE::Damaged);
 		CollidingDesc.Value -= 5.f;
 	}
 }

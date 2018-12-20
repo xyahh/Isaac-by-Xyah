@@ -24,7 +24,6 @@ public:
 
 	void Prepare();
 
-	void SSE_CALLCONV DrawShadow(SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size, float Alpha) const;
 	void SSE_CALLCONV DrawSprite( SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size,
 		const  FLOAT4& Color, u_int TexID, const  UINT2& CurrentSprite, const  UINT2& TotalSprite,
 		u_int LayerGrouping) const;
@@ -36,8 +35,6 @@ public:
 	void UpdateScale(float N);
 
 private:
-	void SSE_CALLCONV DrawTexRect(const FLOAT3& Position, const FLOAT2& Size, const FLOAT4& Color, u_int TexID) const;
-
 	SSE_VECTOR SSE_CALLCONV GLTransform(SSE_VECTOR_PARAM1 v, u_int LayerGrouping) const;
 
 	bool Initialize();

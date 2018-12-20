@@ -157,6 +157,7 @@
     <ClInclude Include="Controller.h" />
     <ClInclude Include="Descriptor.h" />
     <ClInclude Include="Direction.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="EventDispatcher.h" />
     <ClInclude Include="IDType.h" />
     <ClInclude Include="Window.h" />
@@ -184,6 +185,7 @@
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="Descriptor.cpp" />
+    <ClCompile Include="Event.cpp" />
     <ClCompile Include="EventDispatcher.cpp" />
     <ClCompile Include="IDType.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -210,8 +212,6 @@
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\SolidRect.fs" />
-    <None Include="Shaders\SolidRect.vs" />
     <None Include="Shaders\TextureRect.fs" />
     <None Include="Shaders\TextureRect.vs" />
     <None Include="Shaders\TextureRectSeq.fs" />

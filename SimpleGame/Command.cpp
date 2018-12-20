@@ -16,9 +16,9 @@ void StateCommand::execute(const IDType& ObjectIndex)
 	if (Config & ST_CMD::ON_PRESS)
 	{
 		if (Config & ST_CMD::CHANGE_STATE)
-			return Engine.ChangeState(ObjectIndex, StateName);
+			return Engine.ChangeState(ObjectIndex, Type);
 		if(Config & ST_CMD::PUSH_STATE)
-			return Engine.PushState(ObjectIndex, StateName);
+			return Engine.PushState(ObjectIndex, Type);
 		if (Config & ST_CMD::POP_STATE)
 			return Engine.PopState(ObjectIndex);
 	}
@@ -30,9 +30,9 @@ void StateCommand::release(const IDType& ObjectIndex)
 	if (Config & ST_CMD::ON_RELEASE)
 	{
 		if (Config & ST_CMD::CHANGE_STATE)
-			return Engine.ChangeState(ObjectIndex, StateName);
+			return Engine.ChangeState(ObjectIndex, Type);
 		if (Config & ST_CMD::PUSH_STATE)
-			return Engine.PushState(ObjectIndex, StateName);
+			return Engine.PushState(ObjectIndex, Type);
 		if (Config & ST_CMD::POP_STATE)
 			return Engine.PopState(ObjectIndex);
 	}

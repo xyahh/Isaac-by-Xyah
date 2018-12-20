@@ -9,7 +9,7 @@ class Input
 private:
 
 	void DefineInput(int Value);
-	void ProcessInput();
+	virtual void ProcessInput();
 
 private:
 
@@ -18,3 +18,12 @@ private:
 	STD vector<int>		m_Pushed;
 	STD vector<int>		m_Released;
 };
+
+class NPCInput : public Input
+{
+	virtual	void ProcessInput()
+	{
+
+	}
+};
+

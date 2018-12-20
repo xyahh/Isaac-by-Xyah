@@ -63,11 +63,7 @@ bool Renderer::Initialize()
 	//Load shaders
 	m_TextureRectShader = CompileShaders("./Shaders/TextureRect.vs", "./Shaders/TextureRect.fs");
 	m_TextureSpriteShader = CompileShaders("./Shaders/TextureRectSeq.vs", "./Shaders/TextureRectSeq.fs");
-	m_TexShadow = GenerateTexture("./Resources/shadow.png");
 
-#ifdef CYAN_DEBUG_COLLISION
-	m_DebugRect = GenerateTexture("./Resources/debug_rect.png");
-#endif
 	//Create VBOs
 	CreateVertexBufferObjects();
 
@@ -247,55 +243,13 @@ void Renderer::Prepare()
 	
 }
 
-void SSE_CALLCONV Renderer::DrawTexRect(const FLOAT3& Position, const FLOAT2& Size, const FLOAT4& Color, u_int TexID) const
-{
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glUseProgram(m_TextureRectShader);
-
-	glUniform3f(glGetUniformLocation(m_TextureRectShader, "u_Trans"), Position.x, Position.y, Position.z);
-	glUniform2f(glGetUniformLocation(m_TextureRectShader, "u_Size"), Size.x, Size.y);
-	glUniform4f(glGetUniformLocation(m_TextureRectShader, "u_Color"), Color.x, Color.y, Color.z, Color.w);
-	int texUniform = glGetUniformLocation(m_TextureRectShader, "u_Texture");
-	glUniform1i(texUniform, 0);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, TexID);
-
-	int attribPosition = glGetAttribLocation(m_TextureRectShader, "a_Position");
-	int attribTexture = glGetAttribLocation(m_TextureRectShader, "a_TexPos");
-
-	glEnableVertexAttribArray(attribPosition);
-	glEnableVertexAttribArray(attribTexture);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTexRect);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-	glVertexAttribPointer(attribTexture, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(3 * sizeof(float)));
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	glDisableVertexAttribArray(attribPosition);
-	glDisableVertexAttribArray(attribTexture);
-
-	glDisable(GL_BLEND);
-}
-
-void SSE_CALLCONV Renderer::DrawShadow(SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size, float Alpha) const
-{
-	//FLOAT3 GLPos = StoreFloat3(GetGLPos(Position));
-	//FLOAT2 GLSize = StoreFloat2(GetGLSize(Size));
-	//GLPos.z = FARTHEST;
-	//DrawTexRect(GLPos, GLSize, { 1.f, 1.f, 1.f, 1.f }, m_TexShadow);
-	DrawSprite(Position, Size, { 1.f, 1.f, 1.f, Alpha }, m_TexShadow, { 0, 0 }, { 1, 1 }, LayerGroup::Background);
-}
-
 void SSE_CALLCONV Renderer::DrawSprite( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_PARAM1 Size,
 	const  FLOAT4& Color, u_int TexID, const  UINT2& CurrentSprite, const  UINT2& TotalSprite,
 	u_int LayerGrouping) const
 {
 	FLOAT3 GLPos = StoreFloat3(GLTransform(Position, LayerGrouping));
 	FLOAT2 GLSize = StoreFloat2(GLTransform(Size, LayerGrouping));
+
 	u_int shader = m_TextureSpriteShader;
 	glUseProgram(shader);
 

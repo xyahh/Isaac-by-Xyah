@@ -1,6 +1,14 @@
 #pragma once
 #include "CyanEngine.h"
 
+enum CommandType
+{
+	FORCE,
+	FACE,
+	MOD_STATE,
+	SCENE,
+};
+
 enum ST_CMD
 {
 	ON_PRESS		= 0x01,
@@ -53,8 +61,8 @@ private:
 class StateCommand : public Command
 {
 public:
-	StateCommand(const STD string& StateName, DWORD Config = ST_CMD::ON_PRESS | ST_CMD::CHANGE_STATE) :
-		StateName(StateName),
+	StateCommand(State* Type, DWORD Config = ST_CMD::ON_PRESS | ST_CMD::CHANGE_STATE) :
+		Type(Type),
 		Config(Config) {}
 	virtual ~StateCommand() {}
 
@@ -63,7 +71,7 @@ public:
 
 private:
 	DWORD  Config;
-	STD string StateName;
+	State* Type;
 };
 
 template<class T>
@@ -72,6 +80,9 @@ class SceneCommand : public Command
 public:
 	SceneCommand() {}
 	virtual ~SceneCommand() {}
-	virtual void execute(size_t Index) { Engine.GetFramework().PlayScene<T>(); }
+	virtual void execute(const IDType& Index)
+	{
+		Engine.GetWindow().PlayScene<T>(); 
+	}
 };
 

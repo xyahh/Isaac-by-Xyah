@@ -96,6 +96,9 @@
     <ClInclude Include="IDType.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Event.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SimpleGame.cpp">
@@ -167,14 +170,11 @@
     <ClCompile Include="IDType.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Event.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\SolidRect.fs">
-      <Filter>소스 파일\Shaders</Filter>
-    </None>
-    <None Include="Shaders\SolidRect.vs">
-      <Filter>소스 파일\Shaders</Filter>
-    </None>
     <None Include="Shaders\TextureRect.fs">
       <Filter>소스 파일\Shaders</Filter>
     </None>

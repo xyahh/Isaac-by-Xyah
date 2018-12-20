@@ -3,7 +3,7 @@
 #include "CyanEngine.h"
 
 Sprite::Sprite() :
-	Type(SpriteType::Linear),
+	Type(SpriteShape::Linear),
 	FrameRate(0),
 	CurrentFrame(0.f),
 	Current(0, 0),
@@ -30,7 +30,7 @@ void SSE_CALLCONV Sprite::SetOffset( SSE_VECTOR_PARAM1 _Offset)
 	Offset = StoreFloat3(_Offset);
 }
 
-void Sprite::SetSpriteType(SpriteType _Type)
+void Sprite::SetSpriteType(SpriteShape _Type)
 {
 	Type = _Type;
 }
@@ -60,9 +60,9 @@ bool Sprite::Update()
 {
 	switch (Type)
 	{
-	case SpriteType::Linear: 
+	case SpriteShape::Linear: 
 		return LinearUpdate();
-	case SpriteType::Grid: 
+	case SpriteShape::Grid: 
 		return GridUpdate();
 	}
 	return false;

@@ -1,6 +1,5 @@
 #pragma once
-
-enum SpriteType
+enum SpriteShape
 {
 	Linear,
 	Grid,
@@ -27,7 +26,7 @@ public:
 	void SSE_CALLCONV SetTotal(SSE_VECTOR_PARAM1 _Total);
 	void SSE_CALLCONV SetOffset(SSE_VECTOR_PARAM1 _Offset);
 
-	void SetSpriteType(SpriteType Type);
+	void SetSpriteType(SpriteShape Type);
 	void SetFrameRate(float FrameRate);
 	
 	bool Update();

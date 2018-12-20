@@ -7,7 +7,7 @@
 int WINAPI WinMain(HINSTANCE   hInstance, HINSTANCE   hPrevInstance, LPSTR lpCmdLine, int nCmdShow)  
 {
 	Engine.Init("Binding of Isaac", 800, 800, "Debug");
-	Engine.GetFramework().PlayScene<Gameplay>();
+	Engine.GetWindow().PlayScene<Logo>();
 	Engine.GetWorld().SetScale(0.025f, 1);
 	Engine.MainLoop();
 	return FALSE;

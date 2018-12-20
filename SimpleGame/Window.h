@@ -28,6 +28,8 @@ public:
 		});
 	}
 
+	int MsgBox(const STD string& Text, const STD string& Title, UINT Type);
+
 private:
 
 	Window() {}

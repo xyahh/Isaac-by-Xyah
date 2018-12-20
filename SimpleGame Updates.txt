@@ -9,6 +9,7 @@ New Features
 Features Pending (In order of Priority)
 --------------------------------------------
 +) Button UI Interface Class
++) Text Box..
 +) Engine to have a Vibration Time Setter for Controllers
 +) Engine to have an Optional Periodical try to reconnect Controller.
 +) Support for Multiple Controllers
