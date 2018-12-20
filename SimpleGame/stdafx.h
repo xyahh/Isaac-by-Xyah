@@ -20,7 +20,6 @@
 #define	STD		std::
 
 #include "Math.h"
-#include "Indices.h"
 #include "EventDispatcher.h"
 
 //#define CYAN_DEBUG_STATES
@@ -36,7 +35,8 @@ constexpr float UPDATE_TIME			{ 1.f / UPDATE_FREQUENCY };
 template<class T>
 inline size_t Last(const STD vector<T>& v)
 {
-	return v.size() - 1;
+	auto a = v.size() - 1;
+	return a;
 }
 
 template<class T>
@@ -62,6 +62,7 @@ class Window;
 class Scene;
 class Cyan;
 class Timer;
+class IDType;
 
 /* Components */
 class Physics;

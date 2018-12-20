@@ -2,12 +2,12 @@
 #include "Controller.h"
 #include "CyanEngine.h"
 
-void Controller::MapControl(int Value, size_t CommandIndex)
+void Controller::MapControl(int Value, const STD string& CommandIndex)
 {
 	m_Controls.emplace(Value, CommandIndex);
 }
 
-void Controller::HandleControls(size_t ObjectIndex,
+void Controller::HandleControls(const IDType& ObjectIndex,
 	const STD vector<int>& Pressed, 
 	const STD vector<int>& Released)
 {

@@ -6,16 +6,17 @@ class Controller
 
 public:
 
-	void MapControl(int Value, size_t CommandIndex);
+	void MapControl(int Value, const STD string& CommandName);
 
 private:
-	void HandleControls(size_t ObjectIndex,
+
+	void HandleControls(const IDType& ObjectIndex,
 		const STD vector<int>& Pressed,
 		const STD vector<int>& Released
 	);
 
 private:
-	STD multimap<int, size_t>	m_Controls;
+	STD multimap<int, STD string>	m_Controls;
 };
 
 

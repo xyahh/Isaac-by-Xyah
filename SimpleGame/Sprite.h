@@ -20,7 +20,7 @@ public:
 	Sprite();
 	~Sprite() {}
 
-	void SetTexture(size_t TexIdx);
+	void SetTexture(const STD string&  TexIdx);
 	void SetDirection(u_int _State);
 	void SSE_CALLCONV SetSize(SSE_VECTOR_PARAM1 _Size);
 	void ResetSprite();
@@ -39,7 +39,7 @@ public:
 
 	float GetFrameRate() const;
 
-	size_t GetTexture() const;
+	const STD string& GetTexture() const;
 	u_int GetDirection() const;
 
 	SSE_VECTOR SSE_CALLCONV GetSize() const;
@@ -56,14 +56,14 @@ public:
 
 private:
 
-	u_int	Type;
-	size_t	TexIndex;
-	float	FrameRate;
-	float	CurrentFrame;
-	UINT2	Current;
-	UINT2	Total; //How many Columns/Rows in SpriteSheet
-	FLOAT2	Size;
-	FLOAT3	Offset;
-	FLOAT4  Color;
-	u_int	Layer;
+	u_int		Type;
+	STD string	TexIndex;
+	float		FrameRate;
+	float		CurrentFrame;
+	UINT2		Current;
+	UINT2		Total; //How many Columns/Rows in SpriteSheet
+	FLOAT2		Size;
+	FLOAT3		Offset;
+	FLOAT4		Color;
+	u_int		Layer;
 };

@@ -10,12 +10,12 @@ Sprite::Sprite() :
 	Total(1, 1),
 	Size(1.f, 1.f),
 	Offset(0.f, 0.f, 0.f),
-	TexIndex(0),
+	TexIndex(""),
 	Color(1.f, 1.f, 1.f, 1.f),
 	Layer(LayerGroup::Middleground)
 {}
 
-void Sprite::SetTexture(size_t TexIdx)
+void Sprite::SetTexture(const STD string& TexIdx)
 {
  	TexIndex = TexIdx;
 }
@@ -100,7 +100,7 @@ bool Sprite::GridUpdate()
 	return false;
 }
 
-size_t Sprite::GetTexture() const
+const STD string& Sprite::GetTexture() const
 {
 	return TexIndex;
 }
@@ -155,7 +155,6 @@ void Sprite::Render(const Renderer & RenderDevice, SSE_VECTOR_PARAM1 Position)
 	SSE_VECTOR SpriteSize = GetSize();
 	SSE_VECTOR SpriteOffset = GetOffset();
 
-	RenderDevice.DrawShadow(Position, SpriteSize, Color.w);
 	RenderDevice.DrawSprite
 	(
 		Add(Position, SpriteOffset)

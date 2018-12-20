@@ -16,8 +16,8 @@ public:
 	Command() = default;
 	virtual ~Command() {}
 
-	virtual void execute(size_t Index) {};
-	virtual void release(size_t Index) {};
+	virtual void execute(const IDType& Index) {};
+	virtual void release(const IDType& Index) {};
 
 };
 
@@ -28,8 +28,8 @@ public:
 		Force(x, y, z) {}
 	virtual ~ForceCommand() {}
 	
-	virtual void execute(size_t Index);
-	virtual void release(size_t Index) {}
+	virtual void execute(const IDType& Index);
+	virtual void release(const IDType& Index) {}
 
 private:
 	 FLOAT3 Force;
@@ -38,32 +38,32 @@ private:
 class FaceCommand : public Command
 {
 public:
-	FaceCommand(size_t SpriteIndex, u_int Direction) :
-		Direction(Direction), SpriteIndex(SpriteIndex){}
+	FaceCommand(const STD string& SpriteName, u_int Direction) :
+		Direction(Direction), SpriteName(SpriteName){}
 	virtual ~FaceCommand() {}
 
-	virtual void execute(size_t Index);
-	virtual void release(size_t Index) {}
+	virtual void execute(const IDType& Index);
+	virtual void release(const IDType& Index) {}
 
 private:
-	size_t SpriteIndex;
+	STD string SpriteName;
 	u_int Direction;
 };
 
 class StateCommand : public Command
 {
 public:
-	StateCommand(size_t StateID, DWORD Config = ST_CMD::ON_PRESS | ST_CMD::CHANGE_STATE) :
-		StateIndex(StateID),
+	StateCommand(const STD string& StateName, DWORD Config = ST_CMD::ON_PRESS | ST_CMD::CHANGE_STATE) :
+		StateName(StateName),
 		Config(Config) {}
 	virtual ~StateCommand() {}
 
-	virtual void execute(size_t Index);
-	virtual void release(size_t Index);
+	virtual void execute(const IDType& Index);
+	virtual void release(const IDType& Index);
 
 private:
 	DWORD  Config;
-	size_t StateIndex;
+	STD string StateName;
 };
 
 template<class T>

@@ -7,6 +7,7 @@ void SSE_CALLCONV Collision::BBox::SetDimensions(SSE_VECTOR_PARAM1 v)
 	Size = StoreFloat3(v);
 }
 
+
  SSE_VECTOR SSE_CALLCONV Collision::BBox::GetDimensions() const
 {
 	return LoadFloat3(Size);
@@ -15,9 +16,9 @@ void SSE_CALLCONV Collision::BBox::SetDimensions(SSE_VECTOR_PARAM1 v)
 
 void SSE_CALLCONV BasicCollision::OnCollision
 (
-	size_t MyID,
+	const IDType& MyID,
 	Physics* MyBody,
-	size_t CollidingID,
+	const IDType& CollidingID,
 	Physics* CollidingBody,
 	SSE_VECTOR_PARAM1 CollisionNormal
 ) 
@@ -30,9 +31,9 @@ void SSE_CALLCONV BasicCollision::OnCollision
 
 void SSE_CALLCONV PlayerCollision::OnCollision
 (
-	size_t MyID,
+	const IDType& MyID,
 	Physics* MyBody,
-	size_t CollidingID,
+	const IDType& CollidingID,
 	Physics* CollidingBody,
 	SSE_VECTOR_PARAM1 CollisionNormal
 )
@@ -41,9 +42,9 @@ void SSE_CALLCONV PlayerCollision::OnCollision
 
 void SSE_CALLCONV ProjectileCollision::OnCollision
 (
-	size_t MyID,
+	const IDType& MyID,
 	Physics* MyBody,
-	size_t CollidingID,
+	const IDType& CollidingID,
 	Physics* CollidingBody,
 	SSE_VECTOR_PARAM1 CollisionNormal
 )
@@ -51,10 +52,11 @@ void SSE_CALLCONV ProjectileCollision::OnCollision
 	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
 	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
 
-	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor && Engine.GetCurrentState(CollidingID)->Name() != ST::DAMAGED)
+	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor 
+		&& Engine.GetCurrentState(CollidingID)->Name() != "Damaged")
 	{
 		CollidingDesc.Value -= MyDesc.Value;
-		Engine.ChangeState(CollidingID, ST::DAMAGED);
+		Engine.ChangeState(CollidingID, "Damaged");
 		Engine.DeleteObject(MyID);
 	}
 	else if (CollidingDesc.Type == ObjectType::Structure)
@@ -65,9 +67,9 @@ void SSE_CALLCONV ProjectileCollision::OnCollision
 
 void SSE_CALLCONV StructureCollision::OnCollision
 (
-	size_t MyID,
+	const IDType& MyID,
 	Physics* MyBody,
-	size_t CollidingID,
+	const IDType& CollidingID,
 	Physics* CollidingBody,
 	SSE_VECTOR_PARAM1 CollisionNormal
 ) 
@@ -77,9 +79,9 @@ void SSE_CALLCONV StructureCollision::OnCollision
 
 void SSE_CALLCONV ExplosionCollision::OnCollision
 (
-	size_t MyID, 
+	const IDType& MyID,
 	Physics * MyBody, 
-	size_t CollidingID, 
+	const IDType& CollidingID,
 	Physics * CollidingBody, 
 	SSE_VECTOR_PARAM1 CollisionNormal
 )
@@ -87,30 +89,36 @@ void SSE_CALLCONV ExplosionCollision::OnCollision
 	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
 	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
 	
-	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor && Engine.GetCurrentState(CollidingID)->Name() != ST::DAMAGED)
+	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor 
+		&& Engine.GetCurrentState(CollidingID)->Name() != "Damaged")
 	{
 		SSE_VECTOR v =  Subtract(CollidingBody->GetPosition(), MyBody->GetPosition());
 		v = Normalize2(v);
 		v =  Scale(v, 100'000.f);
 		v =  Add(v, { 0.f, 0.f, 1'000.f });
 		CollidingBody->ApplyForce(v);
-		Engine.ChangeState(CollidingID, ST::DAMAGED);
+		Engine.ChangeState(CollidingID, "Damaged");
 		CollidingDesc.Value -= MyDesc.Value;
 	}
 }
 
-void SSE_CALLCONV MonsterCollision::OnCollision(size_t MyID, Physics * MyBody, size_t CollidingID, Physics * CollidingBody, SSE_VECTOR_PARAM1 CollisionNormal)
+void SSE_CALLCONV MonsterCollision::OnCollision
+(
+	const IDType& MyID,
+	Physics * MyBody, 
+	const IDType& CollidingID,
+	Physics * CollidingBody, 
+	SSE_VECTOR_PARAM1 CollisionNormal)
 {
 	Descriptor& MyDesc = Engine.GetDescriptor(MyID);
 	Descriptor& CollidingDesc = Engine.GetDescriptor(CollidingID);
-	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor && Engine.GetCurrentState(CollidingID)->Name() != ST::DAMAGED)
+	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor 
+		&& Engine.GetCurrentState(CollidingID)->Name() != "Damaged")
 	{
-		SSE_VECTOR v = Subtract(CollidingBody->GetPosition(), MyBody->GetPosition());
-		v = Normalize2(v);
-		v = Scale(v, 100'000.f);
-		SetZ(&v, 0.f);
-		CollidingBody->ApplyForce(v);
-		Engine.ChangeState(CollidingID, ST::DAMAGED);
+		SSE_VECTOR Coll_Vel = CollidingBody->GetVelocity();
+		SSE_VECTOR Resultant = Subtract(Coll_Vel, Scale(CollisionNormal, 2.f * Dot2(Coll_Vel, CollisionNormal)));
+		CollidingBody->SetVelocity(Resultant);
+		Engine.ChangeState(CollidingID, "Damaged");
 		CollidingDesc.Value -= 5.f;
 	}
 }

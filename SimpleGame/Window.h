@@ -33,7 +33,7 @@ private:
 	Window() {}
 	~Window() {}
 
-	bool Initialize(const STD string& Title, int Width, int Height, bool EnableDevConsole=false);
+	bool Initialize(const STD string& Title, int Width, int Height, const STD string& DevConsoleTitle);
 	void Close();
 	int ProcMessage();
 	void SwapBuffers();

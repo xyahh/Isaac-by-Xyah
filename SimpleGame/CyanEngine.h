@@ -12,6 +12,7 @@
 #include "Sprite.h"
 #include "Controller.h"
 #include "Direction.h"
+#include "IDType.h"
 
 class Cyan
 {
@@ -20,22 +21,17 @@ class Cyan
 public:
 	Cyan() {}
 	~Cyan() {}
- 
-	size_t GetID(size_t Index)
+
+	const IDType& GetID(size_t Index)
 	{
 		for (auto& obj : m_ObjectLocator)
 			if (Index == obj.second)
 				return obj.first;
-		assert("Hello" && false);
+		assert("Index Out of Bounds!" && false);
 	}
-	
-	size_t GetIndex(size_t ID)
-	{
-		auto& obj = m_ObjectLocator.find(ID);
-		if (obj != m_ObjectLocator.end())
-			return obj->second;
-		assert("Hello" && false);
-	}
+
+	IDType LocateObject(const STD string& Name);
+	IDType LocateObject(size_t Number);
 
 	void ResetClock();
 
@@ -49,7 +45,7 @@ public:
 
 	/*---------Game Loop--------------------------------*/
 
-	bool Init(const STD string& Title, int X, int Y, bool Dev = false);
+	bool Init(const STD string& Title, int X, int Y, const STD string& Dev = "");
 
 	void MainLoop();
 
@@ -60,48 +56,48 @@ public:
 
 	/*---------Components Functions---------------------*/
 
-	void AddObject(size_t * Out);
-	void AddSprite(size_t * Out, size_t ObjectIndex);
-	void AddController(size_t ObjectIndex, size_t StateIndex); 
-
-	void DeleteObject(size_t ObjectIndex);
+	size_t AddObject(const STD string& ObjectID = "");
+	void AddSprite(const IDType& ObjectIndex, const STD string & SpriteID);
+	void AddController(const IDType& ObjectIndex, const STD string & StateID);
+	void DeleteObject(const IDType& ObjectIndex);
 
 	void UpdateInput();
 
 	template<class T, class... Args>
-	void AddStatePrototype(size_t* Out, Args&&... Ax)
+	void AddStatePrototype(STD string&& ID, Args&&... Ax)
 	{
-		AddComponent<T>(m_StatePrototypes, Out, Ax...);
+		m_StatePTLocator[ID] = AddComponent<T>(m_StatePrototypes, Ax...);
 	}
 
 	template<class T, class... Args>
-	void AddCommand(size_t* Out, Args&&... Ax)
+	void AddCommand(STD string&& ID, Args&&... Ax)
 	{
-		AddComponent<T>(m_Commands, Out, Ax...);
+		m_CommandLocator[ID] = AddComponent<T>(m_Commands, Ax...);
 	}
 
-	void AddTexture(size_t * Out, const STD string& ImagePath);
-	void AddSound(size_t * Out, const STD string& ImagePath, bool isBGM);
+	void AddTexture(const STD string& TexName, const STD string & ImagePath);
+	void AddSound(const STD string& SoundName, const STD string & ImagePath, bool isBGM);
 
-	void PushState(size_t ObjectIndex, size_t StateIndex);
-	void PopState(size_t ObjectIndex);
-	void ChangeState(size_t ObjectIndex, size_t StateIndex);
+	void PushState(const IDType& ObjectIndex, const STD string & StateIndex);
+	void PopState(const IDType& ObjectIndex);
+	void ChangeState(const IDType& ObjectIndex, const STD string & StateIndex);
 
 	/*---------Components Getters-----------------------*/
+
 	World& GetWorld();
 	Window& GetFramework();
 	Renderer& GetRenderer();
 
-	Descriptor& GetDescriptor(size_t ObjectIndex);
-	Physics& GetPhysics(size_t ObjectIndex);
-	State*& GetCurrentState(size_t ObjectIndex);
-	Controller& GetController(size_t ObjectIndex, size_t StateIndex);
+	Descriptor& GetDescriptor(const IDType& ObjectIndex);
+	Sprite&  GetSprite(const IDType& ObjectIndex, const STD string & SpriteName);
+	Physics& GetPhysics(const IDType& ObjectIndex);
+	State*&  GetCurrentState(const IDType& ObjectIndex);
+	Controller& GetController(const IDType& ObjectIndex, const STD string & StateName);
 
-	Sprite& GetSprite(size_t ObjectIndex, size_t SpriteNumber);
+	Command*& GetCommand(const STD string& CommandName);
+	u_int GetTexture(const STD string& TextureName);
+	Sound& GetSound(const STD string& SoundName);
 
-	Command*& GetCommand(size_t ObjectIndex);
-	u_int GetTexture(size_t ObjectIndex);
-	Sound& GetSound(size_t ObjectIndex);
 	/*---------Components Deletion----------------------*/
 
 	void DeleteComponents();
@@ -111,10 +107,10 @@ private:
 	void ReleaseComponentData();
 
 	template<class T, class V, class... Args>
-	void AddComponent(STD vector<V>& v, size_t* Out, Args&&... Ax)
+	size_t AddComponent(STD vector<V>& v, Args&&... Ax)
 	{
 		v.emplace_back(new T(STD forward<Args>(Ax)...));
-		*Out = Last(v);
+		return Last(v);
 	}
 
 	void FlushActionQueue()
@@ -126,12 +122,11 @@ private:
 		}
 	}
 
-
 private:
 
-	using ObjController = STD map <size_t, Controller>;
-	using ObjSprite = STD vector<Sprite>;
-	using ObjState = STD pair<bool, STD stack<State*>>;
+	using StateController = STD map <STD string, Controller>;
+	using Graphics = STD vector<Sprite>;
+	using StateStack = STD pair<bool, STD stack<State*>>;
 	/*
 		The Bool in State Pair helps decide whether a
 		Change in state of an Object is Queued in the
@@ -145,15 +140,24 @@ private:
 	Renderer	m_Renderer;
 	World		m_World; //Scale
 
-	/* Object Components */
-	STD map<size_t, size_t>		m_ObjectLocator;
+	/* Locators */
+	STD map<IDType, size_t>		m_ObjectLocator;
+	
 
-	STD vector<Descriptor>		m_Descriptors;
+	STD map<STD string, size_t> m_StatePTLocator;
+	STD map<STD string, size_t> m_CommandLocator;
+	STD map<STD string, size_t> m_TextureLocator;
+	STD map<STD string, size_t> m_SoundLocator;
+
+	STD vector<STD map<STD string, size_t>>	m_SpriteLocator;
+
+	/* Object Components */
+	STD vector<Descriptor>		m_Descriptor;
+	STD vector<Graphics>		m_Graphics;
 	STD vector<Physics>			m_Physics;
 	STD vector<Input>			m_Input;
-	STD vector<ObjSprite>		m_Sprites;
-	STD vector<ObjState>		m_States;
-	STD vector<ObjController>	m_Controllers;
+	STD vector<StateStack>		m_States;
+	STD vector<StateController>	m_Controllers;
 
 	/* Integral Components */
 	STD vector<State*>		m_StatePrototypes;

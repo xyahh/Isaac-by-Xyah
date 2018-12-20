@@ -2,17 +2,44 @@
 #include "Window.h"
 
 #include "CyanEngine.h"
-#include "DevConsole.h"
 #include "resource.h"
 #include "Scene.h"
 
 #include "Dependencies/GL/glew.h"
 #include "Dependencies/GL/freeglut.h"
 
-bool Window::Initialize(const STD string & Title, int Width, int Height, bool EnableDevConsole)
+/* Dev Console */
+#include <fcntl.h>
+#include <io.h>
+
+bool Window::Initialize(const STD string & Title, int Width, int Height, const STD string& DevConsoleTitle)
 {
-	if(EnableDevConsole)
-		DevConsole::Create();
+	if (!DevConsoleTitle.empty())
+	{
+		/* DevConsole Creation Code Source: https://stackoverflow.com/a/43870739 */
+		AllocConsole();
+		STD wstring DevConsole(DevConsoleTitle.begin(), DevConsoleTitle.end());
+		SetConsoleTitle(DevConsole.c_str());
+		typedef struct
+		{
+			char* _ptr;
+			int _cnt;
+			char* _base;
+			int _flag;
+			int _file;
+			int _charbuf;
+			int _bufsiz;
+			char* _tmpfname;
+		} FILE_COMPLETE;
+
+		*(FILE_COMPLETE*)stdout = *(FILE_COMPLETE*)_fdopen(_open_osfhandle(PtrToLong(GetStdHandle(STD_OUTPUT_HANDLE)), _O_TEXT), "w");
+		*(FILE_COMPLETE*)stderr = *(FILE_COMPLETE*)_fdopen(_open_osfhandle(PtrToLong(GetStdHandle(STD_ERROR_HANDLE)), _O_TEXT), "w");
+		*(FILE_COMPLETE*)stdin = *(FILE_COMPLETE*)_fdopen(_open_osfhandle(PtrToLong(GetStdHandle(STD_INPUT_HANDLE)), _O_TEXT), "r");
+		setvbuf(stdout, NULL, _IONBF, 0);
+		setvbuf(stderr, NULL, _IONBF, 0);
+		setvbuf(stdin, NULL, _IONBF, 0);
+		EnableMenuItem(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_GRAYED);
+	}
 
 	m_WindowTitle = Title;
 

@@ -19,7 +19,7 @@ BasicCollision * Physics::GetCollision() const
 	return m_Collision;
 }
 
-void Physics::HandleCollision(size_t MyID, Physics* OtherPhysics, size_t OtherID)
+void Physics::HandleCollision(const IDType& MyID, Physics* OtherPhysics, const IDType& OtherID)
 {
 
 	SSE_VECTOR Min, Max, OtherMin, OtherMax;
@@ -55,22 +55,16 @@ float Physics::GetMass() const
 }
 
 
-void SSE_CALLCONV Physics::ApplyForce( SSE_VECTOR_PARAM1 Force)
+void SSE_CALLCONV Physics::ApplyForce(SSE_VECTOR_PARAM1 Force)
 {
 	 SSE_VECTOR AddedAccel =  Scale(Force, 1.f / m_Mass);
 	m_Acceleration = StoreFloat3( Add(LoadFloat3(m_Acceleration), AddedAccel));
 }
 
-void Physics::SetPosition(float x, float y, float z)
-{
-	m_Position =  FLOAT3(x, y, z);
-	m_PrevPos = m_Position;
-}
-
-void SSE_CALLCONV Physics::SetPosition( SSE_VECTOR_PARAM1 v)
+void SSE_CALLCONV Physics::SetPosition(SSE_VECTOR_PARAM1 v)
 {
 	m_Position = StoreFloat3(v);
-	m_PrevPos = StoreFloat3(v);
+	m_PrevPos = m_Position;
 }
 
  SSE_VECTOR SSE_CALLCONV Physics::GetPrevPosition() const

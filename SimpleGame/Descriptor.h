@@ -24,7 +24,7 @@ public:
 		Value(0.f)
 	{}
 
-	void Update(size_t ObjIndex);
+	void Update();
 
 	/*
 	|---------------|-----------------|

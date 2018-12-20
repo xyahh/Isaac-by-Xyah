@@ -1,15 +1,4 @@
 #pragma once
-namespace ST
-{
-	extern size_t IDLE;
-	extern size_t MOVE;
-	extern size_t CHARGE_JUMP;
-	extern size_t IN_AIR;
-	extern size_t CHARGE_SLAM;
-	extern size_t SLAM;
-	extern size_t SHOOT;
-}
-
 class State
 {
 	friend Cyan;
@@ -19,12 +8,12 @@ public:
 	State() = default;
 	virtual	~State() = default;
 
-	virtual void Enter(size_t Index) = 0;
-	virtual void Exit(size_t Index) = 0;
-	virtual void Update(size_t Index) = 0;
+	virtual void Enter(const IDType& Index) = 0;
+	virtual void Exit(const IDType& Index) = 0;
+	virtual void Update(const IDType& Index) = 0;
 	virtual State* Make() = 0;
 
-	virtual size_t Name() const = 0;
+	virtual STD string Name() const = 0;
 
 
 protected:
@@ -43,11 +32,11 @@ public:
 
 private:
 
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual size_t Name() const { return size_t(); }
+	virtual STD string Name() const { return "Null"; }
 
 	virtual State* Make()	{	return Assemble(new NullState); }
 };
@@ -71,11 +60,11 @@ public:
 
 private:
 
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual size_t Name() const { return ST::IDLE; }
+	virtual STD string Name() const { return "Idle"; }
 
 	virtual State* Make()	{ return Assemble(new IdleState); }
 };
@@ -99,11 +88,11 @@ public:
 
 private:
 
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual size_t Name() const { return ST::MOVE; }
+	virtual STD string Name() const { return "Move"; }
 
 	virtual State* Make() { return Assemble(new MoveState); }
 };
@@ -127,11 +116,11 @@ public:
 
 private:
 
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 	
-	virtual size_t Name() const { return ST::CHARGE_JUMP; }
+	virtual STD string Name() const { return "ChargeJump"; }
 
 	virtual State* Make() { return Assemble(new ChargeJumpState(RageRate, Force)); }
 
@@ -161,11 +150,11 @@ public:
 
 private:
 
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual size_t Name() const { return ST::IN_AIR; }
+	virtual STD string Name() const { return "InAir"; }
 
 	virtual State* Make() { return Assemble(new InAirState(AirResistance)); }
 
@@ -192,11 +181,11 @@ public:
 	}
 
 private:
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual size_t Name() const { return ST::CHARGE_SLAM; }
+	virtual STD string Name() const { return "ChargeSlam"; }
 
 	virtual State* Make() { return Assemble(new ChargeSlamState(RageRate)); }
 
@@ -227,11 +216,11 @@ public:
 
 private:
 
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual size_t Name() const { return ST::SLAM; }
+	virtual STD string Name() const { return "Slam"; }
 
 	virtual State* Make() { return Assemble(new SlamState(SlamForce)); }
 
@@ -243,7 +232,7 @@ class ShootState : public State
 {
 public:
 
-	ShootState(u_int TexID, float ShootingRate, float ShootingForce) :
+	ShootState(float ShootingRate, float ShootingForce) :
 		TexID(TexID), ShootingRate(ShootingRate), ShootingForce(ShootingForce)
 	{
 #ifdef CYAN_DEBUG_STATES
@@ -259,13 +248,13 @@ public:
 
 private:
 
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual size_t Name() const { return ST::SHOOT; }
+	virtual STD string Name() const { return "Shoot"; }
 
-	virtual State* Make() { return Assemble(new ShootState(TexID, ShootingRate, ShootingForce)); }
+	virtual State* Make() { return Assemble(new ShootState(ShootingRate, ShootingForce)); }
 	
 	float Time;
 	float ShootingRate;
@@ -293,11 +282,11 @@ public:
 
 private:
 
-	virtual void Enter(size_t ObjectIndex);
-	virtual void Update(size_t ObjectIndex);
-	virtual void Exit(size_t ObjectIndex);
+	virtual void Enter(const IDType& ObjectIndex);
+	virtual void Update(const IDType& ObjectIndex);
+	virtual void Exit(const IDType& ObjectIndex);
 
-	virtual size_t Name() const { return ST::DAMAGED; }
+	virtual STD string Name() const { return "Damaged"; }
 	virtual State* Make() { return Assemble(new DamagedState(Duration, BlinkingRate)); }
 
 
@@ -305,6 +294,5 @@ private:
 	float BlinkingRate;
 	float BlinkingTimer;
 	float DurationTimer;
-	FLOAT4 Color;
 	int Alpha;
 };

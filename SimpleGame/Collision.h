@@ -10,9 +10,9 @@ public:
 
 	virtual void SSE_CALLCONV OnCollision
 	(
-		size_t MyID,
+		const IDType& MyID,
 		Physics* MyBody,
-		size_t CollidingID,
+		const IDType& CollidingID,
 		Physics* CollidingBody,
 		SSE_VECTOR_PARAM1 CollisionNormal
 	);
@@ -28,9 +28,9 @@ public:
 
 	virtual void SSE_CALLCONV OnCollision
 	(
-		size_t MyID,
+		const IDType& MyID,
 		Physics* MyBody,
-		size_t CollidingID,
+		const IDType& CollidingID,
 		Physics* CollidingBody,
 		SSE_VECTOR_PARAM1 CollisionNormal
 	);
@@ -44,9 +44,9 @@ public:
 
 	virtual void SSE_CALLCONV OnCollision
 	(
-		size_t MyID,
+		const IDType& MyID,
 		Physics* MyBody,
-		size_t CollidingID,
+		const IDType& CollidingID,
 		Physics* CollidingBody,
 		SSE_VECTOR_PARAM1 CollisionNormal
 	);
@@ -61,9 +61,9 @@ public:
 
 	virtual void SSE_CALLCONV OnCollision
 	(
-		size_t MyID,
+		const IDType& MyID,
 		Physics* MyBody,
-		size_t CollidingID,
+		const IDType& CollidingID,
 		Physics* CollidingBody,
 		SSE_VECTOR_PARAM1 CollisionNormal
 	);
@@ -77,9 +77,9 @@ public:
 
 	virtual void SSE_CALLCONV OnCollision
 	(
-		size_t MyID,
+		const IDType& MyID,
 		Physics* MyBody, 
-		size_t CollidingID,
+		const IDType& CollidingID,
 		Physics* CollidingBody, 
 		SSE_VECTOR_PARAM1 CollisionNormal
 	);
@@ -94,9 +94,9 @@ public:
 
 	virtual void SSE_CALLCONV OnCollision
 	(
-		size_t MyID,
+		const IDType& MyID,
 		Physics* MyBody,
-		size_t CollidingID,
+		const IDType& CollidingID,
 		Physics* CollidingBody,
 		SSE_VECTOR_PARAM1 CollisionNormal
 	);

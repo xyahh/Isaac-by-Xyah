@@ -25,8 +25,8 @@ public:
 	void SSE_CALLCONV SetForce(SSE_VECTOR_PARAM1 force);
 	SSE_VECTOR GetForce() const;
 
-	void SetPosition(float x, float y, float z);
 	void SSE_CALLCONV SetPosition(SSE_VECTOR_PARAM1 v);
+
 	SSE_VECTOR SSE_CALLCONV GetPosition() const;
 	SSE_VECTOR SSE_CALLCONV GetPrevPosition() const;
 
@@ -53,7 +53,7 @@ public:
 
 private:
 
-	void HandleCollision(size_t MyID, Physics* OtherPhysics, size_t OtherID);
+	void HandleCollision(const IDType& MyID, Physics* OtherPhysics, const IDType& OtherID);
 	void Update();
 
 private:

@@ -24,10 +24,6 @@ public:
 
 	void Prepare();
 
-#ifdef CYAN_DEBUG_COLLISION
-	void SSE_CALLCONV DrawCollisionRect( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_PARAM1 Size) const;
-#endif
-	
 	void SSE_CALLCONV DrawShadow(SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size, float Alpha) const;
 	void SSE_CALLCONV DrawSprite( SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size,
 		const  FLOAT4& Color, u_int TexID, const  UINT2& CurrentSprite, const  UINT2& TotalSprite,
@@ -36,16 +32,16 @@ public:
 	u_int GenerateTexture(const STD string& filePath) const;
 	void DeleteTexture(u_int texID) const;
 
-	void UpdateWindow(float X, float Y);
+	void UpdateWindow(int X, int Y);
 	void UpdateScale(float N);
 
 private:
 	void SSE_CALLCONV DrawTexRect(const FLOAT3& Position, const FLOAT2& Size, const FLOAT4& Color, u_int TexID) const;
 
-	 SSE_VECTOR SSE_CALLCONV GetGLPos( SSE_VECTOR_PARAM1 Position) const;
-	 SSE_VECTOR SSE_CALLCONV GetGLSize( SSE_VECTOR_PARAM1 Size) const;
+	SSE_VECTOR SSE_CALLCONV GLTransform(SSE_VECTOR_PARAM1 v, u_int LayerGrouping) const;
 
 	bool Initialize();
+	void RecalculateRatio();
 	bool ReadFile(const STD string& filename, STD string *target) const;
 	void AddShader(u_int ShaderProgram, const STD string& pShaderText, u_int ShaderType) const;
 	u_int CompileShaders(const STD string&  filenameVS, const STD string& filenameFS) const;
@@ -53,12 +49,10 @@ private:
 	
 private:
 	float Scale;
-	float WinX, WinY;
-#ifdef CYAN_DEBUG_COLLISION
-	u_int m_DebugRect = 0;
-#endif
-	u_int m_TexShadow = 0;
+	int WinX, WinY;
+	FLOAT3 Ratio;
 
+	u_int m_TexShadow = 0;
 	u_int m_VBOTexRect = 0;
 	u_int m_TextureRectShader = 0;
 	u_int m_TextureSpriteShader = 0;

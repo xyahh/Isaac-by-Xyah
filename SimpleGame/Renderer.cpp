@@ -28,30 +28,34 @@ STD vector<unsigned char> GetImageBits(const CImage & Image)
 	return ImageBits;
 }
 
- SSE_VECTOR SSE_CALLCONV Renderer::GetGLPos( SSE_VECTOR_PARAM1 Position) const
+SSE_VECTOR SSE_CALLCONV Renderer::GLTransform(SSE_VECTOR_PARAM1 v, u_int LayerGrouping) const
 {
-	return  Multiply
-	(
-		Position,
-		{
-			2.f * Scale / WinX,
-			2.f * Scale / WinY,
-			2.f * Scale / WinY
-		}
-	);
-}
+	SSE_VECTOR Result = Multiply(v,  LoadFloat3(Ratio));
+	switch (LayerGrouping)
+	{
+	case LayerGroup::Background:
+	{
+		float Depth = FARTHEST;
+		SetZ(&Result, Depth);
+		break;
+	}
+	case LayerGroup::Middleground:
+	{
+		float Depth = GetY(Result);
+		SetY(&Result, Depth + GetZ(Result));
+		SetZ(&Result, Depth);
+		break;
+	}
+	case LayerGroup::Foreground:
+	{
+		float Depth = NEAREST;
+		SetZ(&Result, Depth);
+		break;
+	}
+	}
 
- SSE_VECTOR SSE_CALLCONV Renderer::GetGLSize( SSE_VECTOR_PARAM1 Size) const
-{
-	return  Multiply
-	(
-		Size,
-		{
-			Scale / WinX,
-			Scale / WinY,
-			Scale / WinY
-		}
-	);
+	
+	return  Result;
 }
 
 bool Renderer::Initialize()
@@ -70,17 +74,24 @@ bool Renderer::Initialize()
 	return (m_TextureSpriteShader > 0 && m_VBOTexRect > 0);
 }
 
+void Renderer::RecalculateRatio()
+{
+	Ratio.x = 2.f * Scale / WinX;
+	Ratio.y = 2.f * Scale / WinY;
+	Ratio.z = Ratio.y;
+}
+
 void Renderer::CreateVertexBufferObjects()
 {
 	float TexRect[]
 		=
 	{
-		-1.f, -1.f, 0.f, 0.f, 0.f,
-		-1.f, +1.f, 0.f, 0.f, 1.f,
-		+1.f, +1.f, 0.f, 1.f, 1.f, //Triangle1
-		-1.f, -1.f, 0.f, 0.f, 0.f,
-		+1.f, +1.f, 0.f, 1.f, 1.f,
-		+1.f, -1.f, 0.f, 1.f, 0.f //Triangle2
+		-0.5f, -0.5f, 0.f, 0.f, 0.f,
+		-0.5f, +0.5f, 0.f, 0.f, 1.f,
+		+0.5f, +0.5f, 0.f, 1.f, 1.f, //Triangle1
+		-0.5f, -0.5f, 0.f, 0.f, 0.f,
+		+0.5f, +0.5f, 0.f, 1.f, 1.f,
+		+0.5f, -0.5f, 0.f, 1.f, 0.f //Triangle2
 	};
 
 	glGenBuffers(1, &m_VBOTexRect);
@@ -118,15 +129,17 @@ void Renderer::DeleteTexture(u_int TexID) const
 	glDeleteTextures(1, &TexID);
 }
 
-void Renderer::UpdateWindow(float X, float Y)
+void Renderer::UpdateWindow(int X, int Y)
 {
 	WinX = X;
 	WinY = Y;
+	RecalculateRatio();
 }
 
 void Renderer::UpdateScale(float N)
 {
 	Scale = N;
+	RecalculateRatio();
 }
 
 void Renderer::AddShader(u_int ShaderProgram, const STD string& pShaderText, u_int ShaderType) const
@@ -234,37 +247,6 @@ void Renderer::Prepare()
 	
 }
 
-#ifdef CYAN_DEBUG_COLLISION
-void SSE_CALLCONV Renderer::DrawCollisionRect( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_PARAM1 Size) const
-{
-	 SSE_VECTOR GLSize = GetGLSize(Size);
-
-	 SSE_VECTOR GLPos = GetGLPos(Position);
-	 SSE_VECTOR BlueRect = GLPos;
-	 SSE_VECTOR GreenRect = GLPos;
-	 SSE_VECTOR YellowRect = GLPos;
-
-	 SSE_VECTOR BlueSize =  Swizzle(GLSize, 0, 2, 2, 3);
-	float BlueRectY =  GetY(BlueRect) +  GetZ(BlueRect);
-	float BlueSizeY =  GetY(BlueSize);
-	 SetY(&BlueRect, BlueRectY );
-	 SetY(&GreenRect, BlueRectY + BlueSizeY);
-	 SetY(&YellowRect, BlueRectY - BlueSizeY);
-
-	float Depth =  GetY(GLPos);
-
-	 SetZ(&GLPos, Depth);
-	 SetZ(&BlueRect, Depth);
-	 SetZ(&GreenRect, Depth);
-	 SetZ(&YellowRect, Depth);
-
-	DrawTexture(YellowRect, GLSize, { 1.f, 1.f, 0.f, 1.f }, m_DebugRect);
-	DrawTexture(GLPos, GLSize, { 1.f, 0.f, 0.f, 1.f }, m_DebugRect);
-	DrawTexture(BlueRect, BlueSize, { 0.f, 0.f, 1.f, 1.f }, m_DebugRect);
-	DrawTexture(GreenRect, GLSize, { 0.f, 1.f, 0.f, 1.f }, m_DebugRect);
-}
-#endif
-
 void SSE_CALLCONV Renderer::DrawTexRect(const FLOAT3& Position, const FLOAT2& Size, const FLOAT4& Color, u_int TexID) const
 {
 	glEnable(GL_BLEND);
@@ -301,42 +283,19 @@ void SSE_CALLCONV Renderer::DrawTexRect(const FLOAT3& Position, const FLOAT2& Si
 
 void SSE_CALLCONV Renderer::DrawShadow(SSE_VECTOR_PARAM1 Position, SSE_VECTOR_PARAM1 Size, float Alpha) const
 {
-	FLOAT3 GLPos = StoreFloat3(GetGLPos(Position));
-	FLOAT2 GLSize = StoreFloat2(GetGLSize(Size));
-	GLPos.z = FARTHEST;
-	DrawTexRect(GLPos, GLSize, { 1.f, 1.f, 1.f, 1.f }, m_TexShadow);
+	//FLOAT3 GLPos = StoreFloat3(GetGLPos(Position));
+	//FLOAT2 GLSize = StoreFloat2(GetGLSize(Size));
+	//GLPos.z = FARTHEST;
+	//DrawTexRect(GLPos, GLSize, { 1.f, 1.f, 1.f, 1.f }, m_TexShadow);
+	DrawSprite(Position, Size, { 1.f, 1.f, 1.f, Alpha }, m_TexShadow, { 0, 0 }, { 1, 1 }, LayerGroup::Background);
 }
 
 void SSE_CALLCONV Renderer::DrawSprite( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_PARAM1 Size,
 	const  FLOAT4& Color, u_int TexID, const  UINT2& CurrentSprite, const  UINT2& TotalSprite,
 	u_int LayerGrouping) const
 {
-	 FLOAT3 GLPos = StoreFloat3(GetGLPos(Position));
-	 FLOAT2 GLSize = StoreFloat2(GetGLSize(Size));
-
-	switch (LayerGrouping)
-	{
-	case LayerGroup::Background:
-	{
-		GLPos.y += GLPos.z;
-		GLPos.z = FARTHEST;
-		break;
-	}
-	case LayerGroup::Middleground:
-	{
-		float Y = GLPos.y;
-		GLPos.y += GLPos.z;
-		GLPos.z = Y;
-		break;
-	}
-	case LayerGroup::Foreground:
-	{
-		GLPos.y += GLPos.z;
-		GLPos.z = NEAREST;
-		break;
-	}
-	}
-
+	FLOAT3 GLPos = StoreFloat3(GLTransform(Position, LayerGrouping));
+	FLOAT2 GLSize = StoreFloat2(GLTransform(Size, LayerGrouping));
 	u_int shader = m_TextureSpriteShader;
 	glUseProgram(shader);
 
@@ -368,10 +327,10 @@ void SSE_CALLCONV Renderer::DrawSprite( SSE_VECTOR_PARAM1 Position,  SSE_VECTOR_
 	glUniform3f(u_Trans, GLPos.x, GLPos.y, GLPos.z);
 	glUniform2f(u_Size, GLSize.x, GLSize.y);
 	glUniform4f(u_Color, Color.x, Color.y, Color.z, Color.w);
-	glUniform1f(u_CurrSeqX, CurrentSprite.x);
-	glUniform1f(u_CurrSeqY, TotalSprite.y - CurrentSprite.y - 1);
-	glUniform1f(u_TotalSeqX, TotalSprite.x);
-	glUniform1f(u_TotalSeqY, TotalSprite.y);
+	glUniform1f(u_CurrSeqX,  static_cast<float>(CurrentSprite.x));
+	glUniform1f(u_CurrSeqY,  static_cast<float>(TotalSprite.y - CurrentSprite.y - 1));
+	glUniform1f(u_TotalSeqX, static_cast<float>(TotalSprite.x));
+	glUniform1f(u_TotalSeqY, static_cast<float>(TotalSprite.y));
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TexID);
