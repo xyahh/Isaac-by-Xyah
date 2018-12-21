@@ -11,7 +11,7 @@ public:
 private:
 
 	bool IsPlaying(size_t i);
-	void UnloadAll();
+	void ReleaseSounds();
 
 
 public:

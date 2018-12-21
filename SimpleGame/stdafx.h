@@ -24,7 +24,6 @@
 #include "EventDispatcher.h"
 
 //#define CYAN_DEBUG_STATES
-//#define CYAN_DEBUG_COLLISION
 
 /* For the Depth Test */
 #define FARTHEST 1.f

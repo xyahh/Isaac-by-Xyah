@@ -12,7 +12,7 @@ u_int	MonsterNumber = 0;
 int		SpawnNumber;
 float	SpawnRate;
 float	SoundRate;
-bool	win;
+bool	GameWon;
 
 void AddActor(const STD string& ActorName, size_t Team,  SSE_VECTOR Position, 
 	const STD string& HeadTex, const STD string& BodyTex, BasicCollision* pCollision)
@@ -64,8 +64,6 @@ void AddActor(const STD string& ActorName, size_t Team,  SSE_VECTOR Position,
 void SpawnMonster()
 {
 	IDType& MonsterID = Engine.AddObject();
-
-	
 
 	auto& ActorDescriptor = Engine.GetDescriptor(MonsterID);
 	auto& ActorPhysics	= Engine.GetPhysics(MonsterID);
@@ -169,7 +167,7 @@ void SpawnMonster()
 	Engine.GetSound().Play("Zombie");
 }
 
-void Update()
+void UpdateGameState()
 {
 	static float time = 0.f;
 	time += UPDATE_TIME;
@@ -181,11 +179,11 @@ void Update()
 		SpawnRate -= 1.f;
 
 	Timer& T = Engine.GetTimer();
-	if (T.GetElapsedTime() < 0.f) return SpawnMonster();
-	if (MonsterNumber == 0 && !win)
+	if (T.GetElapsedTime() < 85.f) return SpawnMonster();
+	if (MonsterNumber == 0 && !GameWon)
 	{
 		Engine.GetSound().Stop();
-		win = true;
+		GameWon = true;
 		Engine.GetSound().Play("Win");
 
 		IDType& Win = Engine.AddObject();
@@ -241,7 +239,7 @@ void Gameplay::Enter()
 		IDType& DEPTHS = Engine.AddObject();
 		Engine.AddSprite(DEPTHS, "Depths");
 		Sprite& Map = Engine.GetSprite(DEPTHS, "Depths");
-		Map.SetSize({20.f, 20.f });
+		Map.SetSize({ 20.f, 20.f });
 		Map.SetTexture("Depths");
 		Map.SetLayerGroup(LayerGroup::Background);
 	}
@@ -399,10 +397,10 @@ void Gameplay::Enter()
 		SpawnNumber = 0;
 		SpawnRate = 5.f;
 		SoundRate = 5.f;
-		win = false;
+		GameWon = false;
 		Engine.AddEvent(Player, "MonsterSpawn");
 		Event& B = Engine.GetEvent(Player, "MonsterSpawn");
-		B.Set(Update);
+		B.Set(UpdateGameState);
 	}
 
 	//Boundaries

@@ -53,8 +53,6 @@ SSE_VECTOR SSE_CALLCONV Renderer::GLTransform(SSE_VECTOR_PARAM1 v, u_int LayerGr
 		break;
 	}
 	}
-
-	
 	return  Result;
 }
 
@@ -79,8 +77,7 @@ void Renderer::RecalculateRatio()
 
 void Renderer::CreateVertexBufferObjects()
 {
-	float TexRect[]
-		=
+	float TexRect[] =
 	{
 		-0.5f, -0.5f, 0.f, 0.f, 0.f,
 		-0.5f, +0.5f, 0.f, 0.f, 1.f,
@@ -117,7 +114,6 @@ u_int Renderer::GenerateTexture(const STD string& filePath) const
 
 	glTexImage2D(GL_TEXTURE_2D, 0, BitsPerPixel, Image.GetWidth(), Image.GetHeight(), 0, Format, GL_UNSIGNED_BYTE, GetImageBits(Image).data());
 	return TexID;
-	
 }
 
 void Renderer::DeleteTexture(u_int TexID) const

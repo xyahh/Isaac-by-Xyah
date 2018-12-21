@@ -362,7 +362,7 @@ void Cyan::DeleteComponents()
 	/* Release Data */
 	ReleaseComponentData();
 
-	m_Sound.UnloadAll();
+	m_Sound.ReleaseSounds();
 
 	/* Clear Data */
 	m_ObjectLocator.clear();

@@ -10,7 +10,7 @@ Sound::Sound()
 
 Sound::~Sound()
 {
-	UnloadAll();
+	ReleaseSounds();
 	m_SoundSystem->close();
 	m_SoundSystem->release();
 }
@@ -61,7 +61,7 @@ bool Sound::IsPlaying(size_t i)
 	return bPlaying;
 }
 
-void Sound::UnloadAll()
+void Sound::ReleaseSounds()
 {
 	for (auto& s : m_Sounds)
 		s->release();
