@@ -17,14 +17,15 @@ void Menu::Enter()
 	TitleSprite.SetSize({ 20.f, 20.f });
 	
 	Engine.AddCommand<SceneCommand<Gameplay>>("StartGame");
+	Engine.SetInput<KeyboardInput>(TitleID);
 	
 	Engine.AddController(TitleID, &STATE::Global);
-
 	Controller& TitleInput = Engine.GetController(TitleID, &STATE::Global);
 
 	TitleInput.MapControl(VK_RETURN, "StartGame");
 
 	Engine.ChangeState(TitleID, &STATE::Global);
+	Engine.UpdateInput();
 }
 
 void Menu::Exit()

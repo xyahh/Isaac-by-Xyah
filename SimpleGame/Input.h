@@ -6,24 +6,32 @@ class Input
 {
 	friend Cyan;
 
-private:
+protected:
 
 	void DefineInput(int Value);
-	virtual void ProcessInput();
-
-private:
+	virtual void ProcessInput() = 0;
 
 	/* map <KeyValue, Pressed> */
 	STD map<int, bool>	m_Input;
-	STD vector<int>		m_Pushed;
-	STD vector<int>		m_Released;
+	STD vector<int>		m_Execute;
+	STD vector<int>		m_Release;
+};
+
+class KeyboardInput : public Input
+{
+public:
+
+	virtual void ProcessInput();
 };
 
 class NPCInput : public Input
 {
-	virtual	void ProcessInput()
-	{
+	STD function<void(STD set<int>&)> Fx;
 
-	}
+public:
+
+	NPCInput(const STD function<void(STD set<int>&)> Pressed)
+		: Fx(Pressed) {}
+	virtual	void ProcessInput();
 };
 

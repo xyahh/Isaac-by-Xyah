@@ -187,6 +187,8 @@ void SlamState::Exit(const IDType& ObjectIndex)
 	EffectDesc.Value = (5.f);
 	EffectDesc.Team = (Engine.GetDescriptor(ObjectIndex).Team);
 
+	Engine.GetSound().Play("Explosion");
+
 	Engine.AddSprite(EffectID, "Sprite");
 	Sprite& EffectSprite = Engine.GetSprite(EffectID, "Sprite");
 	EffectSprite.SetLayerGroup(LayerGroup::Background);

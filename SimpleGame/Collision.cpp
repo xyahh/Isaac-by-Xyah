@@ -55,12 +55,14 @@ void SSE_CALLCONV ProjectileCollision::OnCollision
 	if (MyDesc.Team != CollidingDesc.Team && CollidingDesc.Type == ObjectType::Actor 
 		&& Engine.GetCurrentState(CollidingID)->Type() != StateType::Damaged)
 	{
+		Engine.GetSound().Play("HitEnemy");
 		CollidingDesc.Value -= MyDesc.Value;
 		Engine.ChangeState(CollidingID, &STATE::Damaged);
 		Engine.DeleteObject(MyID);
 	}
 	else if (CollidingDesc.Type == ObjectType::Structure)
 	{
+		Engine.GetSound().Play("HitWall");
 		Engine.DeleteObject(MyID);
 	}
 }

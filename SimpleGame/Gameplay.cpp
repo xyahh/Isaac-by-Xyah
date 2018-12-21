@@ -8,7 +8,7 @@ enum TEAM
 	BLUE,
 };
 
-u_int MonsterNumber = 0;
+u_int	MonsterNumber = 0;
 int		SpawnNumber;
 float	SpawnRate;
 float	SoundRate;
@@ -65,6 +65,8 @@ void SpawnMonster()
 {
 	IDType& MonsterID = Engine.AddObject();
 
+	
+
 	auto& ActorDescriptor = Engine.GetDescriptor(MonsterID);
 	auto& ActorPhysics	= Engine.GetPhysics(MonsterID);
 
@@ -114,25 +116,99 @@ void SpawnMonster()
 	Head.SetDirection(Direction::Down);
 	Head.SetOffset({ 0.f, 0.f, BodySize * 0.5f + HeadSize * 0.5f });
 
-	Engine.AddEvent(MonsterID, "GoToPlayer");
-
 	Engine.ChangeState(MonsterID, &STATE::InAir);
 
-	Event& E = Engine.GetEvent(MonsterID, "GoToPlayer");
-	E.Set([MonsterID]()
+	Engine.AddController(MonsterID, &STATE::Idle);	
+	Engine.AddController(MonsterID, &STATE::Move);
+
+	Controller& IdleInput = Engine.GetController(MonsterID, &STATE::Idle);
+
+	IdleInput.MapControl('W', "StartMove");
+	IdleInput.MapControl('S', "StartMove");
+	IdleInput.MapControl('A', "StartMove");
+	IdleInput.MapControl('D', "StartMove");
+
+	Controller& MoveInput = Engine.GetController(MonsterID, &STATE::Move);
+
+	MoveInput.MapControl('W', "SlowMoveUp");
+	MoveInput.MapControl('S', "SlowMoveDown");
+	MoveInput.MapControl('A', "SlowMoveLeft");
+	MoveInput.MapControl('D', "SlowMoveRight");
+
+	MoveInput.MapControl('W', "HeadFaceUp");
+	MoveInput.MapControl('S', "HeadFaceDown");
+	MoveInput.MapControl('A', "HeadFaceLeft");
+	MoveInput.MapControl('D', "HeadFaceRight");
+
+	MoveInput.MapControl('W', "BodyFaceUp");
+	MoveInput.MapControl('S', "BodyFaceDown");
+	MoveInput.MapControl('A', "BodyFaceLeft");
+	MoveInput.MapControl('D', "BodyFaceRight");
+
+	Engine.SetInput<NPCInput>(MonsterID, [MonsterID](STD set<int>& Pressed)
 	{
-		if (!Engine.GetCurrentState(MonsterID) || Engine.GetCurrentState(MonsterID)->Type() == StateType::InAir) return;
-		SSE_VECTOR PlayerPos = Engine.GetPhysics(Engine.LocateObject("Player")).GetPosition();
-		Physics& p = Engine.GetPhysics(MonsterID);
-		SSE_VECTOR Move = p.GetPosition();
-		Move = Subtract(PlayerPos, Move);
-		SetZ(&Move, 0.f);
-		Move = Scale(Normalize2(Move), 0.5f);
-		p.SetVelocity(Move);
+		FLOAT2 Diff = StoreFloat2(Subtract
+		(
+			Engine.GetPhysics(MonsterID).GetPosition(),
+			Engine.GetPhysics(Engine.LocateObject("Player")).GetPosition()
+		));
+
+		if (fabs(Diff.x) > 0.001)
+		{
+			if (Diff.x > 0) Pressed.emplace('A');
+			else Pressed.emplace('D');
+		}
+		if(fabs(Diff.y) > 0.001)
+		{
+			if (Diff.y > 0) Pressed.emplace('S');
+			else Pressed.emplace('W');
+		}
 	});
 
-	
+	Engine.UpdateInput();
 	Engine.GetSound().Play("Zombie");
+}
+
+void Update()
+{
+	static float time = 0.f;
+	time += UPDATE_TIME;
+
+	if (time < SpawnRate) return;
+	++SpawnNumber;
+	time = 0.f;
+	if (SpawnNumber % 5 == 0 && SpawnRate > 1.f)
+		SpawnRate -= 1.f;
+
+	Timer& T = Engine.GetTimer();
+	if (T.GetElapsedTime() < 0.f) return SpawnMonster();
+	if (MonsterNumber == 0 && !win)
+	{
+		Engine.GetSound().Stop();
+		win = true;
+		Engine.GetSound().Play("Win");
+
+		IDType& Win = Engine.AddObject();
+
+		Engine.AddSprite(Win, "Win");
+
+		Sprite& s = Engine.GetSprite(Win, "Win");
+		s.SetSize({ 15.f, 3.f });
+		s.SetTotal({ 4, 15 });
+		s.SetTexture("Win");
+		s.SetLayerGroup(LayerGroup::Foreground);
+		s.SetFrameRate(10.f);
+
+		Engine.SetInput<KeyboardInput>(Win);
+
+		Engine.AddController(Win, &STATE::Global);
+		Controller& c = Engine.GetController(Win, &STATE::Global);
+		c.MapControl(VK_RETURN, "Restart");
+
+		Engine.UpdateInput();
+
+		Engine.ChangeState(Win, &STATE::Global);
+	}
 }
 
 void Gameplay::Enter()
@@ -141,23 +217,22 @@ void Gameplay::Enter()
 
 	Engine.AddTexture("BasicBody", "./Resources/Characters/basic_body.png");
 	Engine.AddTexture("IsaacHead", "./Resources/Characters/isaac_head.png");
-
-	Engine.AddTexture("Shadow", "./Resources/shadow.png");
-
 	Engine.AddTexture("ZombieBody", "./Resources/Characters/zombie_body.png");
 	Engine.AddTexture("ZombieHead", "./Resources/Characters/zombie_head.png");
-
 	Engine.AddTexture("Depths", "./Resources/Levels/Depths.png");
 	Engine.AddTexture("Explosion", "./Resources/explosion.png");
+	Engine.AddTexture("Shadow", "./Resources/shadow.png");
 	Engine.AddTexture("Tear", "./Resources/tear.png");
-
 	Engine.AddTexture("Win", "./Resources/win.png");
-
+	
 	Sound& Sounds = Engine.GetSound();
 	Sounds.Add("Main", "./Resources/Sounds/Main.mp3", true);
 	Sounds.Add("Pop", "./Resources/Sounds/Pop.mp3", false);
 	Sounds.Add("Zombie", "./Resources/Sounds/Zombie.mp3", false);
 	Sounds.Add("Win", "./Resources/Sounds/Win.mp3", true);
+	Sounds.Add("Explosion", "./Resources/Sounds/Explosion.mp3", false);
+	Sounds.Add("HitEnemy", "./Resources/Sounds/HitEnemy.mp3", false);
+	Sounds.Add("HitWall", "./Resources/Sounds/HitWall.mp3", false);
 
 	Engine.GetSound().Play("Main");
 
@@ -211,6 +286,8 @@ void Gameplay::Enter()
 
 	//Actor Input
 	{
+		Engine.SetInput<KeyboardInput>(Player);
+
 		Engine.AddController(Player, &STATE::Idle);
 		Engine.AddController(Player, &STATE::Move);
 		Engine.AddController(Player, &STATE::ChargeJump);
@@ -296,70 +373,36 @@ void Gameplay::Enter()
 		ShootInput.MapControl(VK_LEFT,	"EndShoot");
 		ShootInput.MapControl(VK_UP,	"EndShoot");
 		ShootInput.MapControl(VK_DOWN,	"EndShoot");
-		
+
+		Controller& DamagedInput = Engine.GetController(Player, &STATE::Damaged);
+
+		DamagedInput.MapControl('W', "MoveUp");
+		DamagedInput.MapControl('S', "MoveDown");
+		DamagedInput.MapControl('A', "MoveLeft");
+		DamagedInput.MapControl('D', "MoveRight");
+
+		DamagedInput.MapControl('W', "HeadFaceUp");
+		DamagedInput.MapControl('S', "HeadFaceDown");
+		DamagedInput.MapControl('A', "HeadFaceLeft");
+		DamagedInput.MapControl('D', "HeadFaceRight");
+
+		DamagedInput.MapControl('W', "BodyFaceUp");
+		DamagedInput.MapControl('S', "BodyFaceDown");
+		DamagedInput.MapControl('A', "BodyFaceLeft");
+		DamagedInput.MapControl('D', "BodyFaceRight");
+
 		Engine.ChangeState(Player, &STATE::Idle);
 	}
 
 	//Events
 	{
-		
 		SpawnNumber = 0;
 		SpawnRate = 5.f;
 		SoundRate = 5.f;
 		win = false;
 		Engine.AddEvent(Player, "MonsterSpawn");
-
 		Event& B = Engine.GetEvent(Player, "MonsterSpawn");
-		B.Set([]()
-		{
-			static float time = 0.f;
-			time += UPDATE_TIME;
-
-			if (time >= SpawnRate)
-			{
-				++SpawnNumber;
-				time = 0.f;
-				if (SpawnNumber % 5 == 0 && SpawnRate > 1.f)
-					SpawnRate -= 1.f;
-
-				Timer& T = Engine.GetTimer();
-				if (T.GetElapsedTime() > 90.f)
-				{
-					if (MonsterNumber == 0)
-					{
-						if (!win)
-						{
-							Engine.GetSound().Stop();
-							win = true;
-							Engine.GetSound().Play("Win");
-
-							IDType& Win = Engine.AddObject();
-
-
-							Engine.AddSprite(Win, "Win");
-
-							Sprite& s = Engine.GetSprite(Win, "Win");
-							s.SetSize({ 15.f, 3.f });
-							s.SetTotal({ 4, 15 });
-							s.SetTexture("Win");
-							s.SetLayerGroup(LayerGroup::Foreground);
-							s.SetFrameRate(10.f);
-
-							Engine.AddController(Win, &STATE::Global);
-							Controller& c = Engine.GetController(Win, &STATE::Global);
-							c.MapControl(VK_RETURN, "Restart");
-							Engine.UpdateInput();
-							
-							Engine.ChangeState(Win, &STATE::Global);
-						}
-					}
-				}
-				else
-				{
-					SpawnMonster();
-				}
-			}
-		});
+		B.Set(Update);
 	}
 
 	//Boundaries
@@ -404,6 +447,8 @@ void Gameplay::Enter()
 		}
 
 	}
+
+	Engine.UpdateInput();
 }
 
 void Gameplay::Exit()

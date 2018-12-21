@@ -43,6 +43,7 @@ public:
 	void ReserveObjects(size_t Number);
 
 	IDType AddObject(size_t * Out = NULL, const STD string& ObjectID = "");
+
 	void AddSprite(const IDType& ObjectIndex, const STD string & SpriteID);
 	void AddEvent(const IDType& ObjectIndex, const STD string& BehaviorName);
 	void AddController(const IDType& ObjectIndex, State* pState);
@@ -55,6 +56,14 @@ public:
 	{
 		m_Commands.emplace_back(new Child(STD forward<Args>(Ax)...));
 		m_CommandLocator[ID] = Last(m_Commands);
+	}
+
+	template<class Child, class... Args>
+	void SetInput(const IDType& ObjectIndex, Args&&... Ax)
+	{
+		size_t Index = m_ObjectLocator[ObjectIndex];
+		if (m_Input[Index]) delete m_Input[Index];
+		m_Input[Index] = new Child(STD forward<Args>(Ax)...);
 	}
 
 	void AddTexture(const STD string& TexName, const STD string & ImagePath);
@@ -112,7 +121,7 @@ private:
 	STD vector <Descriptor>			m_Descriptor;
 	STD vector <STD vector<Sprite>>	m_Sprites;
 	STD vector <Physics>			m_Physics;
-	STD vector <Input>				m_Input;
+	STD vector <Input*>				m_Input;
 	STD vector<STD vector<Event>>	m_Events;
 
 	STD vector <STD map <StateType, Controller>>	m_Controllers;

@@ -4,11 +4,10 @@
 
 void Input::DefineInput(int Value)
 {
-
 	m_Input.emplace(Value, false);
 }
 
-void Input::ProcessInput()
+void KeyboardInput::ProcessInput()
 {
 	for (auto& i : m_Input)
 	{
@@ -16,16 +15,41 @@ void Input::ProcessInput()
 		{
 			if (!i.second)
 			{
-				m_Pushed.emplace_back(i.first);
+				m_Execute.emplace_back(i.first);
 				i.second = true;
 			}
-	
+
 		}
 		else if (i.second)
 		{
-			EraseByValue(m_Pushed, i.first);
-			m_Released.emplace_back(i.first);
+			EraseByValue(m_Execute, i.first);
+			m_Release.emplace_back(i.first);
 			i.second = false;
 		}
 	}
+}
+
+void NPCInput::ProcessInput()
+{
+	STD set<int> Pressed;
+	Fx(Pressed);
+	for (auto& i : m_Input)
+	{
+		if (Pressed.find(i.first) != Pressed.end())
+		{
+			if (!i.second)
+			{
+				m_Execute.emplace_back(i.first);
+				i.second = true;
+			}
+
+		}
+		else if (i.second)
+		{
+			EraseByValue(m_Execute, i.first);
+			m_Release.emplace_back(i.first);
+			i.second = false;
+		}
+	}
+
 }
