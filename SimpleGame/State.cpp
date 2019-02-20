@@ -224,7 +224,7 @@ void ShootState::Update(const IDType& ObjectIndex)
 {
 	Sprite& HeadSprite = Engine.GetSprite(ObjectIndex, "Head");
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, "Body");
-	 SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
+	SSE_VECTOR Velocity = Engine.GetPhysics(ObjectIndex).GetVelocity();
 	if (!Zero(Magnitude2(Velocity)))
 		BodySprite.SetFrameRate(30.f);
 	else
@@ -285,10 +285,11 @@ void ShootState::Exit(const IDType& ObjectIndex)
 
 void DamagedState::Enter(const IDType& ObjectIndex)
 {
-	Descriptor& Desc = Engine.GetDescriptor(ObjectIndex);
 	DurationTimer = 0.f;
 	BlinkingTimer = 0.f;
 	Alpha = 0;
+	Engine.GetSprite(ObjectIndex, "Body").SetAlpha(0.f);
+	Engine.GetSprite(ObjectIndex, "Head").SetAlpha(0.f);
 }
 
 void DamagedState::Update(const IDType& ObjectIndex)
@@ -297,6 +298,7 @@ void DamagedState::Update(const IDType& ObjectIndex)
 	BlinkingTimer += UPDATE_TIME * BlinkingRate;
 
 	Sprite& BodySprite = Engine.GetSprite(ObjectIndex, "Body");
+	Sprite& HeadSprite = Engine.GetSprite(ObjectIndex, "Head");
 
 	Physics& p = Engine.GetPhysics(ObjectIndex);
 	SSE_VECTOR Velocity = p.GetVelocity();
@@ -315,8 +317,9 @@ void DamagedState::Update(const IDType& ObjectIndex)
 
 	if (BlinkingTimer >= 1.f)
 	{
-		Engine.GetSprite(ObjectIndex, "Head").SetAlpha(static_cast<float>(Alpha));
-		BodySprite.SetAlpha(static_cast<float>(Alpha));
+		float fAlpha = static_cast<float>(Alpha);
+		BodySprite.SetAlpha(fAlpha);
+		HeadSprite.SetAlpha(fAlpha);
 		Alpha = (Alpha + 1) % 2;
 		BlinkingTimer = 0.f;
 	}
@@ -330,4 +333,6 @@ void DamagedState::Update(const IDType& ObjectIndex)
 
 void DamagedState::Exit(const IDType& ObjectIndex)
 {
+	Engine.GetSprite(ObjectIndex, "Body").SetAlpha(1.f);
+	Engine.GetSprite(ObjectIndex, "Head").SetAlpha(1.f);
 }

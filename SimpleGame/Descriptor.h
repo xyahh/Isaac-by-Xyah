@@ -1,4 +1,5 @@
 #pragma once
+#include "IDType.h"
 
 enum ObjectType
 {
@@ -19,9 +20,9 @@ class Descriptor : public EventDispatcher
 	friend Cyan;
 public:
 
-	Descriptor() : 
+	Descriptor(const IDType& ID) : 
 		Type(ObjectType::Default), 
-		Value(0.f)
+		Value(0.f), ID(ID)
 	{}
 
 	void Update();
@@ -36,7 +37,8 @@ public:
 	|---------------|-----------------|
 	*/
 
-	ObjectType Type;
-	float Value;
-	size_t Team;
+	IDType		ID;
+	ObjectType	Type;
+	float		Value;
+	size_t		Team;
 };

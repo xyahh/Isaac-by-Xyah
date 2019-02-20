@@ -25,7 +25,7 @@ void Menu::Enter()
 	TitleInput.MapControl(VK_RETURN, "StartGame");
 
 	Engine.ChangeState(TitleID, &STATE::Global);
-	Engine.UpdateInput();
+	Engine.UpdateInputControls();
 }
 
 void Menu::Exit()

@@ -19,7 +19,7 @@ void AddActor(const STD string& ActorName, size_t Team,  SSE_VECTOR Position,
 {
 	Engine.AddObject(NULL, ActorName);
 
-	IDType& ActorID = Engine.LocateObject(ActorName);
+	IDType& ActorID = Engine.GetIDType(ActorName);
 
 	auto& ActorDescriptor = Engine.GetDescriptor(ActorID);
 	auto& ActorPhysics = Engine.GetPhysics(ActorID);
@@ -148,7 +148,7 @@ void SpawnMonster()
 		FLOAT2 Diff = StoreFloat2(Subtract
 		(
 			Engine.GetPhysics(MonsterID).GetPosition(),
-			Engine.GetPhysics(Engine.LocateObject("Player")).GetPosition()
+			Engine.GetPhysics(Engine.GetIDType("Player")).GetPosition()
 		));
 
 		if (fabs(Diff.x) > 0.001)
@@ -163,7 +163,7 @@ void SpawnMonster()
 		}
 	});
 
-	Engine.UpdateInput();
+	Engine.UpdateInputControls();
 	Engine.GetSound().Play("Zombie");
 }
 
@@ -203,7 +203,7 @@ void UpdateGameState()
 		Controller& c = Engine.GetController(Win, &STATE::Global);
 		c.MapControl(VK_RETURN, "Restart");
 
-		Engine.UpdateInput();
+		Engine.UpdateInputControls();
 
 		Engine.ChangeState(Win, &STATE::Global);
 	}
@@ -246,7 +246,7 @@ void Gameplay::Enter()
 
 	//Engine.GetSound(SOUND_TEST).Play();
 	AddActor("Player", RED, { 0.f, 0.f, 0.f }, "IsaacHead", "BasicBody", &Collision::Actor);
-	IDType& Player = Engine.LocateObject("Player");
+	IDType& Player = Engine.GetIDType("Player");
 
 	//Commands
 	{
@@ -446,7 +446,7 @@ void Gameplay::Enter()
 
 	}
 
-	Engine.UpdateInput();
+	Engine.UpdateInputControls();
 }
 
 void Gameplay::Exit()

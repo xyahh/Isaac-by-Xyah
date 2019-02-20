@@ -21,9 +21,9 @@ public:
 	Cyan() {}
 	~Cyan() {}
 
-	const IDType& GetID(size_t Index);
-	IDType LocateObject(const STD string& Name);
-	IDType LocateObject(size_t Number);
+	const IDType& GetObjectID(size_t Index);
+	IDType GetIDType(const STD string& Name);
+	IDType GetIDType(size_t Number);
 
 	void ResetClock();
 	void QueueAction(const STD function<void()>& Fx);
@@ -49,7 +49,7 @@ public:
 	void AddController(const IDType& ObjectIndex, State* pState);
 	void DeleteObject(const IDType& ObjectIndex);
 
-	void UpdateInput();
+	void UpdateInputControls();
 
 	template<class Child, class... Args>
 	void AddCommand(const STD string& ID, Args&&... Ax)
@@ -97,8 +97,6 @@ public:
 private:
 
 	void ReleaseComponentData();
-
-
 	void FlushActionQueue();
 
 private:

@@ -3,20 +3,17 @@
 
 Cyan Engine;
 
-IDType Cyan::LocateObject(size_t ID)
+const IDType & Cyan::GetObjectID(size_t Index)
+{
+	return m_Descriptor[Index].ID;
+}
+
+IDType Cyan::GetIDType(size_t ID)
 {
 	return IDType("" , ID);
 }
 
-const IDType & Cyan::GetID(size_t Index)
-{
-	for (auto& obj : m_ObjectLocator)
-		if (Index == obj.second)
-			return obj.first;
-	assert("Index Out of Bounds!" && false);
-}
-
-IDType Cyan::LocateObject(const STD string & ID)
+IDType Cyan::GetIDType(const STD string & ID)
 {
 	return IDType(ID, ULLONG_MAX);
 }
@@ -76,10 +73,12 @@ void Cyan::ReserveObjects(size_t Number)
 	m_EventLocator.reserve(Number);
 }
 
-
 IDType Cyan::AddObject(size_t * Out, const STD string & ObjectID)
 {
-	m_Descriptor.emplace_back();
+	static size_t Number = 0;
+	IDType ID = IDType(ObjectID, Number++);
+
+	m_Descriptor.emplace_back(ID);
 	m_Controllers.emplace_back();
 	m_Physics.emplace_back();
 	m_Sprites.emplace_back();
@@ -90,9 +89,8 @@ IDType Cyan::AddObject(size_t * Out, const STD string & ObjectID)
 	m_SpriteLocator.emplace_back();
 	m_EventLocator.emplace_back();
 
-	static size_t Number = 0;
-	IDType ID = IDType(ObjectID, Number++);
 	size_t Index = Last(m_Descriptor);
+
 	if (Out) *Out = Number;
 	m_Input[Index] = NULL;
 
@@ -235,10 +233,14 @@ void Cyan::Update()
 		{
 			m_Input[i]->ProcessInput();
 			m_Controllers[i][m_States[i].second.top()->Type()].HandleControls
-			(GetID(i), m_Input[i]->m_Execute, m_Input[i]->m_Release);
+			(
+				GetObjectID(i), 
+				m_Input[i]->m_Execute, 
+				m_Input[i]->m_Release
+			);
 			m_Input[i]->m_Release.clear(); // Call only once;
 		}
-		m_States[i].second.top()->Update(GetID(i));
+		m_States[i].second.top()->Update(GetObjectID(i));
 		FlushActionQueue();
 	}
 
@@ -248,7 +250,7 @@ void Cyan::Update()
 		m_Physics[i].Update();
 		m_Physics[i].SetDeltaPosition( Subtract(m_Physics[i].GetPosition(), m_Physics[i].GetPrevPosition()));
 		for (size_t j = i + 1; j < m_Physics.size(); ++j)
-			m_Physics[i].HandleCollision(GetID(i), &m_Physics[j], GetID(j));
+			m_Physics[i].HandleCollision(GetObjectID(i), &m_Physics[j], GetObjectID(j));
 		m_Physics[i].SetPosition(Add(m_Physics[i].GetPrevPosition(), m_Physics[i].GetDeltaPosition()));
 	}
 
@@ -270,7 +272,7 @@ void Cyan::Render(float fInterpolation)
 	}
 }
 
-void Cyan::UpdateInput()
+void Cyan::UpdateInputControls()
 {
 	for (int i = 0; i < m_Input.size(); ++i)
 	{
